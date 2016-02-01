@@ -175,7 +175,8 @@ class SentenceGenerator(object):
             if i < len(sentence[1]) - 1:
                 print ""
                 print " " * (indent + 1 + len(sentence[0])),
-        print ")",
+        # print ")",
+        sys.stdout.write(")")
 
 def parseArgs(args):
     """
