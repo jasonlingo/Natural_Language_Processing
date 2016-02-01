@@ -175,7 +175,6 @@ class SentenceGenerator(object):
             if i < len(sentence[1]) - 1:
                 print ""
                 print " " * (indent + 1 + len(sentence[0])),
-        # print ")",
         sys.stdout.write(")")
 
 def parseArgs(args):
@@ -224,4 +223,3 @@ if __name__ == "__main__":
     # create a SentenceGenerator object and generate sentences
     sentGen = SentenceGenerator(filename)
     sentGen.generate(toTree, sentenceNum)
-
