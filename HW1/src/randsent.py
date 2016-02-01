@@ -100,7 +100,8 @@ class SentenceGenerator(object):
 
         if not subGrammar:  # cannot find sub grammar, and this means the keyword is a terminal
             if toTree:
-                return keyword
+                # return keyword
+                return None
             else:
                 return [keyword]
         else:
@@ -108,7 +109,8 @@ class SentenceGenerator(object):
 
         if type(subGrammar) is str:  # if the subGrammar is a single string, this means the subGrammar is a vocabulary
             if toTree:
-                return subGrammar
+                # return subGrammar
+                return None
             else:
                 return [subGrammar]
 
@@ -154,6 +156,9 @@ class SentenceGenerator(object):
         if type(sentence[1]) is str:
             print sentence[1] + ")"
             return
+        if sentence[1] is None:
+            print ""
+            return 
 
         # for every child, print the child recursively
         for i in range(len(sentence[1])):
