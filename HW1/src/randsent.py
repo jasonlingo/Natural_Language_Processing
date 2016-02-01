@@ -82,6 +82,7 @@ class SentenceGenerator(object):
         if toTree:
             for sentence in sentences:
                 self.printTree(sentence, 0, 0)
+                print ""
         else:
             for sentence in sentences:
                 print sentence
@@ -91,14 +92,17 @@ class SentenceGenerator(object):
         Find a possible sub-sentence according to the given keyword, e.g. NP and PP, and
         return the result.
         :param keyword: grammar type
-        :return: (tuple)
+        :return: tuple - if the grammar key has sub-grammar;
+                 list - if the grammar key has no sub-grammar or its sub-grammar is a string (in plain text mode)
+                 string - if the grammar key mapped to a string (in tree mode)
+                 None - if the grammar key has no sub-grammar (in tree mode)
+
         """
         words = []
         subGrammar = self.grammar.get(keyword, None)
 
-        if not subGrammar:  # cannot find sub grammar, and this means the keyword is a terminal
+        if not subGrammar:  # cannot find sub grammar, and this means the keyword must be a terminal
             if toTree:
-                # return keyword
                 return None
             else:
                 return [keyword]
@@ -164,7 +168,6 @@ class SentenceGenerator(object):
 
         elif sentence[1] is None:
             print sentence[0],
-            # print ")",
             return
         else:
             print "(" + str(sentence[0]),
