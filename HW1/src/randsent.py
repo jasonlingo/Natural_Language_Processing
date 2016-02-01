@@ -2,7 +2,6 @@ import sys
 import getopt
 from collections import defaultdict
 import random
-import pprint
 
 class SentenceGenerator(object):
     """
@@ -82,8 +81,7 @@ class SentenceGenerator(object):
         # print all the generated sentences
         if toTree:
             for sentence in sentences:
-                self.printTree(sentence, 0)
-                # pprint.pprint(sentence, indent=2)
+                self.printTree(sentence, 0, 0)
         else:
             for sentence in sentences:
                 print sentence
@@ -109,8 +107,7 @@ class SentenceGenerator(object):
 
         if type(subGrammar) is str:  # if the subGrammar is a single string, this means the subGrammar is a vocabulary
             if toTree:
-                # return subGrammar
-                return None
+                return subGrammar
             else:
                 return [subGrammar]
 
@@ -141,7 +138,7 @@ class SentenceGenerator(object):
         return
 
     @classmethod
-    def printTree(cls, sentence, indent):
+    def printTree(cls, sentence, indent, peren):
         """
         Print the sentence as a tree structure.
         :param sentence: multi-layer list
@@ -150,22 +147,35 @@ class SentenceGenerator(object):
         if not sentence:
             return
 
-        print "(" + str(sentence[0]),
-
         # it is a leaf, so change the line after print the current grammar
         if type(sentence[1]) is str:
-            print sentence[1] + ")"
+            print "(" + str(sentence[0]),
+            words = sentence[1].split()
+            if len(words) > 1:
+                for i in range(len(words)):
+                    if i < len(words) - 1:
+                        print words[i]
+                        print " " * (indent + 1 + len(sentence[0])),
+                    else:
+                        print words[i] + ")",
+            else:
+                print sentence[1] + ")",
             return
-        if sentence[1] is None:
-            print ""
-            return 
+
+        elif sentence[1] is None:
+            print sentence[0],
+            # print ")",
+            return
+        else:
+            print "(" + str(sentence[0]),
 
         # for every child, print the child recursively
         for i in range(len(sentence[1])):
-            cls.printTree(sentence[1][i], indent + 2 + len(sentence[0]))
+            cls.printTree(sentence[1][i], indent + 2 + len(sentence[0]), peren + 1)
             if i < len(sentence[1]) - 1:
+                print ""
                 print " " * (indent + 1 + len(sentence[0])),
-
+        print ")",
 
 def parseArgs(args):
     """
