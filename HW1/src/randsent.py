@@ -2,7 +2,6 @@ import sys
 import getopt
 from collections import defaultdict
 import random
-import pprint
 
 class SentenceGenerator(object):
     """
@@ -83,7 +82,6 @@ class SentenceGenerator(object):
         if toTree:
             for sentence in sentences:
                 self.printTree(sentence, 0, 0)
-                # pprint.pprint(sentence, indent=2)
         else:
             for sentence in sentences:
                 print sentence
@@ -148,8 +146,6 @@ class SentenceGenerator(object):
         """
         if not sentence:
             return
-
-
 
         # it is a leaf, so change the line after print the current grammar
         if type(sentence[1]) is str:
