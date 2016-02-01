@@ -149,23 +149,29 @@ class SentenceGenerator(object):
         if not sentence:
             return
 
-        print "(" + str(sentence[0]),
+
 
         # it is a leaf, so change the line after print the current grammar
         if type(sentence[1]) is str:
+            print "(" + str(sentence[0]),
             words = sentence[1].split()
             if len(words) > 1:
                 for i in range(len(words)):
-                    print words[i]
                     if i < len(words) - 1:
+                        print words[i]
                         print " " * (indent + 1 + len(sentence[0])),
+                    else:
+                        print words[i] + ")",
             else:
                 print sentence[1] + ")",
             return
 
-        if sentence[1] is None:
-            print ")",
+        elif sentence[1] is None:
+            print sentence[0],
+            # print ")",
             return
+        else:
+            print "(" + str(sentence[0]),
 
         # for every child, print the child recursively
         for i in range(len(sentence[1])):
