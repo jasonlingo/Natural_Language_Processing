@@ -2,23 +2,21 @@ import sys
 import getopt
 from collections import defaultdict
 import random
+import argparse
 
-class SentenceGenerator(object):
+class CFG(object):
     """
     This is a sentence generator. It parses the given grammar and vocabulary list and then
     generate a sentence by search the matched grammar pattern until a terminal is reached.
     This class can output the generated sentences to a plain text or a tree structure.
     """
 
-    def __init__(self, filename):
+    def __init__(self):
         """
         Initialize needed dictionaries and parse the given file.
         :param filename: (string) the address of the grammar list
         """
         self.grammar = defaultdict(list)    # store the grammar and vocabulary
-        self.weight = defaultdict(float)    # store the weight for each single item
-        self.weightSum = defaultdict(int)   # store the summation of the weight that belongs to the same grammar key
-        self.parseFile(filename)
 
     def parseFile(self, filename):
         """
@@ -29,30 +27,17 @@ class SentenceGenerator(object):
         grammarFlag = True
         with open(filename, 'r') as f:
             inlines = [line.rstrip() for line in f.readlines()]
-            lines = [line for line in inlines if line]  # eliminate blank line
+            lines = [line for line in inlines if line and line[0] != "#"]  # eliminate blank line
             for line in lines:
                 words = line.split()
-
-                if "Vocabulary." in words:  # switch to vocabulary mode
-                    grammarFlag = False
-
-                if "#" in words[0]: continue  # skip comments
-
                 key = words[1]
-                rule = []
+                rule = [int(words[0])]
                 for w in words[2:]:
                     if w == "#": break  # skip comments
                     rule.append(w)
-                if grammarFlag:
-                    rule = tuple(rule)
-                else:
-                    rule = " ".join(rule)
-
                 self.grammar[key].append(rule)
-                self.weight[(key, rule)] = float(words[0])  # record the weight for the paired grammar key and rule
-                self.weightSum[key] += float(words[0])      # record the summation of the weight of the same grammar key
 
-    def generate(self, toTree, num):
+    def genSent(self, toTree, num):
         """
         Generate random sentences and output the results.
         :param toTree: (boolean) indicates the output type
@@ -131,13 +116,13 @@ class SentenceGenerator(object):
         :return: the chosen sub-grammar
         """
         rules = self.grammar[keyword]
-        total = self.weightSum[keyword]
+        total = sum([pair[0] for pair in rules])
         randomNum = random.uniform(0, total)
         cumulate = 0
         for rule in rules:
-            cumulate += self.weight.get((keyword, rule), 0)
+            cumulate += rule[0]
             if cumulate >= randomNum:
-                return rule
+                return rule[1:]
         print "Err: cannot find the rule in weightedRandomChoice()"
         return
 
@@ -177,49 +162,22 @@ class SentenceGenerator(object):
                 print " " * (indent + 1 + len(sentence[0])),
         sys.stdout.write(")")
 
-def parseArgs(args):
-    """
-    Parse the arguments:
-        opts: indicate whether the sentence generator will output the sentences as a tree structure.
-              "-t": output tree structure
-              None: output plain text
-        filename: the address of the grammar file
-        sentenceNum: total number of sentences to be generated
-    :param args:
-    :return: opts, filename, sentenceNum
-    """
-    try:
-        opts, args = getopt.getopt(args, "t", [])
-    except getopt.GetoptError:
-        print "Option should be '-t' before other arguments"
-        sys.exit(1)
-
-    try:
-        filename = args[0]
-    except IndexError:
-        print "Missing argument: file name of grammar!"
-        sys.exit(1)
-
-    try:
-        sentenceNum = int(args[1])
-    except IndexError:
-        sentenceNum = 1
-    except ValueError:
-        print "Wrong format for an argument: sentence number! Set the argument to 1 (default)"
-        sentenceNum = 1
-
-    return opts, filename, sentenceNum
-
 
 if __name__ == "__main__":
-    opts, filename, sentenceNum = parseArgs(sys.argv[1:])
+    # Get the parameters from command line
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-t', help='output tree', action='store_true')
+    parser.add_argument('grammar', help='grammar file')
+    parser.add_argument('count', type=int, help="produces trees instead of strings")
 
-    optKey = [opt[0] for opt in opts]
-    if "-t" in optKey:
-        toTree = True
+    parser.parse_args()
+    args = parser.parse_args()
+    input_file = args.grammar
+    sen_num = args.count
+
+    cfg = CFG()
+    cfg.parseFile(input_file)
+    if args.t:
+        cfg.genSent(True, sen_num)
     else:
-        toTree = False
-
-    # create a SentenceGenerator object and generate sentences
-    sentGen = SentenceGenerator(filename)
-    sentGen.generate(toTree, sentenceNum)
+        cfg.genSent(False, sen_num)
