@@ -166,11 +166,11 @@ class CFG(object):
 if __name__ == "__main__":
     # Get the parameters from command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', help='output tree', action='store_true')
+    parser.add_argument('-t', default=None, help='output tree', action='store_true')
     parser.add_argument('grammar', help='grammar file')
-    parser.add_argument('count', type=int, help="produces trees instead of strings")
+    parser.add_argument('count', type=int, default=1, help="produces trees instead of strings")
 
-    parser.parse_args()
+    # parser.parse_args()
     args = parser.parse_args()
     input_file = args.grammar
     sen_num = args.count
