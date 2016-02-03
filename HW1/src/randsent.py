@@ -31,7 +31,7 @@ class CFG(object):
             for line in lines:
                 words = line.split()
                 key = words[1]
-                rule = [int(words[0])]
+                rule = [float(words[0])]
                 for w in words[2:]:
                     if w == "#": break  # skip comments
                     rule.append(w)
