@@ -1,44 +1,71 @@
-2  ROOT   S .
-#1  ROOT   it VP that S .
+# Rules for creating full sentences.
 
-1  S 	NP VP
-1  S	it VP that S
-2  VP	V_trans NP
-2  VP	V_trans Conj V_trans NP
-10  VP	V_intrans
-1  VP	V_trans that S
-1   VP  V_intrans PP
+#   The weight of sentence ending with period is increased due to the fact that
+#   declarative sentence appears more often than sentence that expresses
+#   exclamation and question
 
-10  NP	Det Noun
-2  NP	NP PP
-1  NP	that S
-2  NP 	NP Conj NP
-2  PP	Prep NP
-2  Noun	Adj Noun
-0.2  Adj	Adv Adj
+1   ROOT    PRP VP  IN  S .
+1   ROOT    S .
+1   ROOT    S !
+1   ROOT    IN  S   VP .
+1   ROOT    is it true that S ?
 
-1  V_trans   ate
-2  V_trans   wanted
-1   V_intrans    sighed
-1   V_trans    thought
-1   V_intrans    worked
+#   The weight of rule "NP -> Det Noun" is increased to avoid sentences that
+#   are too long, the rule "NP -> NP PP" could contribute to generating
+#   long sentence by producing long noun phrases with many small noun phrases
+#   linked together
 
-1  Det    the
-1  Det    a
-1  Det    every
+1   S 	    NP VP
+1   VP	    V_trans NP
+0.2 VP	    V_trans Conj V_trans NP
+1   VP	    V_intrans
+1   VP      V_trans SBAR
+1   VP      V_trans NP  SBAR
+1   VP      V_intrans   PP
+1   SBAR    IN  S
 
-5  Noun   president
-5  Noun   sandwich
-5   Noun    Sally
-5   Noun    proposal
-5   Noun    desk
+2   NP	    Det Noun
+1   NP      NNP
+0.2 NP 	    NP Conj NP
+1   NP      NP  PP
+0.5 PP      Prep    NP
+2   Noun    Adj Noun
+1   Adj     Adv Adj
 
-5  Adj    perplexed
+3   V_trans    kissed
+3   V_trans    understood
+0.5 V_trans    pickled
+3   V_trans    ate
+3   V_trans    wanted
+3   V_intrans  sighed
+3   V_trans    thought
 
-1   Adv very
+1   IN  that
 
-1  Prep   on
-1  Prep	over
-1  Prep	of
+1   Det    the
+1   Det    a
+1   Det every
 
-1   Conj    and
+1   Adj perplexed
+1   Adj nice
+1   Adj fine
+1   Adj pickled
+
+1   Adv   very
+
+2   Noun   president
+1   Noun   sandwich
+1   Noun   pickle
+1   Noun   chief of staff
+1   Noun   floor
+
+1   NNP    Sally
+
+1   Conj   and
+
+1   PRP    it
+
+1   Prep   on
+1   Prep   with
+1   Prep   under
+1   Prep   in
