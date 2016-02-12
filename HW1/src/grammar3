@@ -1,36 +1,31 @@
 # Rules for creating full sentences.
 
-#   The weight of sentence ending with period is increased due to the fact that
-#   declarative sentence appears more often than sentence that expresses
-#   exclamation and question
 
+# add two sentence structure for ROOT to deal with the sentences "it .... that ..."  and "that .... VP NP"
 1   ROOT    PRP VP  IN  S .
 1   ROOT    S .
 1   ROOT    S !
 1   ROOT    IN  S   VP .
 1   ROOT    is it true that S ?
 
-#   The weight of rule "NP -> Det Noun" is increased to avoid sentences that
-#   are too long, the rule "NP -> NP PP" could contribute to generating
-#   long sentence by producing long noun phrases with many small noun phrases
-#   linked together
-
 1   S 	    NP VP
+
+# differentiate verb into transitive and intransitive verb categories
 1   VP	    V_trans NP
-0.2 VP	    V_trans Conj V_trans NP
+0.2 VP	    V_trans Conj V_trans NP     # add conjunction category that allows two verb to be paired with a NP
 1   VP	    V_intrans
 1   VP      V_trans SBAR
-1   VP      V_trans NP  SBAR
+#1   VP      V_trans NP  SBAR
 1   VP      V_intrans   PP
-1   SBAR    IN  S
+1   SBAR    IN  S                       # add SBAR category for clause introduced by a subordinating conjunction.
 
 2   NP	    Det Noun
 1   NP      NNP
-0.2 NP 	    NP Conj NP
+0.2 NP 	    NP Conj NP                  # add this grammar to allow the use of "and"
 1   NP      NP  PP
 0.5 PP      Prep    NP
 2   Noun    Adj Noun
-1   Adj     Adv Adj
+1   Adj     Adv Adj                     # add this grammar to allow adverb modify adjective
 
 3   V_trans    kissed
 3   V_trans    understood
@@ -59,7 +54,7 @@
 1   Noun   chief of staff
 1   Noun   floor
 
-1   NNP    Sally
+1   NNP    Sally                # Add this grammar category for personal name to prevent the phrase "a Sally"
 
 1   Conj   and
 

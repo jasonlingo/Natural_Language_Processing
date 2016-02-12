@@ -1,0 +1,173 @@
+# Rules for creating full sentences.
+
+# S         present tense sentence
+# SD        past tense sentence
+# QS        question sentence
+
+# NP        could be 3sgNP or plNP
+# 3sgNP     singular noun phrase
+# plNP      plural noun phrase
+
+# VP        all possible verb phrase
+# plVP        plural present tense
+# 3sgVP     singular present tense
+# VPD       past tense
+
+# 3sgNoun      singular noun
+# plNoun       Plural noun
+
+# V_trans      simple tense transitive verb
+# V_intrans    simple tense intransitive verb
+# 3sgV_trans   singular present transitive verb
+# 3sgV_intrans singular present intransitive verb
+# VD_trans     past tense transitive verb
+# VD_intrans   past tense intransitive verb
+
+# Aux
+
+# 3sgDet    singular det
+# Det       plural det
+
+# ==============================================
+
+1   ROOT    PRP VPD  IN  S .
+1   ROOT    S .
+1   ROOT    S !
+1   ROOT    IN  S   VPD .
+1   ROOT    is it true that S ?
+1   ROOT    QS ?
+# extra grammar
+1   ROOT    plVP !    # Imperative sentence
+1   ROOT    IS        # Inversion sentence
+
+1   S       NP VPD
+1   S       3sgNP   3sgVP
+20   S       NP not only VP but also VP
+1   QS      Aux NP  plVP
+1   IS      PP  Aux NP plVP
+
+0.5 PP      Prep    NP
+1   SBAR  IN  S
+
+1   NP  3sgNP
+1   NP  plNP
+
+# NP =======================================
+# indicates plural noun
+2   plNP      Det plNoun
+0.2 plNP      NP Conj NP
+1   plNP      plNP  PP
+
+1   3sgNP   3sgDet sgNoun
+1   3sgNP   NNP
+1   3sgNP   3sgNP  PP
+
+2   Noun  Adj Noun
+
+1   Adj     Adv Adj
+
+
+# VP =======================================
+1 VP    plVP
+1 VP    3sgVP
+1 VP    VPD
+
+1   plVP  V_trans NP
+0.2 plVP  V_trans Conj V_trans NP
+1   plVP  V_intrans
+1   plVP  V_trans SBAR
+1   plVP  V_intrans   PP
+
+1   3sgVP  3sgV_trans NP
+1   3sgVP  VD_trans NP
+0.2 3sgVP  3sgV_trans Conj 3sgV_trans NP
+0.2 3sgVP  VD_trans Conj VD_trans NP
+1   3sgVP  3sgV_intrans
+1   3sgVP  VD_intrans
+1   3sgVP  3sgV_trans SBAR
+1   3sgVP  VD_trans SBAR
+1   3sgVP  3sgV_intrans   PP
+1   3sgVP  VD_intrans   PP
+
+1   VPD     VD_trans NP
+0.2 VPD     VD_trans Conj VD_trans NP
+1   VPD     VD_intrans
+1   VPD     VD_trans SBAR
+1   VPD     VD_intrans   PP
+
+# Noun =======================================
+1   Noun    plNoun
+1   Noun    sgNoun
+
+1   plNoun   citizens
+2   sgNoun   president
+1   sgNoun   sandwich
+1   sgNoun   pickle
+1   sgNoun   chief of staff
+1   sgNoun   floor
+
+# Verb =======================================
+# V_trans      simple tense transitive verb
+# V_intrans    simple tense intransitive verb
+# 3sgV_trans   singular present transitive verb
+# 3sgV_intrans singular present intransitive verb
+# VD_trans     past tense transitive verb
+# VD_intrans   past tense intransitive verb
+
+# simple tense verbs
+3   V_trans    kiss
+3   V_trans    understand
+0.5 V_trans    pickle
+3   V_trans    eat
+3   V_trans    want
+3   V_trans    think
+3   V_intrans  sigh
+
+# singular verb
+3   3sgV_trans    kisses
+3   3sgV_trans    understands
+0.5 3sgV_trans    pickles
+3   3sgV_trans    eats
+3   3sgV_trans    wants
+3   3sgV_trans    thinks
+3   3sgV_intrans  sighs
+
+# past tense verb
+3   VD_trans    kissed
+3   VD_trans    understood
+0.5 VD_trans    pickled
+3   VD_trans    ate
+3   VD_trans    wanted
+3   VD_trans    thought
+3   VD_intrans  sighed
+
+
+
+# add auxiliary verb for question sentence
+1   Aux   did
+1   Aux  will
+
+1   IN  that
+
+1   3sgDet    the
+1   3sgDet    a
+1   3sgDet     every
+1   Det    the
+
+1   Adj perplexed
+1   Adj nice
+1   Adj fine
+1   Adj pickled
+
+1   Adv   very
+
+1   NNP    Sally
+
+1   Conj   and
+
+1   PRP    it
+
+1   Prep   on
+1   Prep   with
+1   Prep   under
+1   Prep   in

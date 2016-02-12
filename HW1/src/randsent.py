@@ -1,3 +1,5 @@
+#!/usr/local/bin/python
+
 import sys
 import getopt
 from collections import defaultdict
@@ -45,6 +47,7 @@ class CFG(object):
         """
         sentences = []
 
+
         while num > 0:
             words = []
             root = self.weightedRandomChoice("ROOT")
@@ -67,6 +70,8 @@ class CFG(object):
         if toTree:
             for sentence in sentences:
                 self.printTree(sentence, 0, 0)
+                print ""
+                CFG.treeToSentence(sentence)
                 print ""
         else:
             for sentence in sentences:
@@ -162,15 +167,22 @@ class CFG(object):
                 print " " * (indent + 1 + len(sentence[0])),
         sys.stdout.write(")")
 
+    @classmethod
+    def treeToSentence(cls, tree):
+        if tree[1] is None:
+            print tree[0],
+            return
+        for subTree in tree[1]:
+            cls.treeToSentence(subTree)
+
 
 if __name__ == "__main__":
     # Get the parameters from command line
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', default=None, help='output tree', action='store_true')
+    parser.add_argument('-t', default=None, help='produces trees instead of strings', action='store_true')
     parser.add_argument('grammar', help='grammar file')
-    parser.add_argument('count', type=int, default=1, help="produces trees instead of strings")
+    parser.add_argument('count', type=int, default=1, help="number of sentences to be generated")
 
-    # parser.parse_args()
     args = parser.parse_args()
     input_file = args.grammar
     sen_num = args.count
