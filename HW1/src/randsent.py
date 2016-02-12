@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/python
 
 import sys
 import getopt
@@ -71,8 +71,8 @@ class CFG(object):
             for sentence in sentences:
                 self.printTree(sentence, 0, 0)
                 print ""
-                CFG.treeToSentence(sentence)
-                print ""
+                # CFG.treeToSentence(sentence)
+                # print ""
         else:
             for sentence in sentences:
                 print sentence

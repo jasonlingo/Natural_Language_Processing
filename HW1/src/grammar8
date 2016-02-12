@@ -31,18 +31,19 @@
 # ==============================================
 
 1   ROOT    PRP VPD  IN  S .
-1   ROOT    S .
+5   ROOT    S .
 1   ROOT    S !
 1   ROOT    IN  S   VPD .
 1   ROOT    is it true that S ?
 1   ROOT    QS ?
 # extra grammar
-1   ROOT    plVP !    # Imperative sentence
-1   ROOT    IS        # Inversion sentence
+5   ROOT    plVP !    # Imperative sentence
+5   ROOT    IS .      # Inversion sentence
 
 1   S       NP VPD
 1   S       3sgNP   3sgVP
-20   S       NP not only VP but also VP
+10  S       3sgNP not only 3sgVP but also 3sgVP   # for "not only ... but also ..."
+10  S       plNP not only plVP but also plVP      # for "not only ... but also ..."
 1   QS      Aux NP  plVP
 1   IS      PP  Aux NP plVP
 

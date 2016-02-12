@@ -1,1 +1,0 @@
-('ROOT' 'is' 'it' 'true' 'that' ('S' (('NP' (('NP' (('Det' 'every') ('Noun' 'chief of staff'))) ('PP' (('Prep' 'on') ('NP' (('NP' (('Det' 'every') ('Noun' 'sandwich'))) ('PP' (('Prep' 'on') ('NP' (('Det' 'the') ('Noun' 'chief of staff'))))))))))) ('VP' (('Verb' 'ate') ('NP' (('Det' 'the') ('Noun' 'chief of staff'))))))) '?')

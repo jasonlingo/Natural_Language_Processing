@@ -1,5 +1,8 @@
 # Rules for creating full sentences.
+# Based on grammar3, we added rules to handle cases in (b) and
+# (e) in problem 6.
 
+# List of notations:
 # S         present tense sentence
 # SD        past tense sentence
 # QS        question sentence
@@ -23,58 +26,62 @@
 # VD_trans     past tense transitive verb
 # VD_intrans   past tense intransitive verb
 
-# Aux
+# Aux       auxillary verb
 
 # 3sgDet    singular det
 # Det       plural det
 
-# ==============================================
-
+#   Rules for generating different types of sentence
 1   ROOT    PRP VPD  IN  S .
 1   ROOT    S .
 1   ROOT    S !
 1   ROOT    IN  S   VPD .
-#1   ROOT    IN  S   3sgVP .
 1   ROOT    is it true that S ?
-3   ROOT    QS ?
+3   ROOT    QS ?                  # added "QS" for yes-no questions
 
-1   S       NP VPD
-1   S       3sgNP   3sgVP
-1   QS      Aux NP  plVP
+#   Different types of sentence
+1   S       NP VPD                # sentence with non-singular subject
+1   S       3sgNP   3sgVP         # sentence with singlar subject
+1   QS      Aux NP  plVP          # questions, verb phrases should be basic form, which is same as ones for plurals
 
 0.5 PP      Prep    NP
 1   SBAR  IN  S
 
+#   Noun phrases, divided into third person singular and plural
 1   NP  3sgNP
 1   NP  plNP
 
-# NP =======================================
-# indicates plural noun
+#   Plural noun phrases
 2   plNP      Det plNoun
-#1   plNP      NNP
-0.2 plNP      NP Conj NP
+0.2 plNP      NP Conj NP  # any two noun phrases (either singular or plural) linked together
+                          # should be deemed as plural
 1   plNP      plNP  PP
 
+#   Noun phrases for 3rd person singular
 1   3sgNP   3sgDet sgNoun
 1   3sgNP   NNP
 1   3sgNP   3sgNP  PP
 
+#   Add adjectives to nouns
 2   Noun  Adj Noun
 
+#   Adjectives
 1   Adj     Adv Adj
 
 
-# VP =======================================
-1 VP    plVP
-1 VP    3sgVP
-1 VP    VPD
+#   Three types of verb phrase
+1   VP    plVP
+1   VP    3sgVP
+1   VP    VPD
 
+#   Verb phrase of plural form
 1   plVP  V_trans NP
 0.2 plVP  V_trans Conj V_trans NP
 1   plVP  V_intrans
 1   plVP  V_trans SBAR
 1   plVP  V_intrans   PP
 
+#   Verb phrase of singular form
 1   3sgVP  3sgV_trans NP
 1   3sgVP  VD_trans NP
 0.2 3sgVP  3sgV_trans Conj 3sgV_trans NP
@@ -86,16 +93,18 @@
 1   3sgVP  3sgV_intrans   PP
 1   3sgVP  VD_intrans   PP
 
+#   Past tense verb
 1   VPD     VD_trans NP
 0.2 VPD     VD_trans Conj VD_trans NP
 1   VPD     VD_intrans
 1   VPD     VD_trans SBAR
 1   VPD     VD_intrans   PP
 
-# Noun =======================================
+#   Two types of noun: singular and plural
 1   Noun    plNoun
 1   Noun    sgNoun
 
+#   Nouns
 1   plNoun   citizens
 2   sgNoun   president
 1   sgNoun   sandwich
@@ -103,7 +112,7 @@
 1   sgNoun   chief of staff
 1   sgNoun   floor
 
-# Verb =======================================
+# Verbs:
 # V_trans      simple tense transitive verb
 # V_intrans    simple tense intransitive verb
 # 3sgV_trans   singular present transitive verb
@@ -111,7 +120,7 @@
 # VD_trans     past tense transitive verb
 # VD_intrans   past tense intransitive verb
 
-# simple tense verbs
+#   Simple tense verbs
 3   V_trans    kiss
 3   V_trans    understand
 0.5 V_trans    pickle
@@ -120,7 +129,7 @@
 3   V_trans    think
 3   V_intrans  sigh
 
-# singular verb
+#   Singular verb
 3   3sgV_trans    kisses
 3   3sgV_trans    understands
 0.5 3sgV_trans    pickles
@@ -129,7 +138,7 @@
 3   3sgV_trans    thinks
 3   3sgV_intrans  sighs
 
-# past tense verb
+#   Past tense verb
 3   VD_trans    kissed
 3   VD_trans    understood
 0.5 VD_trans    pickled
@@ -138,32 +147,40 @@
 3   VD_trans    thought
 3   VD_intrans  sighed
 
-
-
-# add auxiliary verb for question sentence
+#   Add auxiliary verb for question sentence
 1   Aux   did
 1   Aux  will
 
+#   Subordinating conjunction，here we only have "that"
 1   IN  that
 
+#   Determiners for singular nouns
 1   3sgDet    the
 1   3sgDet    a
 1   3sgDet     every
+
+#   Determiners for all nouns
 1   Det    the
 
+#   Adjectives
 1   Adj perplexed
 1   Adj nice
 1   Adj fine
 1   Adj pickled
 
+#   Adverb
 1   Adv   very
 
+#   Proper Nouns
 1   NNP    Sally
 
+#   Conjunctions
 1   Conj   and
 
+#   Personal pernoun
 1   PRP    it
 
+#   Prepositions
 1   Prep   on
 1   Prep   with
 1   Prep   under
