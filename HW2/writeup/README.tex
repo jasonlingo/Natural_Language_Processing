@@ -167,10 +167,102 @@ the likelihood of the evidence is $p(Claimed = blue \mid Actual = blue)$,\\ and 
 
 \noindent
 \textbf{(c) Answer:}\\
+prior probability = $p(Actual = blue) = 0.1$\\
+likelihood of the evidence = $p(Claimed = blue \mid Actual = blue) = 0.8$\\
+posterior probability = $\frac{p(Claimed = blue \mid Actual = blue) \cdot p(Actual = blue)}{p(Claimed = blue)} = \frac{0.8 \times 0.1}{p(Claimed = blue)}$\\
+
+\noindent
+Now we need to calculate $p(Claimed = blue)$.\\
+$p(Claimed = blue)$\\
+$= p(Claimed = blue \mid Actual = blue) \cdot p(Actual = blue) + p(Claimed = blue \mid Actual = red) \cdot p(Actual = red)$\\
+$= 0.8 \times 0.1 + 0.2 \times 0.9$\\
+$= 0.26$\\
+
+\noindent
+So, posterior probability = $\frac{0.8 \times 0.1}{p(Claimed = blue)} = \frac{0.08}{0.26} = 0.3077$\\
+
+\noindent
 The judge should care about the posterior because it takes not only about the observed events, likelihood, but also the belief about the probability of the event we want to guess. By considering the posterior probability, the judge can avoid the situation that our belief is wrong or we have not enough observed events so that the judge can have more accurate information for judgement.\\
 
 \noindent
 \textbf{(d) Answer:}\\
+To prove the given equation, we start with the right hand side:
+\begin{align*}
+  \frac{p(B \mid A, Y) \cdot p(A \mid Y)}{p(B \mid Y)}
+  &= \frac{\frac{p(B \cap A \cap Y)}{p(A \cap Y)} \cdot \frac{p(A \cap Y)}{p(Y)}}{\frac{p(B \cap Y)}{p(Y)}}
+  \\&= \frac{p(B \cap A \cap Y)}{p(B \cap Y)}
+  \\&= p(A \mid B, Y)
+\end{align*}\\
+Thus, by we have proven that 
+$$p(A \mid B, Y) = \frac{p(B \mid A, Y) \cdot p(A \mid Y)}{p(B \mid Y)}$$\\
+
+\noindent
+\textbf{(e) Answer:}\\
+By (d), we have $$p(A \mid B, Y) = \frac{p(B \mid A, Y) \cdot p(A \mid Y)}{p(B \mid Y)}$$
+Now we want to prove that 
+$$p(A \mid B, Y) = \frac{p(B \mid A, Y) \cdot p(A \mid Y)}{p(B \mid A, Y) \cdot p(A \mid Y) + p(B \mid \bar{A}, Y) \cdot p(\bar{A} \mid Y)}$$
+So we only have to prove that 
+$$p(B \mid Y) = p(B \mid A, Y) \cdot p(A \mid Y) + p(B \mid \bar{A}, Y) \cdot p(\bar{A} \mid Y)$$
+We start from the right hand side.
+\begin{align*}
+    p(B \mid A, Y) \cdot p(A \mid Y) + p(B \mid \bar{A}, Y) \cdot p(\bar{A} \mid Y)
+    &= \frac{p(B \cap A \cap Y)}{p(A \cap Y)} \cdot \frac{p(A \cap Y)}{p(Y)} + \frac{p(B \cap \bar{A} \cap Y)}{p(\bar{A} \cap Y)} \cdot \frac{p(\bar{A} \cap Y)}{p(Y)}
+    \\&= \frac{p(B \cap A \cap Y)}{p(Y)} + \frac{p(B \cap \bar{A} \cap Y)}{p(Y)}
+    \\&= \frac{p(B \cap Y)}{p(Y)}
+    \\&= p(B \mid Y)
+\end{align*}
+By the derivation above, we proved the given equation.\\
+
+\noindent
+\textbf{(f) Answer:}\\
+Let $Y$ be "Baltimore," $A$ be "car is actually blue," and $B$ be "Claimed the car is blue."\\
+Then the original equation becomes:\\
+\begin{align*}
+    p(\text{car is actually blue} \mid \text{Claimed the car is blue}, \text{Baltimore})
+    &= \frac{p(B \mid A, Y) \cdot p(A \mid Y)}{p(B \mid A, Y) \cdot p(A \mid Y) + p(B \mid \bar{A}, Y) \cdot p(\bar{A} \mid Y)}
+    \\&= \frac{0.8 \times 0.1}{0.8 \times 0.1 + 0.2 \times 0.9}
+    \\&= 0.3077
+\end{align*}
+
+\noindent
+\textbf{Question 3.}\\
+\textbf{(a) Answer:}\\
+$$\sum_{c \in cry}p(c \mid s) = 1\text{, where } s \in situation$$
+
+\noindent
+\textbf{(b) Answer:}\\
+\begin{tabular}{ |p{2.5cm}||p{2.5cm}|p{2.5cm}|p{2.5cm}||p{2.5cm}|  }
+ \hline
+ p(cry, situation) & Predator! & Timber! & I need help! & TOTAL\\
+ \hline
+ \hline
+ bwa   & 0   & 0 & 0.64 & 0.64\\
+ \hline
+ bwee  & 0   & 0 & 0.08 & 0.08\\
+ \hline
+ kiki  & 0.2 & 0 & 0.08 & 0.28\\
+ \hline
+ \hline
+ TOTAL & 0.2 & 0 & 0.8 & 1\\
+ \hline
+\end{tabular}
+\\
+
+\noindent
+\textbf{(c) Answer:}\\
+\textbf{i.} This probability is written as: $p(\text{Predator} \mid \text{kiki})$\\
+\textbf{ii.} It can be rewritten without the $\mid$ symbol as: $\frac{p(\text{Predator}, \text{kiki})}{p(\text{kiki})}$\\
+\textbf{iii.} Using the above tables, its value is: $\frac{0.2}{0.28} = .7143$\\
+\textbf{iv.} Alternatively, Bayes's Theorem allows you to express this probability as:\\
+$$\frac{p(\text{kiki} \mid \text{Predator}) \cdot p(\text{Predatory})}{p(\text{kiki} \mid \text{Predator}) \cdot p(\text{Predator}) + p(\text{kiki} \mid \text{Timber}) \cdot p(\text{Timber}) + p(\text{kiki} \mid \text{I need help}) \cdot p(\text{I need help})}$$
+\textbf{v.} Using the above tables, the value of this is:\\
+$$\frac{1 \times 0.2}{1 \times 0.2 + 0 \times 0 + 0.1 \times 0.8} = 0.7143$$
+
+\noindent
+\textbf{Question 4.}\\
+\textbf{(a) Answer:}\\
+
+
 
 
 
