@@ -252,7 +252,7 @@ $$\sum_{c \in cry}p(c \mid s) = 1\text{, where } s \in situation$$
 \textbf{(c) Answer:}\\
 \textbf{i.} This probability is written as: $p(\text{Predator} \mid \text{kiki})$\\
 \textbf{ii.} It can be rewritten without the $\mid$ symbol as: $\frac{p(\text{Predator}, \text{kiki})}{p(\text{kiki})}$\\
-\textbf{iii.} Using the above tables, its value is: $\frac{0.2}{0.28} = .7143$\\
+\textbf{iii.} Using the above tables, its value is: $\frac{0.2}{0.28} = 0.7143$\\
 \textbf{iv.} Alternatively, Bayes's Theorem allows you to express this probability as:\\
 $$\frac{p(\text{kiki} \mid \text{Predator}) \cdot p(\text{Predatory})}{p(\text{kiki} \mid \text{Predator}) \cdot p(\text{Predator}) + p(\text{kiki} \mid \text{Timber}) \cdot p(\text{Timber}) + p(\text{kiki} \mid \text{I need help}) \cdot p(\text{I need help})}$$
 \textbf{v.} Using the above tables, the value of this is:\\
@@ -261,6 +261,103 @@ $$\frac{1 \times 0.2}{1 \times 0.2 + 0 \times 0 + 0.1 \times 0.8} = 0.7143$$
 \noindent
 \textbf{Question 4.}\\
 \textbf{(a) Answer:}\\
+$$p(\vec{w}) = \frac{c(BOS\;BOS\; w_1)}{c(BOS\;BOS)}\frac{c(BOS\;w_1\;w_2)}{c(BOS\;w_1)}\frac{c(w_1\;w_2\; w_3)}{c(w_1\;w_2)}...\frac{c(w_{n-2}\;w_{n-1}\;w_n)}{c(w_{n-2}\;w_{n-1})}\frac{c(w_{n-1}\;w_n\;EOS)}{c(w_{n-1}\;w_n)}$$\\
+
+\noindent
+$c(BOS\;BOS)$ counts the total number of sentences in the corpus.\\
+$c(BOS\;BOS\;i)$ counts the total number of sentences that start with a word $i$ in the corpus.\\
+$c(new\;york\;EOS)$ counts the total number of sentences that end with $new \;york$ in the corpus.\\
+
+\noindent
+\textbf{(b) Answer:}\\
+The probability of $<s>$ do you think the $</s>$ should be extremely low because "the" has very low probability, or even close to zero, to be the last word in a sentence.\\
+
+\noindent
+In the trigram model, the parameter that makes this probability low is $c(think\;the\;</s>)$ because the "$think\;the\;</s>$" will not happen many times in the corpus. $the$, a determiner, should be followed by a noun or noun phrase. But in the example, $the$ is followed by $</s>$.\\
+
+\noindent
+\textbf{(c) Answer:}\\
+Expression (A) is matched with description (2) because (A) doesn't have $<s>$ or $</s>$, we don't know whether it is a sentence. We only know that we hear the three words, "Do you think".\\
+
+\noindent
+Expression (B) is matched with description (1) since (B) has both the $<s>$ and $</s>$ to indicate the start and end mark of the sentence "Do you think".\\
+
+\noindent
+Expression (C) is matched with description (3) because (C) only has $<s>$ indicating the start of a sentence but no $</s>$. So we only can be sure that "Do you think" is the starting words of a sentence.\\
+
+\noindent
+$p(\vec{w})$ is to calculate the probability of the sentence using trigram model. Since a sentence needs a $<s>$ and a $</s>$, quantity (B) is suitable for describing the trigram model probability of a sentence.\\
+
+\noindent
+\textbf{(d) Answer:}\\
+We first expand the equation for both $p(w)$ and $p_{reversed}(\vec{w})$ and show they are the same.\\
+For $p(\vec{w})$
+\begin{align*}
+    p(\vec{w})
+    &= \frac{p(w_1, w_0, w_{-1})}{p(w_0, w_{-1})}
+       \frac{p(w_2, w_3, w_4)}{p(w_3, w_4)}...
+       \frac{p(w_n, w_{n-1}, w_{n-2})}{p(w_{n-1}, w_{n-2})}
+       \frac{p(w_{n+1}, w_n, w_{n-1})}{p(w_n, w_{n-1})}
+    \\&= \frac{p(w_1, BOS, BOS)}{p(BOS, BOS)}
+       \frac{p(w_2, w_3, w_4)}{p(w_3, w_4)}...
+       \frac{p(w_n, w_{n-1}, w_{n-2})}{p(w_{n-1}, w_{n-2})}
+       \frac{p(EOS, w_n, w_{n-1})}{p(w_n, w_{n-1})}       
+\end{align*}
+If we use "i love new york" as an example for this model, then it becomes
+\begin{align*}
+    p(\text{i love new york})
+    &= \frac{p(i, BOS, BOS)}{p(BOS, BOS)}
+       \frac{p(love, i, BOS)}{p(i, BOS)}
+       \frac{p(new, love, i)}{p(love, i)}
+       \frac{p(york, new, love)}{p(new, love)}
+       \frac{p(EOS, york, new)}{p(york, new)}       \tag{4.d.1}
+\end{align*}
+
+\noindent
+For $p_{reversed}(\vec{w})$ (notice that $w_1$ is the right most word in the origin sentence)
+\begin{align*}
+    p_{reversed}(\vec{w})
+    &= \frac{p(w_0, w_1, w_2)}{p(w_1, w_2)}
+       \frac{p(w_1, w_2, w_3)}{p(w_2, w_3)}...
+       \frac{p(w_{n-1}, w_n, w_{n+1})}{P(w_n, w_{n+1})}
+       \frac{p(w_n, w_{n+1}, w_{w+2})}{p(w_{n+1}, w_{n+2})}
+    \\&= \frac{p(BOS, w_1, w_2)}{p(w_1, w_2)}
+       \frac{p(w_1, w_2, w_3)}{p(w_2, w_3)}...
+       \frac{p(w_{n-1}, w_n, w_{n+1})}{P(w_n, w_{n+1})}
+       \frac{p(w_n, EOS, EOS)}{p(EOS, EOS)}
+\end{align*}
+If we use "i love new york" as an example for this model, then it becomes\\
+\begin{align*}
+    p_{reversed}(\text{i love new york})
+    &= \frac{p(BOS, york, new)}{P(york, new)}
+       \frac{p(york, new, love)}{p(new, love)}
+       \frac{p(new, love, i)}{p(love, i)}
+       \frac{p(love, i, EOS)}{p(i, EOS)}
+       \frac{p(i, EOS, EOS)}{p(EOS, EOS)}       \tag{4.d.2}
+\end{align*}
+Since the "EOS" in $p(\vec{w})$ equals to the "BOS" in $p_{reversed}(\vec{w})$ and the "BOS" in $p(\vec{w})$ equals to the "EOS" in $p_{reversed}(\vec{w})$, the equation (4.d.1) equals to (4.d.2). If we observe the two equations, they have the same structure. Thus we have proved that $p(\vec{w}) = p_{reversed}(\vec{w})$.\\
+
+
+\noindent
+\textbf{Question 5.}\\
+\textbf{Answer:}\\
+We added "$a$" denoting the topic variable and "$h$" denoting word history. Then make the language model condition on topic and word history.
+$$p(w \mid h) = \sum_a p(w \mid a)p(a \mid h)$$
+Next, we rewrite it as a bigram language model.\\
+$$p(w \mid h) = \sum_a \prod_{i=1}^n p(w_i \mid w_{i-1}, a)p(a \mid \text{words before } w_i)$$
+Based on the modified model, the formula for $p(w_1w_2w_3w_4)$ can be written as
+\begin{align*}
+    p(w \mid h) 
+    &= p(w_1w_2w_3w_4 \mid h)
+    \\&= \sum_a p(w_1 \mid <s>, a)p(a \mid <s>)p(w_2 \mid w_1, a)p(a \mid <s>, w_1)...p(</s> \mid w_n, a)p(a \mid <s>, w_1, ..., w_n)
+\end{align*}
+
+
+
+
+
+
+
 
 
 
