@@ -350,28 +350,362 @@ Based on the modified model, the formula for $p(w_1w_2w_3w_4)$ can be written as
     p(w \mid h) 
     &= p(w_1w_2w_3w_4 \mid h)
     \\&= \sum_a p(w_1 \mid <s>, a)p(a \mid <s>)p(w_2 \mid w_1, a)p(a \mid <s>, w_1)...p(</s> \mid w_n, a)p(a \mid <s>, w_1, ..., w_n)
+\end{align*}\\
+To simply the computation, we can apply backoff on the history to make it depend on only at most some certain number of words in the begining of a sentence. The proposed model will become as below (we take first three words, including $<s>$ in the sentence into account):\\
+\begin{align*}
+    p(w \mid h) 
+    &= p(w_1w_2w_3w_4 \mid h)
+    \\&= \sum_a p(w_1 \mid <s>, a)p(a \mid <s> )p(w_2 \mid w_1, a)p(a \mid <s>, w_1)...p(</s> \mid w_n, a)p(a \mid <s>, w_1, w_2)
+\end{align*}\\
+To make this equation easier, we could only consider the probability of each topic in the training corpus. Thus, the model becomes\\
+\begin{align*}
+    p(w) 
+    &= \sum_a \prod_{i=1}^n p(w_i \mid w_{i-1}, a)p(a)
+\end{align*}\\
+
+
+\textbf{Question 8.}\\
+\textbf{(a) Answer:}\\
+The top 5 most similar words to \textbf{seattle} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+ 1 & seahawks & 0.758477017352 \\
+ 2 & spokane  & 0.753791653178 \\
+ 3 & tacoma   & 0.713077987387 \\
+ 4 & florida  & 0.710194673562 \\
+ 5 & atlanta  & 0.684451194731 \\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{dog} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & badger & 0.827403953553\\
+2 & dogs & 0.799978724722\\
+3 & hound & 0.799708354606\\
+4 & cat & 0.79232823091\\
+5 & borzoi & 0.765538313797\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{communist} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & socialist & 0.874821580314\\
+2 & communists & 0.818631237596\\
+3 & comintern & 0.812112934282\\
+4 & bolshevik & 0.794996023603\\
+5 & leftist & 0.78247516237\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{jpg} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & png & 0.757922362133\\
+2 & svg & 0.658103171326\\
+3 & galleria & 0.634697828169\\
+4 & gif & 0.614576269941\\
+5 & fuji & 0.609729535714\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{the} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & its & 0.783370512889\\
+2 & in & 0.770665320002\\
+3 & entire & 0.764974819916\\
+4 & of & 0.752080748141\\
+5 & which & 0.742970631173\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{google} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & com & 0.745915499849\\
+2 & yahoo & 0.73721515423\\
+3 & faq & 0.726275514433\\
+4 & flickr & 0.697346988155\\
+5 & web & 0.689164493716\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{baltimore} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & colts & 0.715448935471\\
+2 & unitas & 0.715169266716\\
+3 & philadelphia & 0.711700587058\\
+4 & dallas & 0.673996636042\\
+5 & cleveland & 0.67395991933\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The top 5 most similar words to \textbf{go} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & get & 0.804380163332\\
+2 & going & 0.791917570246\\
+3 & wait & 0.767667283823\\
+4 & want & 0.735100324766\\
+5 & leave & 0.7046638208\\
+ \hline
+\end{tabular}\\
+
+\noindent
+From the examples shown above, "communist" worked best because "findsim" found the words that are similar to "communist." "go", and "the" worked poorly because the program returned words that are not similar to the them regarding their semantic. For example, "entire" is not similar to "the," and "wait" is not similar to "go" either. Other examples worked well because even the words are not similar to the target words regarding semantic property, those words are related to the target words. For instance, "cat" and "dog" are both animals.\\
+
+\noindent
+If we use smaller $d$, the result become worse. Take "jpg" for example, see the following result based on 10-dimension vector. The result shows less similar words than the previous result of "jpg."\\
+\noindent
+The top 5 most similar words to \textbf{jpg} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & wan & 0.93912896681\\
+2 & maui & 0.935697578676\\
+3 & crannogs & 0.93356830967\\
+4 & bahnhof & 0.928524004063\\
+5 & tor & 0.923776536092\\
+ \hline
+\end{tabular}\\
+
+\noindent
+On the other hand, if we use higher $d$, some results become better. For instance, the following result of "baltimore" is based on 200-dimension vector. Although those word are not similar to "balitmore" regarding semantic property, they are related to "baltimore." "colts" is the former football team based on Baltimore and "irsay" is the owner of the team "colts." In addition, "maryland" is more relevant to "baltimore" than "cleveland", "dallas", and "philadelphia" do.\\
+
+The top 5 most similar words to \textbf{baltimore} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & maryland & 0.552843128503\\
+2 & irsay & 0.513162445035\\
+3 & hagerstown & 0.491446562888\\
+4 & colts & 0.483818773756\\
+5 & philadelphia & 0.467494981195\\
+ \hline
+\end{tabular}\\
+\\
+
+\noindent
+\textbf{(b) Answer:}\\
+
+The top 5 most similar words to \textbf{king - man + woman} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & queen & 0.601229954946\\
+2 & betrothed & 0.511752594404\\
+3 & consort & 0.50889281754\\
+4 & heiress & 0.506015397295\\
+5 & daughter & 0.49657862759\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{paris - france + uk} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & london & 0.451385461104\\
+2 & odeon & 0.440057066559\\
+3 & manchester & 0.433118122934\\
+4 & promo & 0.424648134466\\
+5 & molview & 0.385688566984\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{hitler - germany + italy} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & mussolini & 0.534804309489\\
+2 & speer & 0.427586316995\\
+3 & eichmann & 0.419265599542\\
+4 & petacci & 0.417031583213\\
+5 & graziani & 0.416849390689\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{child - goose + geese} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & children & 0.515179273254\\
+2 & parents & 0.460154553343\\
+3 & infants & 0.456994574398\\
+4 & parenting & 0.424722392905\\
+5 & infanticide & 0.42345248145\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{goes - eats + ate} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & went & 0.562417091534\\
+2 & going & 0.520057339135\\
+3 & go & 0.494516630298\\
+4 & got & 0.48438702187\\
+5 & forgot & 0.436886429364\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{car - road + air} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & aircraft & 0.492352479725\\
+2 & pressurized & 0.477225898754\\
+3 & helicopter & 0.476701914758\\
+4 & parachutes & 0.472783841942\\
+5 & bomber & 0.456567849462\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{fish - water + air} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & airbase & 0.45353525027\\
+2 & marine & 0.444535774596\\
+3 & corsairs & 0.438252257403\\
+4 & warbird & 0.43731466043\\
+5 & squadrons & 0.434321217474\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{baseball - music + guitar} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & mlb & 0.498584908014\\
+2 & slugger & 0.496346693662\\
+3 & lofton & 0.486907223076\\
+4 & manny & 0.483677369284\\
+5 & alou & 0.478289071071\\
+ \hline
+\end{tabular}\\
+
+\noindent
+The following results are based on 10-dimension vector.\\
+
+The top 5 most similar words to \textbf{fish - water + air} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & mills & 0.944182264876\\
+2 & hmas & 0.925994377082\\
+3 & scout & 0.905816290242\\
+4 & hanford & 0.898035552892\\
+5 & superfund & 0.896362367403\\
+ \hline
+\end{tabular}\\
+
+The top 5 most similar words to \textbf{baseball - music + guitar} are:\\
+\begin{tabular}{ p{2.5cm}|p{2.5cm}|p{3cm}  }
+ \hline
+ Ranking & Word & Cosine Similarity\\
+ \hline
+1 & mvps & 0.958718104671\\
+2 & player & 0.949188663523\\
+3 & ace & 0.945560961722\\
+4 & yount & 0.94276522126\\
+5 & heisman & 0.936004993904\\
+ \hline
+\end{tabular}\\
+
+
+\noindent
+This method for finding analogy works well for "paris - france + uk", "king - man + woman", "car - road + air", and "baseball - music + guitar." However, if we use $d = 10$ instead of $d = 200$, it didn't work well for some case. For example, it found less similar words for "fish - water + air".\\
+
+\noindent
+This method of finding analogies will find syntactic and semantic similar words or relative words. For example, it found "colts", which is a football team based on Baltimore, for the word "baltimore". It is not similar regarding syntactic or semantic aspects (or we can say they are both a noun).\\
+
+\noindent
+The role of the vector "king - man" before "woman" is added means that a word has the property of "king" but no property of "man." So, after "man" was subtracted from "king," we might have the word that have a property like the leader of a group. After we added "woman" into the vector, we might have the word that has the properties like a leader and a woman. So we got the word "queen."\\ 
+
+\noindent
+This technique can solve analogies because the found word is similar to the vector "A - B + C." So, if we let $A - B + C = D$, where $D$ is the analogy word, and move elements in the equation to make it become $A - D = B - C$. By the new equation, we can find a word $D$ that is similar to $A$ just like $C$ is similar to $B$.\\
+
+
+\noindent
+\textbf{Question 9.}\\
+The chain rule of $p(A, B, C, D)$ is\\
+$$p(A, B, C, D) = p(A \mid B, C, D)p(B \mid C, D)p(C \mid D)p(D)$$
+Then we apply backoff on the equation:\\
+\begin{align*}
+    p(A, B, C, D)
+    &=p(A \mid B, D)p(B \mid C)p(C \mid D)p(D)  \tag{assume each pixel only depends on adjacent pixels}
+    \\&=\frac{p(A, B, D)}{p(B, D)}p(B \mid C)p(C \mid D)p(D)
+    \\&=\frac{p(D \mid A, B)p(A \mid B)p(B)}{p(B)p(D)}p(B \mid C)p(C \mid D)p(D) \tag{assume $B$ and $D$ are independent, and $A$ and $C$ are independent}
+    \\&=p(D \mid A)p(A \mid B)p(B \mid C)p(C \mid D)  
+    \\&=p(A \mid B)p(B \mid C)p(C \mid D)p(D \mid A)
 \end{align*}
+Thus, we have proven that $p(A, B, C, D)$ can be approximated to $p(A \mid B)p(B \mid C)p(C \mid D)p(D \mid A)$ by using chain rule and backoff.\\
 
 
+\noindent
+\textbf{Question 10.}\\
+\textbf{Answer:}\\
+We first convert the following probability using chain rule:\\
 
+\noindent
+$p(\neg fortune, \neg race, \neg horse, \neg shoe \mid \neg nail)$\\
+%
+$= p(\neg fortune \mid \neg race, \neg horse, \neg shoe, \neg nail)p(\neg race \mid \neg horse, \neg shoe, \neg nail)p(\neg horse \mid \neg shoe, \neg nail)p(\neg shoe \mid \neg nail)$\\
 
+\noindent
+Since $p(\neg fortune \mid \neg race) = 1$, $p(\neg fortune \mid \neg race, \neg horse, \neg shoe, \neg nail)$ will also be 1 by (1k) and so do $p(\neg race \mid \neg horse, \neg shoe, \neg nail)$ and $p(\neg horse \mid \neg shoe, \neg nail)$.\\
 
+\noindent
+Hence, we know that\\
+$$p(\neg fortune, \neg race, \neg horse, \neg shoe \mid \neg nail) = 1 \times 1 \times 1 \times 1 = 1$$
 
+\noindent
+In addition, because $(\neg fortune \cap \neg race \cap \neg house \cap \neg shoe \cap \neg nail) \subseteq (\neg fortune)$, $p(\neg fortune, \neg race, \neg house, \neg shoe, \neg nail) \leq p(\neg fortune)$ by (1a). Combine this equation with the above equation and we have:\\
+$$p(\neg fortune, \neg race, \neg house, \neg shoe, \neg nail) \leq p(\neg fortune) \leq 1$$ 
+We further make both side condition on $\neg nail$, then we have the following equation and the probability after adding a condition is still between [0,1] by (1b):\\
+$$p(\neg fortune, \neg race, \neg house, \neg shoe, \neg nail \mid \neg nail) \leq p(\neg fortune \mid \neg nail) \leq 1$$
+Since we already know that $p(\neg fortune, \neg race, \neg horse, \neg shoe \mid \neg nail) = 1$, the above equation will become\\
+$$1 \leq p(\neg fortune \mid \neg nail) \leq 1$$
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+\noindent
+Therefore, $p(\neg fortune \mid \neg nail)$ must also be 1.
 
 
 \end{document}
