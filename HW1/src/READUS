@@ -1,0 +1,267 @@
+EN600.465 Natural Language Process 
+Assignment 1: Designing Context-Free Grammars
+
+Team members:
+Jinyi Guo 
+Li-Yi Lin
+Chenyang Su
+
+
+
+Questions 1:
+Sentence 1:
+the floor in every pickle on a chief of staff on a floor in every pickle on a floor in every delicious president with the floor with every chief of staff in every floor with a sandwich with a floor with the floor under every fine president with the perplexed perplexed pickle in every pickle under every sandwich under every floor with a pickled floor under a president with every floor on a president with every sandwich in the delicious floor on every president on every floor under the president on every president in a pickle on every president in every floor in every pickle under the pickled chief of staff in the president under the pickle with every pickled chief of staff in a pickle with every delicious pickle in a chief of staff under every sandwich on every chief of staff under every president in a fine chief of staff on the chief of staff on the floor in every floor under a pickle in a sandwich under the president on a sandwich in every perplexed chief of staff with a president in every president under every pickled sandwich with every pickle on the president on the president on the fine chief of staff on every delicious chief of staff with the sandwich with the sandwich under the president in a president under every floor with the floor with every perplexed sandwich under the floor in every chief of staff in the floor with every president in a pickle in the sandwich under every delicious pickle in every pickle under a president with every president in a fine floor with every pickle under the president on the chief of staff on a president in the pickled floor in the president on every pickle under the floor in a perplexed sandwich kissed the pickle under the floor under every fine chief of staff with the president under a sandwich in every pickle in every floor under every pickle under every president under a floor in the chief of staff with a pickle in the fine floor on the chief of staff in a floor under a fine president with every floor in every chief of staff with a perplexed delicious delicious pickle with the sandwich with every sandwich on a sandwich in the pickle with the sandwich with a chief of staff with a president on the floor on the president under the chief of staff with the chief of staff under a chief of staff in a president under every sandwich under a fine pickled floor under every sandwich with a pickled chief of staff with a floor in the pickle with the president in a perplexed floor under the floor on a president in a pickle with a perplexed sandwich under a chief of staff on every floor in the chief of staff in every fine sandwich under a president in a perplexed chief of staff with the sandwich in every president under a floor on every floor in every chief of staff under the president under every pickled chief of staff !
+
+Sentence 2:
+the pickled pickle in the pickle with the floor under the floor understood the president .
+
+Sentence 3:
+is it true that every sandwich kissed every pickle in every fine floor ?
+
+Sentence 4:
+every sandwich on the pickled perplexed president with the president under every floor under the sandwich under the floor pickled every chief of staff with a president !
+
+Sentence 5:
+every chief of staff with a sandwich with every pickle wanted a chief of staff !
+
+Sentence 6:
+every fine president in a chief of staff on every chief of staff under the pickle under every pickle wanted the fine floor under the floor under a floor .
+
+Sentence 7:
+the pickle ate the president in the sandwich !
+
+Sentence 8:
+a president on every floor kissed the pickle !
+
+Sentence 9:
+every pickled chief of staff on every delicious pickled sandwich with a sandwich in a sandwich in the sandwich on every pickle under a president with every chief of staff with a perplexed chief of staff under every chief of staff on a pickle on every chief of staff under every delicious pickle with every pickle with every sandwich in every sandwich with every pickle with every delicious chief of staff on a chief of staff on every sandwich in every president with a pickle in the perplexed pickle on every pickle under a chief of staff on the perplexed pickle with the delicious chief of staff in every president on every floor under the pickle in every chief of staff under a pickle in the sandwich on every sandwich under the floor with a pickle with a chief of staff on every sandwich on a sandwich under every chief of staff on every president in the pickle with the president with every pickle on the fine floor on a floor under every pickle under every chief of staff under a pickle on every floor in every chief of staff in every pickle on every fine perplexed floor under every president on the floor on every pickled floor under the president with the sandwich under a floor with a pickle in the delicious floor on the floor in every president under the perplexed chief of staff in the president on every pickle on a sandwich under every delicious chief of staff on the sandwich on every perplexed chief of staff in the delicious president wanted the chief of staff on a chief of staff with every president in every pickle in a pickled floor .
+
+Sentence 10:
+is it true that the perplexed pickle with a floor with a chief of staff under the pickle in a chief of staff on the pickle with every delicious fine president in every sandwich on every floor with every president with a perplexed chief of staff with a chief of staff under a chief of staff with a pickle with the chief of staff on a delicious perplexed president on every delicious chief of staff under the president with a president in the delicious sandwich under a chief of staff in every pickled sandwich under the delicious floor with every floor in a chief of staff on the pickle under the sandwich under a president under a sandwich in every pickled floor with a sandwich with the pickled floor under the sandwich in the chief of staff on a perplexed president under a chief of staff on a sandwich on every president with every president under a pickle with the perplexed president in the chief of staff on a president with a president in the chief of staff with every sandwich with the pickle under a sandwich under the president under every chief of staff on a president with the president in a president in a pickle under a president on the chief of staff understood every floor on a sandwich in a fine floor under the delicious floor in every pickled president with the president on the floor with a sandwich in the sandwich under the pickle on every floor under the pickle on the chief of staff with the chief of staff in the pickle on the chief of staff on the president with the sandwich under the delicious floor on the president with a chief of staff in a floor on a pickle ?
+
+
+
+Question 2:
+(a) It generates so many long sentences because, when performing the depth first search, the program can hardly reach a terminal. Therefore, it keeps adding new grammar to the end of the current sentence until it reach a terminal. Any grammar that contains no terminal could be the reason for generating long sentences. The “NP -> NP PP” rule, especially, might be responsible for this phenomena because when reaching the NP, the following two non-terminal phrase, NP and PP, will further generate another sub-sentence. On the other hand, other grammars , except the “S -> NP VP”, all contains at least one terminal that can reduce the probability of creating long sentences.
+
+(b) For the rules keyword “Noun”, there is only one rule that contains keyword “Adj”, while there are 5 rules resulting in a terminal. So the chances of generating a noun with an adjectives is only ⅙, and (⅙)^n for generating a noun with n adjectives.
+
+(d) For problem (a), we should increase the number of “NP -> Det Noun” in order to make the program choose the “NP -> Det Noun” more likely than “NP -> NP PP.” 
+
+For problem in (b) the number before rule “Noun -> Adj Noun” should be increased so that this rule could be chosen more frequently. Likewise, the numbers before other rules of “Noun” pointing to a terminal could be reduced to make adjectives more frequent.
+
+(e) In addition to the modification on part (d), we also adjusted the weight of terminals by how often they might appear in our natural language. For example the verb “pickled” is less likely to be used than “ate”, hence we reduced the weight of “pickled”. The following ten sentences are generated using the modified grammar2:
+Sentence 1:
+is it true that the president under a perplexed chief of staff kissed every chief of staff ?
+
+Sentence 2:
+the perplexed pickled president kissed a fine perplexed chief of staff .
+
+Sentence 3:
+a sandwich understood the chief of staff .
+
+Sentence 4:
+a sandwich ate the president !
+
+Sentence 5:
+is it true that the chief of staff ate the chief of staff ?
+
+Sentence 6:
+the chief of staff under a fine president understood a chief of staff .
+
+Sentence 7:
+is it true that a chief of staff wanted the chief of staff under a president ?
+
+Sentence 8:
+the president understood every chief of staff in the president under a president with a chief of staff .
+
+Sentence 9:
+the president under a delicious sandwich with the chief of staff kissed the floor .
+
+Sentence 10:
+every president wanted a president under a fine delicious chief of staff .
+
+
+
+Question 4:
+(ROOT (S (NP (NP (Det a)
+                 (Noun president))
+             (PP (Prep in)
+                 (NP (NP (Det every)
+                         (Noun (Adj (Adv very)
+                                    (Adj (Adv very)
+                                         (Adj nice)))
+                               (Noun sandwich)))
+                     (Conj and)
+                     (NP (NP (NP (Det a)
+                                 (Noun pickle))
+                             (PP (Prep in)
+                                 (NP (Det a)
+                                     (Noun president))))
+                         (PP (Prep in)
+                             (NP (NNP Sally)))))))
+         (VP (V_trans pickled)
+             (NP (NNP Sally))))
+      !)
+
+(ROOT (IN that)
+      (S (NP (Det the)
+             (Noun chief 
+                   of 
+                   staff))
+         (VP (V_trans understood)
+             (NP (NNP Sally))))
+      (VP (V_trans kissed)
+          (NP (Det every)
+              (Noun (Adj nice)
+                    (Noun sandwich))))
+      .)
+
+(ROOT (S (NP (NP (NNP Sally))
+             (PP (Prep under)
+                 (NP (NNP Sally))))
+         (VP (V_trans wanted)
+             (SBAR (IN that)
+                   (S (NP (NNP Sally))
+                      (VP (V_intrans sighed)
+                          (PP (Prep with)
+                              (NP (NP (Det every)
+                                      (Noun president))
+                                  (PP (Prep on)
+                                      (NP (Det every)
+                                          (Noun president))))))))))
+      .)
+
+(ROOT (PRP it)
+      (VP (V_intrans sighed))
+      (IN that)
+      (S (NP (Det a)
+             (Noun sandwich))
+         (VP (V_trans kissed)
+             (NP (NP (NNP Sally))
+                 (PP (Prep on)
+                     (NP (NNP Sally))))
+             (SBAR (IN that)
+                   (S (NP (NNP Sally))
+                      (VP (V_trans understood)
+                          (NP (NNP Sally)))))))
+      .)
+
+(ROOT is 
+      it 
+      true 
+      that 
+      (S (NP (Det the)
+             (Noun pickle))
+         (VP (V_intrans sighed)))
+      ?)
+
+
+
+
+Question 5.
+(a)  The other derivation is as follows: 
+(ROOT  (S  (NP  (NP  (Det  every)
+                     (Noun  sandwich))
+                (PP  (prep  with)
+                     (NP  (NP  (Det  a)
+                               (Noun  pickle))
+                          (PP  (Prep  on)
+                               (NP  (Det  the)
+                                    (Noun  floor))))))
+           (VP  (Verb  wanted)
+                (NP  (Det  a)
+                     (Noun  president))))
+        .)
+
+
+(b) These two derivations actually correspond to the two possible meanings of this sentence. In the derivation given in (a), “on the floor” is after “every sandwich with a pickle”. So sandwich and pickle are both on the floor. But in the derivation given by us as above, “on the floor” is only after “a pickle”. Therefore we can only say pickle is on the floor. That is the difference of the meaning of these two derivations. 
+
+
+
+Question 6.
+(a) 
+According to the results we got from our sentence generator and the parser, the parser did not always recover the original derivation that was intended by randsent. The reason is that some grammar can generate repeated same grammar and this will cause different derivations. For example, if many “NP Conj NP” grammar happen consecutively, it is hard to determine which derivation is the original one. For “NP Conj NP Conj NP,” it can be parsed into two different derivations, “(NP Conj NP) Conj NP” and “NP Conj (NP Conj NP).” Another reason that causes different derivations is the grammar “NP -> NP PP.” Since NP can generate other NP grammar, PP can be paired with any NP in front of itself if it is grammatical. For instance, in the sentence “a floor and every sandwich and Sally with the president with the nice president with every chief of staff understood every floor and the pickle !”, (PP (Prep with) NP…) can be paired with (NP (NNP Sally)) or (NP (NP (Det a) …). Therefore, the parser may give different derivations when only take grammar into account.
+
+
+(b) 
+The different derivations all come from how we split the NP into NP PP. If we first make “every sandwich with a pickle on the floor” as NP and “under the chief of staff” as PP, then second from “every sandwich with a pickle on the floor” we can make “every sandwich with a pickle” as NP and “on the floor” as PP, or we can make “every sandwich” as NP and “with a pickle on the floor” as PP. This gives as two derivations. 
+
+If we first make “every sandwich with a pickle” as NP and “on the floor under the chief of staff” as PP, this gives us another derivation.
+
+If we first make “every sandwich” as NP and “with a pickle on the floor under the chief of staff” as PP, then similarly as the first case, there is still two ways to split the NP “a pickle on the floor under the chief of staff”. Therefore this also gives two derivations.
+
+Above all, in total there are five ways to derive this NP phrase. And we have checked with parse command, which gave the same answer five. 
+
+
+(c) 
+Among the 100 sentences we generated from grammar, about 80% of them only have 1 parse while others have multiple parses. Usually longer sentences have more parses. By further observation we found that the number of parses is related to the number of “PP” element in the sentence. As we discussed in part (a) and (b), “NP PP” pair can cause different derivations of parse since there are multiple ways to split “NP” into “NP PP”.
+
+For grammar3, as we discussed in part (a), another case where several NPs are linked together by conjunctions can also cause multiple ways of parse. Thus sentences with multiple “PP” elements and “NP Conj NP Conj NP …” are more likely to have more ways of parse.
+
+
+(d) 
+i. For the first sentence, the small probability 5.144032922e-05 comes from multiplying the probability in the grammar. Namely, the sentence “the president ate the sandwich.” can only be parsed as follows:
+    (1) ROOT -> S .  with probability 1/3
+    (2) S -> NP  VP with probability 1
+    (3) NP -> Det Noun  VP -> Verb NP  with probability 1/2
+    (4) Det -> the  Noun -> president  Verb -> ate  NP -> Det Noun  with probability (1/3)*(1/6)*(1/5)*(1/2)
+    (5) Det -> the Noun -> sandwich  with probability (1/3)*(1/6) 
+Now multiplying all these probabilities together, we get (1/3)*1*(1/2)*(1/3)*(1/6)*(1/5)*(1/2)*(1/3)*(1/6)=5.144032922e-05. We shall note this is the only way to parse the sentence.So p(best_parse)=5.144032922e-05. The sentence must be generated from the way above. Therefore p(sentence) is equal to p(best_parse). And given this sentence, it is always generated by the best parse. So p(best_parse|sentence)=1. 
+
+ii. The fact that the third number equals to 0.5 means the chance of getting the best parse among all possible parses is 0.5. It is exactly so because the there are two possible parses (two ways to split the NPs into NP and PP) for this sentence, each one is of the same probability.
+
+iii. The cross entropy is calculated by formula 
+H(p,q)=\sum_xp(x)[−log_2q(x)].
+where p(x) is the probability that sentence x appears in English, and q(x) is the probability of our model generating sentence x. Since we can’t really get p(x), we can estimate the cross entropy using a random sample, which is a collection of N sentences, x1,x2,…,xN. By calculating the “sample average”, we can estimate the “population average” by
+H(p,q)=\sum_xp(x)[−log_2q(x)] \approx \sum_i 1/N[−log_2q(xi)].
+In our case where the corpus consists two sentences, N = 2 and q(x) = p(sentence). We can estimate the cross-entropy by the equation above and obtain the cross-entropy for each word by dividing the result by the length of text (18 here). Here the result is 2.435185068 bits per word.
+
+iv. By the definition the perplexity per word for this grammar is 2^2.435185067 = 5.4083370619.
+
+v. The cross-entropy here is infinity here. This is because there is no grammar that can parse the second input sentence, causing p(sentence) = 0 and if we take the logarithm we get infinity.
+
+
+(e) 
+We generated 10000 sentences using grammar2 and use the same grammar to predict the word sequences. Here is our command:
+./randsent grammar2 10000 | ./parse -P -g grammar2 | ./prettyprint
+
+The cross-entropy is 1.79254052 bits per word.
+
+For grammar3, we have cross-entropy = 2.445285259 bits per word. This is much higher than the cross-entropy of grammar2 because grammar3 can generate a greater variety of sentences which have multiple parses, we have discussed it in detail in part (a) and (b).
+
+When we try to calculate the entropy for grammar using corpus with the same size, we got “RuntimeError: maximum recursion depth exceeded” because in the original version of the grammar chances of generating long sentence with multiple NP-PP paris are very high, making it very easy to reach the recursion limit (in Python, the default maximum recursion depth is 1000). If generating any of the 10000 sentences uses recursion with depth more than 1000, an error will be thrown.
+
+
+(f) 
+For the corpus consisting of 10000 sentences generated from grammar2, the entropy of grammar2 is  1.79254052 bits per word, while the entropy of grammar and grammar3 are 2.020510882 bits per word and 2.325070064 bits per word respectively. This matches with the theory that entropy is always smaller than the cross entropy. Since greater entropy means worse performance in predicting the corpus, we can conclude that grammar2 does better in predicting the corpus generated by itself. 
+
+
+
+Question 7.
+For this question, we extend the grammar to support phenomena (b) and (e). For phenomenon (b), we introduced auxiliary verbs, did and will, and simple present tense verbs to form a question sentence. For the sentence structure, we introduct question sentence structure, QS, which is "Aux NP  plVP." By those grammar we added, the randsent can generate the question sentences similiar to the given sample sentences. 
+
+For phenomenon (e), we need to deal with the agreement of noun and verb. To do this, we differentiate the noun and verb into singular and plural form. In addition, we used 3sgNP and plNP to represent singular noun phrase and plural noun phrase respectively.
+
+The generated sample sentences are shown below: 
+a chief of staff understood that every pickle kissed that the citizens on Sally under the citizens under the citizens sighed in the citizens in the citizens .
+that Sally sighs wanted the citizens .
+every president in the president and Sally on a president with the citizens in a president in the chief of staff under the citizens under the citizens under a sandwich on every pickle kissed the citizens on every sandwich .
+the sandwich thinks that Sally sighed on the citizens !
+the citizens pickled a floor .
+is it true that the floor sighs ?
+did the pickle on a president in the citizens understand that Sally in the president on a pickle in Sally in every president wants that a sandwich under the citizens with the citizens in the citizens understands and kisses the president ?
+every floor sighs with the citizens !
+will the citizens sigh ?
+that the president ate that Sally under every president understood and ate Sally kissed the citizens .
+
+
+
+Question 8.
+We further extended our grammar to support imperative, inversion sentences and "not only ... but also ..." structure. 
+For imperative sentence, we used plVP as the sentence structure that uses simple plural tense verb phrase without a noun in the sentence. For example, "think that the citizens and the citizens not only sigh but also want the president !" is an imperative sentence.
+For inversion sentence, we use "PP Aux NP plVP" as the sentence structure. For instance, "with Sally will the citizens sigh ." is generate under the inversion sentence grammar. For "not only ... but also" structure, we used "3sgNP not only 3sgVP but also 3sgVP" and "plNP not only plVP but also plVP" to generate the corresponding sentences, e.g., "the sandwich not only kisses Sally but also wants and kisses the citizens ."
+
+
+
+
