@@ -64,14 +64,14 @@ def main():
   for i in range(0,len(result1)):
     if result1[i] > result2[i]:
       type1 += 1
-      print train_file1, '\t', files[i]
+      #print train_file1, '\t', files[i]
     else:
       type2 += 1
-      print train_file2, '\t', files[i]
+      #print train_file2, '\t', files[i]
 
 
-  print '%d looked more like %s (%.2f%%)'%(type1, train_file1, type1*100/(type1+type2))
-  print '%d looked more like %s (%.2f%%)'%(type2, train_file2, type2*100/(type1+type2))
+  print '%d looked more like %s (%.2f%%)'%(type1, train_file1, type1*100.0/(type1+type2))
+  print '%d looked more like %s (%.2f%%)'%(type2, train_file2, type2*100.0/(type1+type2))
 
 if __name__ ==  "__main__":
   main()
