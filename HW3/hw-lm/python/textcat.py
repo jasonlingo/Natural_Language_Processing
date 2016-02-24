@@ -41,8 +41,9 @@ def main():
   lm = Probs.LanguageModel()
   lm.set_smoother(smoother)
   lm.read_vectors(lexicon)
-  lm.train(train_file1)
   lm.set_vocab_size(train_file1, train_file2)
+  lm.train(train_file1)
+
   # We use natural log for our internal computations and that's
   # the kind of log-probability that fileLogProb returns.
   # But we'd like to print a value in bits: so we convert
@@ -55,7 +56,7 @@ def main():
     files.append(testfile)
     result1.append(lm.filelogprob(testfile) / math.log(2))
 
-  lm.train(train_file1)
+  lm.train(train_file2)
   for testfile in argv:
     result2.append(lm.filelogprob(testfile) / math.log(2))
 
@@ -66,7 +67,7 @@ def main():
       print train_file1, '\t', files[i]
     else:
       type2 += 1
-      print train_file2, '\t', testfile
+      print train_file2, '\t', files[i]
 
 
   print '%d looked more like %s (%.2f%%)'%(type1, train_file1, type1*100/(type1+type2))
