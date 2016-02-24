@@ -1,0 +1,12 @@
+#!/usr/bin/python
+class FindSim(object):
+  def __init__(self):
+
+  def findsim(self, word):
+    
+if __name__=="__main__":
+ # Get the parameters from command line 
+ fs = FindSim()
+  
+
+  
