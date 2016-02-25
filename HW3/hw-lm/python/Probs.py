@@ -53,7 +53,10 @@ class LanguageModel:
     # the two weight matrices U and W used in log linear model
     # They are initialized in train() function and represented as two
     # dimensional lists.
-    self.U, self.W = None, None  
+    self.U, self.W = None, None
+
+    # for prob
+    self.probDP = {}
 
     # self.tokens[(x, y, z)] = # of times that xyz was observed during training.
     # self.tokens[(y, z)]    = # of times that yz was observed during training.
@@ -70,7 +73,6 @@ class LanguageModel:
     """Computes a smoothed estimate of the trigram probability p(z | x,y)
     according to the language model.
     """
-
     if self.smoother == "UNIFORM":
       return float(1) / self.vocab_size
     elif self.smoother == "ADDL":
@@ -89,7 +91,45 @@ class LanguageModel:
       # as is required for any probability function.
 
     elif self.smoother == "BACKOFF_ADDL":
-      sys.exit("BACKOFF_ADDL is not implemented yet (that's your job!)")
+      if x == '' and y == '' and z == '':
+        # deno = self.tokens.get((''), 0)
+        # if deno > 0:
+        return 1.0 / self.vocab_size
+        # else:
+        #   sys.stderr.write("Backoff add lambda divided by zero\n")
+
+      if x == '' and y != '':
+         return (self.tokens.get((y, z), 0) + self.lambdap * self.vocab_size * self.prob('', '', z)) / \
+                (self.tokens.get((y), 0) + self.lambdap * self.vocab_size)
+      if x == '':
+         return (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
+                (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
+
+      if x not in self.vocab:
+        x = OOV
+      if y not in self.vocab:
+        y = OOV
+      if z not in self.vocab:
+        z = OOV
+
+      # normalization
+
+      if (x, y, z) in self.probDP:
+        return self.probDP[(x, y, z)]
+      nor = 0
+      for v in self.vocab:
+        nor += (self.tokens.get((x, y, v), 0) + self.lambdap * self.vocab_size * self.prob('', y, v)) / \
+             (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
+      nor += (self.tokens.get((x, y, OOV), 0) + self.lambdap * self.vocab_size * self.prob('', y, OOV)) / \
+             (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
+
+      result = ((self.tokens.get((x, y, z), 0) + self.lambdap * self.vocab_size * self.prob('', y, z)) / \
+                (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)) / nor
+
+      self.probDP[(x, y, z)] = result
+      return result
+
+      # sys.exit("BACKOFF_ADDL is not implemented yet (that's your job!)")
     elif self.smoother == "BACKOFF_WB":
       sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
     elif self.smoother == "LOGLINEAR":
@@ -142,7 +182,7 @@ class LanguageModel:
     self.tokens = { }
     self.types_after = { }
     self.bigrams = []
-    self.trigrams = [];
+    self.trigrams = []
 
     # While training, we'll keep track of all the trigram and bigram types
     # we observe.  You'll need these lists only for Witten-Bell backoff.
