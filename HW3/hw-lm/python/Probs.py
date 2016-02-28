@@ -12,6 +12,7 @@ import math
 import random
 import re
 import sys
+import numpy as np
 
 # TODO for TA: Currently, we use the same token for BOS and EOS as we only have
 # one sentence boundary symbol in the word embedding file.  Maybe we should
@@ -105,6 +106,7 @@ class LanguageModel:
       if x == '':
         if ('', '', z) in self.probDP:
           return self.probDP[('', '', z)]
+        # result = (self.tokens.get((z), 0) + self.lambdap) / \
         result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
         self.probDP[('', '', z)] = result
@@ -134,13 +136,33 @@ class LanguageModel:
       self.probDP[(x, y, z)] = result
       return result
 
-      # sys.exit("BACKOFF_ADDL is not implemented yet (that's your job!)")
     elif self.smoother == "BACKOFF_WB":
       sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
+
     elif self.smoother == "LOGLINEAR":
-      sys.exit("LOGLINEAR is not implemented yet (that's your job!)")
+      if x not in self.vocab:
+        x = OOV
+      if y not in self.vocab:
+        y = OOV
+      if z not in self.vocab:
+        z = OOV
+
+      matrixU = np.matrix(self.U)
+      matrixV = np.matrix(self.V)
+      u = self.calculateU(x, y, z, matrixU, matrixV)
+      bigZ = sum([self.calculateU(x, y, v, matrixU, matrixV) for v in self.vocab if v != z])
+      if bigZ == 0:
+        return 0
+      return u / bigZ
+
     else:
       sys.exit("%s has some weird value" % self.smoother)
+
+  def calculateU(self, x, y, z, matrixU, matrixV):
+    lexX = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    lexY = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    lexZ = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    return math.exp(lexX.T * matrixU * lexZ + lexY.T * matrixV * lexZ)
 
   def filelogprob(self, filename):
     """Compute the log probability of the sequence of tokens in file.
@@ -173,7 +195,7 @@ class LanguageModel:
         word = arr.pop(0)
         self.vectors[word] = [float(x) for x in arr]
 
-  def train (self, filename):
+  def train(self, filename):
     """Read the training corpus and collect any information that will be needed
     by the prob function later on.  Tokens are whitespace-delimited.
 
@@ -210,6 +232,7 @@ class LanguageModel:
 
     tokens_list = [x, y]  # the corpus saved as a list
     corpus = self.open_corpus(filename)
+
     for line in corpus:
       for z in line.split():
         # substitute out-of-vocabulary words with OOV symbol
@@ -257,6 +280,8 @@ class LanguageModel:
       #####################
       # TODO: Implement your SGD here
       #####################
+
+      
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
