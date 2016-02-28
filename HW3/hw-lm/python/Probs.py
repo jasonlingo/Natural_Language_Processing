@@ -92,6 +92,7 @@ class LanguageModel:
       # as is required for any probability function.
 
     elif self.smoother == "BACKOFF_ADDL":
+
       if x == '' and y == '' and z == '':
         return 1.0 / self.vocab_size
 
