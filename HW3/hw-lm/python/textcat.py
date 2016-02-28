@@ -22,7 +22,7 @@ import Probs
 # prob() is specified by the global variable "smoother".
 
 def main():
-  course_dir = '../All_Training'
+  course_dir = ''
   argv = sys.argv[1:]
 
   if len(argv) < 4:
@@ -36,13 +36,11 @@ def main():
   if not argv:
     print "warning: no input files specified"
 
-
-
   lm = Probs.LanguageModel()
   lm.set_smoother(smoother)
   lm.read_vectors(lexicon)
   lm.set_vocab_size(train_file1, train_file2)
-  lm.train(train_file1)
+
 
   # We use natural log for our internal computations and that's
   # the kind of log-probability that fileLogProb returns.
@@ -52,6 +50,8 @@ def main():
   result1 = []
   result2 = []
   files = []
+
+  lm.train(train_file1)
   for testfile in argv:
     files.append(testfile)
     result1.append(lm.filelogprob(testfile) / math.log(2))
@@ -61,7 +61,7 @@ def main():
     result2.append(lm.filelogprob(testfile) / math.log(2))
 
   type1 = type2 = 0
-  for i in range(0,len(result1)):
+  for i in range(0, len(result1)):
     if result1[i] > result2[i]:
       type1 += 1
       #print train_file1, '\t', files[i]
@@ -70,8 +70,8 @@ def main():
       #print train_file2, '\t', files[i]
 
 
-  print '%d looked more like %s (%.2f%%)'%(type1, train_file1, type1*100.0/(type1+type2))
-  print '%d looked more like %s (%.2f%%)'%(type2, train_file2, type2*100.0/(type1+type2))
+  print '%d looked more like %s (%.2f%%)' % (type1, train_file1, type1 * 100.0 / (type1 + type2))
+  print '%d looked more like %s (%.2f%%)' % (type2, train_file2, type2 * 100.0 / (type1 + type2))
 
 if __name__ ==  "__main__":
   main()

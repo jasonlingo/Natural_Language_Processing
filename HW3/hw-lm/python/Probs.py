@@ -12,6 +12,7 @@ import math
 import random
 import re
 import sys
+import numpy as np
 
 # TODO for TA: Currently, we use the same token for BOS and EOS as we only have
 # one sentence boundary symbol in the word embedding file.  Maybe we should
@@ -20,7 +21,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = "../All_Training/"
+DEFAULT_TRAINING_DIR = ""
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -93,18 +94,24 @@ class LanguageModel:
     elif self.smoother == "BACKOFF_ADDL":
 
       if x == '' and y == '' and z == '':
-        # deno = self.tokens.get((''), 0)
-        # if deno > 0:
         return 1.0 / self.vocab_size
-        # else:
-        #   sys.stderr.write("Backoff add lambda divided by zero\n")
 
       if x == '' and y != '':
-         return (self.tokens.get((y, z), 0) + self.lambdap * self.vocab_size * self.prob('', '', z)) / \
+        if ('', y, z) in self.probDP:
+          return self.probDP[('', y, z)]
+        result = (self.tokens.get((y, z), 0) + self.lambdap * self.vocab_size * self.prob('', '', z)) / \
                 (self.tokens.get((y), 0) + self.lambdap * self.vocab_size)
+        self.probDP[('', y, z)] = result
+        return result
+
       if x == '':
-         return (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
+        if ('', '', z) in self.probDP:
+          return self.probDP[('', '', z)]
+        # result = (self.tokens.get((z), 0) + self.lambdap) / \
+        result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
+        self.probDP[('', '', z)] = result
+        return result
 
       if x not in self.vocab:
         x = OOV
@@ -113,30 +120,50 @@ class LanguageModel:
       if z not in self.vocab:
         z = OOV
 
-      # normalization
-
       if (x, y, z) in self.probDP:
         return self.probDP[(x, y, z)]
-      nor = 0
-      for v in self.vocab:
-        nor += (self.tokens.get((x, y, v), 0) + self.lambdap * self.vocab_size * self.prob('', y, v)) / \
-             (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
-      nor += (self.tokens.get((x, y, OOV), 0) + self.lambdap * self.vocab_size * self.prob('', y, OOV)) / \
-             (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
+
+      # normalization
+      # nor = 0
+      # for v in self.vocab:
+      #   nor += (self.tokens.get((x, y, v), 0) + self.lambdap * self.vocab_size * self.prob('', y, v)) / \
+      #        (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
+      # nor += (self.tokens.get((x, y, OOV), 0) + self.lambdap * self.vocab_size * self.prob('', y, OOV)) / \
+      #        (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)
 
       result = ((self.tokens.get((x, y, z), 0) + self.lambdap * self.vocab_size * self.prob('', y, z)) / \
-                (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size)) / nor
+                (self.tokens.get((x, y), 0) + self.lambdap * self.vocab_size))
 
       self.probDP[(x, y, z)] = result
       return result
 
-      # sys.exit("BACKOFF_ADDL is not implemented yet (that's your job!)")
     elif self.smoother == "BACKOFF_WB":
       sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
+
     elif self.smoother == "LOGLINEAR":
-      sys.exit("LOGLINEAR is not implemented yet (that's your job!)")
+      if x not in self.vocab:
+        x = OOV
+      if y not in self.vocab:
+        y = OOV
+      if z not in self.vocab:
+        z = OOV
+
+      matrixU = np.matrix(self.U)
+      matrixV = np.matrix(self.V)
+      u = self.calculateU(x, y, z, matrixU, matrixV)
+      bigZ = sum([self.calculateU(x, y, v, matrixU, matrixV) for v in self.vocab if v != z])
+      if bigZ == 0:
+        return 0
+      return u / bigZ
+
     else:
       sys.exit("%s has some weird value" % self.smoother)
+
+  def calculateU(self, x, y, z, matrixU, matrixV):
+    lexX = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    lexY = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    lexZ = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
+    return math.exp(lexX.T * matrixU * lexZ + lexY.T * matrixV * lexZ)
 
   def filelogprob(self, filename):
     """Compute the log probability of the sequence of tokens in file.
@@ -169,7 +196,7 @@ class LanguageModel:
         word = arr.pop(0)
         self.vectors[word] = [float(x) for x in arr]
 
-  def train (self, filename):
+  def train(self, filename):
     """Read the training corpus and collect any information that will be needed
     by the prob function later on.  Tokens are whitespace-delimited.
 
@@ -184,6 +211,7 @@ class LanguageModel:
     self.types_after = { }
     self.bigrams = []
     self.trigrams = []
+    self.probDP = {}
 
     # While training, we'll keep track of all the trigram and bigram types
     # we observe.  You'll need these lists only for Witten-Bell backoff.
@@ -205,6 +233,7 @@ class LanguageModel:
 
     tokens_list = [x, y]  # the corpus saved as a list
     corpus = self.open_corpus(filename)
+
     for line in corpus:
       for z in line.split():
         # substitute out-of-vocabulary words with OOV symbol
@@ -253,6 +282,8 @@ class LanguageModel:
       # TODO: Implement your SGD here
       #####################
 
+      
+
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
   def count(self, x, y, z):
@@ -292,7 +323,7 @@ class LanguageModel:
       for line in corpus:
         for z in line.split():
           count[z] = count.get(z, 0) + 1
-          self.show_progress();
+          self.show_progress()
       corpus.close()
 
     self.vocab = set(w for w in count if count[w] >= OOV_THRESHOLD)
