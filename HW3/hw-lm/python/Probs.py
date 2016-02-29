@@ -12,7 +12,9 @@ import math
 import random
 import re
 import sys
+import copy
 import numpy as np
+
 
 # TODO for TA: Currently, we use the same token for BOS and EOS as we only have
 # one sentence boundary symbol in the word embedding file.  Maybe we should
@@ -51,10 +53,10 @@ class LanguageModel:
     self.bigrams = None
     self.trigrams = None
     
-    # the two weight matrices U and W used in log linear model
+    # the two weight matrices U and V used in log linear model
     # They are initialized in train() function and represented as two
     # dimensional lists.
-    self.U, self.W = None, None
+    self.U, self.V = None, None
 
     # for prob
     self.probDP = {}
@@ -141,29 +143,34 @@ class LanguageModel:
       sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
 
     elif self.smoother == "LOGLINEAR":
-      if x not in self.vocab:
-        x = OOV
-      if y not in self.vocab:
-        y = OOV
-      if z not in self.vocab:
-        z = OOV
+      if (x, y, z) in self.probDP:
+        return self.probDP[(x, y, z)]
 
-      matrixU = np.matrix(self.U)
-      matrixV = np.matrix(self.V)
-      u = self.calculateU(x, y, z, matrixU, matrixV)
-      bigZ = sum([self.calculateU(x, y, v, matrixU, matrixV) for v in self.vocab if v != z])
+      u = self.calculateU(x, y, z)
+      bigZ = sum([self.calculateU(x, y, v) for v in self.vocab])
+      bigZ += self.calculateU(x, y, OOV)
+
       if bigZ == 0:
         return 0
+
+      self.probDP[(x, y, z)] = u / bigZ
+
       return u / bigZ
 
     else:
       sys.exit("%s has some weird value" % self.smoother)
 
-  def calculateU(self, x, y, z, matrixU, matrixV):
-    lexX = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
-    lexY = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
-    lexZ = np.matrix(self.vectors.get(x, self.vectors[OOL])).T
-    return math.exp(lexX.T * matrixU * lexZ + lexY.T * matrixV * lexZ)
+  def calculateU(self, x, y, z):
+    if (x, y, z) in self.logProb:
+      return self.logProb[(x, y, z)]
+
+    vecX = np.array(self.vectors.get(x, self.vectors[OOL]))
+    vecY = np.array(self.vectors.get(y, self.vectors[OOL]))
+    vecZ = np.array(self.vectors.get(z, self.vectors[OOL]))
+    p = math.exp(vecX.dot(self.U).dot(vecZ) + vecY.dot(self.V).dot(vecZ))
+
+    self.logProb[(x, y, z)] = p
+    return p
 
   def filelogprob(self, filename):
     """Compute the log probability of the sequence of tokens in file.
@@ -207,11 +214,11 @@ class LanguageModel:
     sys.stderr.write("Training from corpus %s\n" % filename)
 
     # Clear out any previous training
-    self.tokens = { }
-    self.types_after = { }
+    self.tokens = {}
+    self.types_after = {}
     self.bigrams = []
     self.trigrams = []
-    self.probDP = {}
+    self.probDP = {}  # clean before training
 
     # While training, we'll keep track of all the trigram and bigram types
     # we observe.  You'll need these lists only for Witten-Bell backoff.
@@ -255,8 +262,8 @@ class LanguageModel:
       # Train the log-linear model using SGD.
 
       # Initialize parameters
-      self.U = [[0.0 for _ in range(self.dim)] for _ in range(self.dim)]
-      self.V = [[0.0 for _ in range(self.dim)] for _ in range(self.dim)]
+      self.U = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
+      self.V = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
 
       # Optimization parameters
       gamma0 = 0.1  # initial learning rate, used to compute actual learning rate
@@ -281,10 +288,57 @@ class LanguageModel:
       #####################
       # TODO: Implement your SGD here
       #####################
+      updateTimes = 0
+      vocabPlusOOV = list(self.vocab) + [OOV]
+      for epoch in range(epochs):
+        for i in range(2, len(tokens_list)):   # loop over summands of (21)
+          self.show_progress()
 
-      
+          partialDeU = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
+          partialDeV = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
+          self.probDP = {}
+          self.logProb = {}
+
+          # update gamma0
+          gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
+
+          # update self.U, self.V
+          x, y, z = tokens_list[i - 2], tokens_list[i - 1], tokens_list[i]
+          vecX = self.vectors.get(x, self.vectors[OOL])
+          vecY = self.vectors.get(y, self.vectors[OOL])
+          vecZ = self.vectors.get(z, self.vectors[OOL])
+
+          for j in range(self.dim):
+            for m in range(self.dim):
+              sumLogProbMultiplyZ = 0
+              for zp in vocabPlusOOV:
+                sumLogProbMultiplyZ += self.prob(x, y, zp) * self.vectors.get(zp, self.vectors[OOL])[m]
+              partialDeU[j][m] = vecX[j] * vecZ[m] - sumLogProbMultiplyZ * vecX[j] - (2.0 * self.lambdap * self.U[j][m]) / self.N
+              partialDeV[j][m] = vecY[j] * vecZ[m] - sumLogProbMultiplyZ * vecY[j] - (2.0 * self.lambdap * self.V[j][m]) / self.N
+
+          self.U += gamma * partialDeU
+          self.V += gamma * partialDeV
+
+          updateTimes += 1
+        self.calculateFTheta(tokens_list, epoch + 1)
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
+
+
+  def calculateFTheta(self, tokenList, epoch):
+    self.probDP = {}
+    self.logProb = {}
+
+    tokenLen = len(tokenList) - 1
+    fTheta = 0
+    thetaSquare = (np.sum(np.square(self.U)) + np.sum(np.square(self.V))) * self.lambdap / self.N
+
+    for i in range(2, tokenLen):
+      x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
+      fTheta += math.log(self.prob(x, y, z)) - thetaSquare
+
+    print ""
+    print "epoch %d: F=%f" % (epoch, fTheta)
 
   def count(self, x, y, z):
     """Count the n-grams.  In the perl version, this was an inner function.
@@ -388,4 +442,5 @@ class LanguageModel:
     """Print a dot to stderr every 5000 calls (frequency can be changed)."""
     self.progress += 1
     if self.progress % freq == 1:
+      self.progress = 1
       sys.stderr.write('.')
