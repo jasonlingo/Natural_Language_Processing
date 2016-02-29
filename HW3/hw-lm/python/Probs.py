@@ -150,12 +150,9 @@ class LanguageModel:
       bigZ = sum([self.calculateU(x, y, v) for v in self.vocab])
       bigZ += self.calculateU(x, y, OOV)
 
-      if bigZ == 0:
-        return 0
-
-      self.probDP[(x, y, z)] = u / bigZ
-
-      return u / bigZ
+      p = u / bigZ
+      self.probDP[(x, y, z)] = p
+      return p
 
     else:
       sys.exit("%s has some weird value" % self.smoother)
@@ -329,13 +326,13 @@ class LanguageModel:
     self.probDP = {}
     self.logProb = {}
 
-    tokenLen = len(tokenList) - 1
     fTheta = 0
-    thetaSquare = (np.sum(np.square(self.U)) + np.sum(np.square(self.V))) * self.lambdap / self.N
+    thetaSquare = ((np.sum(np.square(self.U)) + np.sum(np.square(self.V))) * self.lambdap / self.N) * (len(tokenList) - 2)
 
-    for i in range(2, tokenLen):
+    for i in range(2, len(tokenList)):
       x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
-      fTheta += math.log(self.prob(x, y, z)) - thetaSquare
+      fTheta += math.log(self.prob(x, y, z))
+    fTheta -= thetaSquare
 
     print ""
     print "epoch %d: F=%f" % (epoch, fTheta)
