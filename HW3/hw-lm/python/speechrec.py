@@ -1,3 +1,4 @@
+
 # CS465 at Johns Hopkins University.
 # Module to estimate n-gram probabilities.
 
@@ -14,6 +15,7 @@ import re
 import sys
 import copy
 import numpy as np
+import argparse
 
 
 # TODO for TA: Currently, we use the same token for BOS and EOS as we only have
@@ -184,6 +186,28 @@ class LanguageModel:
     corpus.close()
     return logprob
 
+  def speechRec(self, filename):
+    wordNum, candSents = self.readSpeechFile(filename)
+    bestSentScore = -sys.maxint
+    bestSent = None
+    for candSent in candSents:  
+      fTheta = self.calculateFTheta(candSent.sent)
+      if fTheta > bestSentScore:
+        bestSentScore = fTheta
+        bestSent = candSent
+
+    print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1])
+    return wordNum, wordNum * bestSent.errRate
+
+  def readSpeechFile(self, filename):
+    f = open(filename, "r")
+    wordNum = int(f.readline().split()[0])
+    return wordNum, map(self.parseSpeechCandSent, f.readlines())
+    
+  def parseSpeechCandSent(self, line):
+    data = line.split()
+    return SpeechCandidate(float(data[0]), float(data[1]), data[3:])
+
   def read_vectors(self, filename):
     """Read word vectors from an external file.  The vectors are saved as
     arrays in a dictionary self.vectors.
@@ -260,7 +284,7 @@ class LanguageModel:
       self.V = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
 
       # Optimization parameters
-      gamma0 = 0.01  # initial learning rate, used to compute actual learning rate
+      gamma0 = 0.1  # initial learning rate, used to compute actual learning rate
       epochs = 10  # number of passes
 
       self.N = len(tokens_list) - 2  # number of training instances
@@ -292,7 +316,7 @@ class LanguageModel:
           self.probDP = {}
           self.logProb = {}
 
-          # update gamma
+          # update gamma0
           gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
 
           # update self.U, self.V
@@ -313,14 +337,14 @@ class LanguageModel:
           self.V += gamma * partialDeV
 
           updateTimes += 1
+        self.probDP = {}
+        self.logProb = {}
         print ""
-        print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
+        print "epoch %d: F=%f" % (epoch, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
   def calculateFTheta(self, tokenList):
-    self.probDP = {}
-    self.logProb = {}
     fTheta = 0
     for i in range(2, len(tokenList)):
       x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
@@ -433,3 +457,36 @@ class LanguageModel:
     if self.progress % freq == 1:
       self.progress = 1
       sys.stderr.write('.')
+
+
+class SpeechCandidate(object):
+
+  def __init__(self, errRate, loglinear, sent):
+      self.errRate = errRate
+      self.loglinear = loglinear
+      self.sent = sent
+
+  
+if __name__=="__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('smoother', type=str, help='smoother')
+    parser.add_argument('lexicon', type=str, help='training lexicon')
+    parser.add_argument('corpus', type=str, help='training corpus')
+    parser.add_argument('testing', nargs='*', type=str, default=[], help="testing data")
+
+    args = parser.parse_args()
+    smoother = args.smoother
+    lexicon = args.lexicon
+    corpus = args.corpus
+    testingFiles = args.testing
+    
+    lm = LanguageModel()
+    lm.set_smoother(smoother)
+    lm.read_vectors(lexicon)
+    lm.set_vocab_size(corpus)
+    lm.train(corpus)
+    
+    result = map(lm.speechRec, testingFiles)
+    errData = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), result)
+    print "%.3f %s" % (errData[1] / errData[0], "OVERALL")
+    
