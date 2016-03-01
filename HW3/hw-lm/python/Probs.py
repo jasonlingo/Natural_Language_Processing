@@ -290,7 +290,7 @@ class LanguageModel:
           partialDeU = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
           partialDeV = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
           self.probDP = {}
-          self.logProb = {}
+          self.logProb =g {}
 
           # update gamma
           gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
