@@ -164,7 +164,7 @@ class LanguageModel:
     vecX = self.vectors.get(x, self.vectors[OOL])
     vecY = self.vectors.get(y, self.vectors[OOL])
     vecZ = self.vectors.get(z, self.vectors[OOL])
-    p = math.exp(vecX.dot(self.U).dot(vecZ) + vecY.dot(self.V).dot(vecZ))
+    p = math.exp(vecX.T.dot(self.U).dot(vecZ) + vecY.T.dot(self.V).dot(vecZ))
     self.logProb[(x, y, z)] = p
     return p
 
@@ -192,8 +192,8 @@ class LanguageModel:
     bestSent = None
     for candSent in candSents:  
       fTheta = self.calculateFTheta(candSent.sent)
-      if fTheta > bestSentScore:
-        bestSentScore = fTheta
+      if fTheta + candSent.loglinear > bestSentScore:
+        bestSentScore = fTheta + candSent.loglinear
         bestSent = candSent
 
     print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1])
@@ -219,7 +219,7 @@ class LanguageModel:
       for line in infile:
         arr = line.split()
         word = arr.pop(0)
-        self.vectors[word] = np.array([float(x) for x in arr])
+        self.vectors[word] = np.array([float(x) for x in arr]).reshape(self.dim, 1)
 
   def train(self, filename):
     """Read the training corpus and collect any information that will be needed
@@ -280,8 +280,8 @@ class LanguageModel:
       # Train the log-linear model using SGD.
 
       # Initialize parameters
-      self.U = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
-      self.V = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
+      self.U = np.zeros((self.dim, self.dim))
+      self.V = np.zeros((self.dim, self.dim))
 
       # Optimization parameters
       gamma0 = 0.1  # initial learning rate, used to compute actual learning rate
@@ -307,48 +307,46 @@ class LanguageModel:
       # TODO: Implement your SGD here
       #####################
       updateTimes = 0
+      OOLVec = self.vectors[OOL]
       for epoch in range(epochs):
         for i in range(2, len(tokens_list)):   # loop over summands of (21)
           self.show_progress()
 
-          partialDeU = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
-          partialDeV = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
           self.probDP = {}
           self.logProb = {}
 
-          # update gamma0
+          # update gamma
           gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
 
           # update self.U, self.V
           x, y, z = tokens_list[i - 2], tokens_list[i - 1], tokens_list[i]
-          vecX = self.vectors.get(x, self.vectors[OOL])
-          vecY = self.vectors.get(y, self.vectors[OOL])
-          vecZ = self.vectors.get(z, self.vectors[OOL])
+          vecX = self.vectors.get(x, OOLVec)
+          vecY = self.vectors.get(y, OOLVec)
+          vecZ = self.vectors.get(z, OOLVec)
 
-          for j in range(self.dim):
-            for m in range(self.dim):
-              sumLogProbMultiplyZ = 0
-              for zp in self.vocab:
-                sumLogProbMultiplyZ += self.prob(x, y, zp) * self.vectors.get(zp, self.vectors[OOL])[m]
-              partialDeU[j][m] = vecX[j] * vecZ[m] - sumLogProbMultiplyZ * vecX[j] - (2.0 * self.lambdap * self.U[j][m]) / self.N
-              partialDeV[j][m] = vecY[j] * vecZ[m] - sumLogProbMultiplyZ * vecY[j] - (2.0 * self.lambdap * self.V[j][m]) / self.N
+          sumZP = np.zeros((self.dim, 1))
+          for zp in self.vocab:
+            sumZP += self.prob(x, y, zp) * self.vectors.get(zp, OOLVec)
+
+          partialDeU = vecX.dot(vecZ.T) - vecX.dot(sumZP.T) - (2.0 * self.lambdap * self.U) / self.N
+          partialDeV = vecY.dot(vecZ.T) - vecY.dot(sumZP.T) - (2.0 * self.lambdap * self.V) / self.N
 
           self.U += gamma * partialDeU
           self.V += gamma * partialDeV
 
           updateTimes += 1
-        self.probDP = {}
-        self.logProb = {}
         print ""
-        print "epoch %d: F=%f" % (epoch, self.calculateFTheta(tokens_list))
+        print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
   def calculateFTheta(self, tokenList):
+    self.probDP = {}
+    self.logProb = {}
     fTheta = 0
     for i in range(2, len(tokenList)):
       x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
-      fTheta += math.log(self.prob(x, y, z))
+      fTheta += math.log(self.prob(x, y, z)) / math.log(2)
     if self.smoother == "LOGLINEAR":
       fTheta -= (np.sum(np.square(self.U)) + np.sum(np.square(self.V))) * self.lambdap
     return fTheta
