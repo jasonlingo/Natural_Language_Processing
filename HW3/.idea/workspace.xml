@@ -25,7 +25,7 @@
       <file leaf-file-name="Probs.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/hw-lm/python/Probs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-3.6578948">
+            <state vertical-scroll-proportion="5.0263157">
               <caret line="191" column="32" selection-start-line="191" selection-start-column="32" selection-end-line="191" selection-end-column="32" />
               <folding>
                 <element signature="e#303#314#0" expanded="true" />
@@ -90,8 +90,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/hw-lm/python/fileprob.py" />
-        <option value="$PROJECT_DIR$/hw-lm/python/Probs.py" />
         <option value="$PROJECT_DIR$/hw-lm/python/textcat.py" />
+        <option value="$PROJECT_DIR$/hw-lm/python/Probs.py" />
       </list>
     </option>
   </component>
@@ -695,7 +695,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/hw-lm/python/Probs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-3.6578948">
+        <state vertical-scroll-proportion="5.0263157">
           <caret line="191" column="32" selection-start-line="191" selection-start-column="32" selection-end-line="191" selection-end-column="32" />
           <folding>
             <element signature="e#303#314#0" expanded="true" />
