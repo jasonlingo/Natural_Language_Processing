@@ -54,7 +54,7 @@ def main():
   lm.train(train_file1)
   for testfile in argv:
     files.append(testfile)
-    result1.append((lm.filelogprob(testfile) + math.log(3))/ math.log(2))
+    result1.append((lm.filelogprob(testfile))/ math.log(2))
 
   lm.train(train_file2)
   for testfile in argv:
