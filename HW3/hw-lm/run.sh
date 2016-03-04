@@ -12,4 +12,11 @@
 
 
 # Qustion 8
-python python/speechrec.py add0.01 lexicons/words-10.txt All_Training/switchboard speech/test/unrestricted/*
+# python python/speechrec.py add1 lexicons/words-10.txt All_Training/switchboard speech/test/unrestricted/*
+
+
+# Question 9
+python python/speechrec.py backoff_wb lexicons/words-10.txt All_Training/switchboard speech/test/easy/*
+
+
+# backoff_wb ../lexicons/words-10.txt ../All_Training/switchboard ../speech/test/easy/*
