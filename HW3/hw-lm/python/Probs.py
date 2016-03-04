@@ -23,7 +23,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = ""
+DEFAULT_TRAINING_DIR = "../All_Training/"
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -32,7 +32,7 @@ OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in
 class LanguageModel:
   def __init__(self):
     # The variables below all correspond to quantities discussed in the assignment.
-    # For log-linear or Witten-Bell smoothing, you will need to define some 
+    # For log-linear or Witten-Bell smoothing, you will need to define some
     # additional global variables.
     self.smoother = None       # type of smoother we're using
     self.lambdap = None        # lambda or C parameter used by some smoothers
@@ -52,7 +52,7 @@ class LanguageModel:
 
     self.bigrams = None
     self.trigrams = None
-    
+
     # the two weight matrices U and V used in log linear model
     # They are initialized in train() function and represented as two
     # dimensional lists.
@@ -162,7 +162,7 @@ class LanguageModel:
     vecX = self.vectors.get(x, self.vectors[OOL])
     vecY = self.vectors.get(y, self.vectors[OOL])
     vecZ = self.vectors.get(z, self.vectors[OOL])
-    p = math.exp(vecX.dot(self.U).dot(vecZ) + vecY.dot(self.V).dot(vecZ))
+    p = math.exp(vecX.T.dot(self.U).dot(vecZ) + vecY.T.dot(self.V).dot(vecZ))
     self.logProb[(x, y, z)] = p
     return p
 
@@ -195,7 +195,7 @@ class LanguageModel:
       for line in infile:
         arr = line.split()
         word = arr.pop(0)
-        self.vectors[word] = np.array([float(x) for x in arr])
+        self.vectors[word] = np.array([float(x) for x in arr]).reshape(self.dim, 1)
 
   def train(self, filename):
     """Read the training corpus and collect any information that will be needed
@@ -244,20 +244,20 @@ class LanguageModel:
         if self.smoother == 'LOGLINEAR' and z not in self.vectors:
           z = OOL
         self.count(x, y, z)
-        self.show_progress()
+        # self.show_progress()
         x=y; y=z
         tokens_list.append(z)
-    tokens_list.append(EOS)   # append a end-of-sequence symbol 
+    tokens_list.append(EOS)   # append a end-of-sequence symbol
     sys.stderr.write('\n')    # done printing progress dots "...."
     self.count(x, y, EOS)     # count EOS "end of sequence" token after the final context
     corpus.close()
 
-    if self.smoother == 'LOGLINEAR': 
+    if self.smoother == 'LOGLINEAR':
       # Train the log-linear model using SGD.
 
       # Initialize parameters
-      self.U = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
-      self.V = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
+      self.U = np.zeros((self.dim, self.dim))
+      self.V = np.zeros((self.dim, self.dim))
 
       # Optimization parameters
       gamma0 = 0.01  # initial learning rate, used to compute actual learning rate
@@ -283,38 +283,36 @@ class LanguageModel:
       # TODO: Implement your SGD here
       #####################
       updateTimes = 0
+      OOLVec = self.vectors[OOL]
       for epoch in range(epochs):
         for i in range(2, len(tokens_list)):   # loop over summands of (21)
-          self.show_progress()
+          # self.show_progress()
 
-          partialDeU = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
-          partialDeV = np.array([[0.0 for _ in range(self.dim)] for _ in range(self.dim)])
           self.probDP = {}
-          self.logProb =g {}
+          self.logProb = {}
 
           # update gamma
           gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
 
           # update self.U, self.V
           x, y, z = tokens_list[i - 2], tokens_list[i - 1], tokens_list[i]
-          vecX = self.vectors.get(x, self.vectors[OOL])
-          vecY = self.vectors.get(y, self.vectors[OOL])
-          vecZ = self.vectors.get(z, self.vectors[OOL])
+          vecX = self.vectors.get(x, OOLVec)
+          vecY = self.vectors.get(y, OOLVec)
+          vecZ = self.vectors.get(z, OOLVec)
 
-          for j in range(self.dim):
-            for m in range(self.dim):
-              sumLogProbMultiplyZ = 0
-              for zp in self.vocab:
-                sumLogProbMultiplyZ += self.prob(x, y, zp) * self.vectors.get(zp, self.vectors[OOL])[m]
-              partialDeU[j][m] = vecX[j] * vecZ[m] - sumLogProbMultiplyZ * vecX[j] - (2.0 * self.lambdap * self.U[j][m]) / self.N
-              partialDeV[j][m] = vecY[j] * vecZ[m] - sumLogProbMultiplyZ * vecY[j] - (2.0 * self.lambdap * self.V[j][m]) / self.N
+          sumZP = np.zeros((self.dim, 1))
+          for zp in self.vocab:
+            sumZP += self.prob(x, y, zp) * self.vectors.get(zp, OOLVec)
+
+          partialDeU = vecX.dot(vecZ.T) - vecX.dot(sumZP.T) - (2.0 * self.lambdap * self.U) / self.N
+          partialDeV = vecY.dot(vecZ.T) - vecY.dot(sumZP.T) - (2.0 * self.lambdap * self.V) / self.N
 
           self.U += gamma * partialDeU
           self.V += gamma * partialDeV
 
           updateTimes += 1
-        print ""
-        print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
+        #  print ""
+        #  print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
@@ -346,7 +344,7 @@ class LanguageModel:
 
     self.tokens[z] = self.tokens.get(z, 0) + 1
     if self.tokens[z] == 1:         # first time we've seen unigram z
-      self.types_after[''] = self.types_after.get('', 0) + 1 
+      self.types_after[''] = self.types_after.get('', 0) + 1
 
     self.tokens[''] = self.tokens.get('', 0) + 1  # the zero-gram
 
@@ -366,7 +364,7 @@ class LanguageModel:
       for line in corpus:
         for z in line.split():
           count[z] = count.get(z, 0) + 1
-          self.show_progress()
+          # self.show_progress()
       corpus.close()
 
     self.vocab = set(w for w in count if count[w] >= OOV_THRESHOLD)
