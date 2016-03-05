@@ -23,7 +23,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = "/usr/local/data/cs465/hw-lm/All_Training/"
+DEFAULT_TRAINING_DIR = "../All_Training/"
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -32,7 +32,7 @@ OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in
 class LanguageModel:
   def __init__(self):
     # The variables below all correspond to quantities discussed in the assignment.
-    # For log-linear or Witten-Bell smoothing, you will need to define some 
+    # For log-linear or Witten-Bell smoothing, you will need to define some
     # additional global variables.
     self.smoother = None       # type of smoother we're using
     self.lambdap = None        # lambda or C parameter used by some smoothers
@@ -52,7 +52,7 @@ class LanguageModel:
 
     self.bigrams = None
     self.trigrams = None
-    
+
     # the two weight matrices U and V used in log linear model
     # They are initialized in train() function and represented as two
     # dimensional lists.
@@ -109,6 +109,7 @@ class LanguageModel:
       if x == '':
         if ('', '', z) in self.probDP:
           return self.probDP[('', '', z)]
+        # result = (self.tokens.get((z), 0) + self.lambdap) / \
         result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
         self.probDP[('', '', z)] = result
@@ -161,7 +162,15 @@ class LanguageModel:
     vecX = self.vectors.get(x, self.vectors[OOL])
     vecY = self.vectors.get(y, self.vectors[OOL])
     vecZ = self.vectors.get(z, self.vectors[OOL])
-    p = math.exp(vecX.T.dot(self.U).dot(vecZ) + vecY.T.dot(self.V).dot(vecZ))
+
+    # if z not in self.vectors.keys():
+    #   z = OOL
+
+    if z not in self.vocab:
+      z = OOV
+
+    f_uni = np.log(self.tokens.get((z),0) + 1)
+    p = math.exp(vecX.T.dot(self.U).dot(vecZ) + vecY.T.dot(self.V).dot(vecZ) + self.beta * f_uni)
     self.logProb[(x, y, z)] = p
     return p
 
@@ -243,20 +252,23 @@ class LanguageModel:
         if self.smoother == 'LOGLINEAR' and z not in self.vectors:
           z = OOL
         self.count(x, y, z)
-        self.show_progress()
+        # self.show_progress()
         x=y; y=z
         tokens_list.append(z)
-    tokens_list.append(EOS)   # append a end-of-sequence symbol 
+    tokens_list.append(EOS)   # append a end-of-sequence symbol
     sys.stderr.write('\n')    # done printing progress dots "...."
     self.count(x, y, EOS)     # count EOS "end of sequence" token after the final context
     corpus.close()
 
-    if self.smoother == 'LOGLINEAR': 
+    if self.smoother == 'LOGLINEAR':
       # Train the log-linear model using SGD.
 
       # Initialize parameters
       self.U = np.zeros((self.dim, self.dim))
       self.V = np.zeros((self.dim, self.dim))
+
+      # for 6f
+      self.beta = 0
 
       # Optimization parameters
       gamma0 = 0.01  # initial learning rate, used to compute actual learning rate
@@ -285,7 +297,7 @@ class LanguageModel:
       OOLVec = self.vectors[OOL]
       for epoch in range(epochs):
         for i in range(2, len(tokens_list)):   # loop over summands of (21)
-          self.show_progress()
+          # self.show_progress()
 
           self.probDP = {}
           self.logProb = {}
@@ -306,11 +318,22 @@ class LanguageModel:
           partialDeU = vecX.dot(vecZ.T) - vecX.dot(sumZP.T) - (2.0 * self.lambdap * self.U) / self.N
           partialDeV = vecY.dot(vecZ.T) - vecY.dot(sumZP.T) - (2.0 * self.lambdap * self.V) / self.N
 
+          if z not in self.vocab:
+            z = OOV
+          partialDeBeta = math.log(self.tokens.get((z),0) + 1) - (2.0 * self.lambdap * self.beta) / self.N
+
+          for zp in self.vocab:
+            # if zp not in self.vectors.keys():
+            #   zp = OOL
+            partialDeBeta -= self.prob(x, y, zp) * math.log(self.tokens.get((zp), 0) + 1)
+
+
           self.U += gamma * partialDeU
           self.V += gamma * partialDeV
+          self.beta += gamma * partialDeBeta
 
           updateTimes += 1
-        print ""
+        print self.beta
         print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
@@ -324,6 +347,7 @@ class LanguageModel:
       fTheta += math.log(self.prob(x, y, z))
     if self.smoother == "LOGLINEAR":
       fTheta -= (np.sum(np.square(self.U)) + np.sum(np.square(self.V))) * self.lambdap
+      fTheta -= self.lambdap * np.square(self.beta)
     return fTheta
 
   def count(self, x, y, z):
@@ -343,7 +367,7 @@ class LanguageModel:
 
     self.tokens[z] = self.tokens.get(z, 0) + 1
     if self.tokens[z] == 1:         # first time we've seen unigram z
-      self.types_after[''] = self.types_after.get('', 0) + 1 
+      self.types_after[''] = self.types_after.get('', 0) + 1
 
     self.tokens[''] = self.tokens.get('', 0) + 1  # the zero-gram
 
@@ -363,7 +387,7 @@ class LanguageModel:
       for line in corpus:
         for z in line.split():
           count[z] = count.get(z, 0) + 1
-          self.show_progress()
+          # self.show_progress()
       corpus.close()
 
     self.vocab = set(w for w in count if count[w] >= OOV_THRESHOLD)
@@ -385,7 +409,7 @@ class LanguageModel:
     """
     r = re.compile('^(.*?)-?([0-9.]*)$')
     m = r.match(arg)
-    
+
     if not m.lastindex:
       sys.exit("Smoother regular expression failed for %s" % arg)
     else:
@@ -408,7 +432,7 @@ class LanguageModel:
       self.smoother = "LOGLINEAR"
     else:
       sys.exit("Don't recognize smoother name '%s'" % smoother_name)
-    
+
     if self.lambdap is None and self.smoother.find('ADDL') != -1:
       sys.exit('You must include a non-negative lambda value in smoother name "%s"' % arg)
 

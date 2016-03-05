@@ -26,7 +26,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = ""
+DEFAULT_TRAINING_DIR = "/usr/local/data/cs465/hw-lm/All_Training/"
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -49,8 +49,8 @@ class LanguageModel:
     self.vocab_size = None  # V: the total vocab size including OOV.
 
     # for Witten-Bell backoff
-    self.tcount = collections.defaultdict(set)
-    self.alphaNorm = {}
+    self.tcount = None
+    self.alphaNorm = None
 
     self.tokens = None      # the c(...) function
     self.types_after = None # the T(...) function
@@ -68,6 +68,7 @@ class LanguageModel:
 
     # for prob
     self.probDP = {}
+    self.wbProbDP = {}
 
     # self.tokens[(x, y, z)] = # of times that xyz was observed during training.
     # self.tokens[(y, z)]    = # of times that yz was observed during training.
@@ -126,7 +127,6 @@ class LanguageModel:
       if x == '':
         if ('', '', z) in self.probDP:
           return self.probDP[('', '', z)]
-        # result = (self.tokens.get((z), 0) + self.lambdap) / \
         result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
         self.probDP[('', '', z)] = result
@@ -158,12 +158,12 @@ class LanguageModel:
 
     elif self.smoother == "BACKOFF_WB":
 
-      # if x not in self.vocab:
-      #   x = OOV
-      # if y not in self.vocab:
-      #   y= OOV
-      # if z not in self.vocab:
-      #   z = OOV
+      if x not in self.vocab:
+        x = OOV
+      if y not in self.vocab:
+        y = OOV
+      if z not in self.vocab:
+        z = OOV
 
       if (x, y, z) in self.probDP:
         return self.probDP[(x, y, z)]
@@ -171,8 +171,6 @@ class LanguageModel:
       p = self.wbProbXYZ(x, y, z)
       self.probDP[(x, y, z)] = p
       return p
-
-      # sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
 
     elif self.smoother == "LOGLINEAR":
       if (x, y, z) in self.probDP:
@@ -189,103 +187,108 @@ class LanguageModel:
 
 
   def computeAlphaXY(self, x, y):
-    otherProb = sum([self.discProbXYZ(x, y, zp) for zp in self.vocab if (x, y, zp) in self.tokens])
+    otherProb = sum([self.discProbXYZ(x, y, zp) for zp in self.vocab if self.tokens.get((x, y, zp), 0) > 0])
     if otherProb > 1:
       sys.stderr.write("computeAlphaXY err: otherProb = %f" % otherProb)
-    return (1 - otherProb) / (1 - sum([self.wbProbYZ(y, zp) for zp in self.vocab if (x, y, zp) in self.tokens]))
+    return (1 - otherProb) / (1 - sum([self.wbProbYZ(y, zp) for zp in self.vocab if self.tokens.get((x, y, zp), 0) > 0]))
 
   def computeAlphaY(self, y):
-    otherProb = sum([self.discProbYZ(y, zp) for zp in self.vocab if (y, zp) in self.tokens])
+    otherProb = sum([self.discProbYZ(y, zp) for zp in self.vocab if self.tokens.get((y, zp), 0) > 0])
     if otherProb > 1:
       sys.stderr.write("computeAlphaY err: otherProb = %f" % otherProb)
-    return (1 - otherProb) / (1 - sum([self.wbProbZ(zp) for zp in self.vocab if (y, zp) in self.tokens]))
+    return (1 - otherProb) / (1 - sum([self.wbProbZ(zp) for zp in self.vocab if self.tokens.get((y, zp), 0) > 0]))
 
   def computeAlpha(self):
-    otherProb = sum([self.discProbZ(zp) for zp in self.vocab if zp in self.tokens])
+    otherProb = sum([self.discProbZ(zp) for zp in self.vocab if self.tokens.get(zp, 0) > 0])
     if otherProb > 1:
       sys.stderr.write("computeAlpha err: otherProb = %f" % otherProb)
-    return (1 - otherProb) / (self.vocab_size - len([zp for zp in self.vocab if zp not in self.tcount]))
+
+    # deal with 0/0 situation
+    if self.vocab_size - self.types_after[''] == 0:
+      self.vocab.add("#FUTUREWORD#")
+      self.vocab_size += 1
+
+    return (1 - otherProb) / (self.vocab_size - self.types_after[''])
 
   def discProbXYZ(self, x, y, z):
-    return float(self.tokens.get((x, y, z), 0)) / ( self.tokens.get((x, y), 0) + len(self.tcount.get((x, y), [])) )
+    return float(self.tokens.get((x, y, z), 0)) / (self.tokens.get((x, y), 0) + self.types_after.get((x, y), 0))
 
   def discProbYZ(self, y, z):
-    return float(self.tokens.get((y, z), 0)) / (self.tokens.get(y, 0) + len(self.tcount.get(y, [])))
+    return float(self.tokens.get((y, z), 0)) / (self.tokens.get(y, 0) + self.types_after.get(y, 0))
 
   def discProbZ(self, z):
-    return float(self.tokens.get(z, 0)) / (self.N + len(self.vocab) - 1)  # extract 1 for OOV in self.vocab
+    return float(self.tokens.get(z, 0)) / (self.tokens.get('', 0) + self.types_after.get('', 0))  # extract 1 for OOV in self.vocab
 
   def wbProbXYZ(self, x, y, z):
-    if (x, y, z) in self.probDP:
-      return self.probDP[(x, y, z)]
+    if (x, y, z) in self.wbProbDP:
+      return self.wbProbDP[(x, y, z)]
 
     if self.tokens.get((x, y, z), 0) > 0:
-      self.probDP[(x, y, z)] = self.discProbXYZ(x, y, z)
-      return self.probDP[(x, y, z)]
+      self.wbProbDP[(x, y, z)] = self.discProbXYZ(x, y, z)
+      return self.wbProbDP[(x, y, z)]
     else:
       if (x, y) in self.alphaNorm:
         tmpAlpha = self.alphaNorm[(x, y)]
       else:
         tmpAlpha = self.computeAlphaXY(x, y)
         self.alphaNorm[(x, y)] = tmpAlpha
-      self.probDP[(x, y, z)] = tmpAlpha * self.wbProbYZ(y, z)
-      return self.probDP[(x, y, z)]
+      self.wbProbDP[(x, y, z)] = tmpAlpha * self.wbProbYZ(y, z)
+      return self.wbProbDP[(x, y, z)]
 
   def wbProbYZ(self, y, z):
-    if (y, z) in self.probDP:
-      return self.probDP[(y, z)]
+    if (y, z) in self.wbProbDP:
+      return self.wbProbDP[(y, z)]
 
     if self.tokens.get((y, z), 0) > 0:
-      self.probDP[(y, z)] = self.discProbYZ(y, z)
-      return self.probDP[(y, z)]
+      self.wbProbDP[(y, z)] = self.discProbYZ(y, z)
+      return self.wbProbDP[(y, z)]
     else:
       if y in self.alphaNorm:
         tmpAlpha = self.alphaNorm[y]
       else:
         tmpAlpha = self.computeAlphaY(y)
         self.alphaNorm[y] = tmpAlpha
-      self.probDP[(y, z)] = tmpAlpha * self.wbProbZ(z)
-      return self.probDP[(y, z)]
+      self.wbProbDP[(y, z)] = tmpAlpha * self.wbProbZ(z)
+      return self.wbProbDP[(y, z)]
 
   def wbProbZ(self, z):
-    if z in self.probDP:
-      return self.probDP[z]
+    if z in self.wbProbDP:
+      return self.wbProbDP[z]
 
     if self.tokens.get(z, 0) > 0:
-      self.probDP[z] = self.discProbZ(z)
-      return self.probDP[z]
+      self.wbProbDP[z] = self.discProbZ(z)
+      return self.wbProbDP[z]
     else:
       if "allAlpha" in self.alphaNorm:
         tmpAlpha = self.alphaNorm["allAlpha"]
       else:
         tmpAlpha = self.computeAlpha()
         self.alphaNorm["allAlpha"] = tmpAlpha
-      self.probDP[z] = tmpAlpha
+      self.wbProbDP[z] = tmpAlpha
       return tmpAlpha
 
   def testWB(self):
-    prob = 0
 
+    self.computeAlpha()
     vocabList = list(self.vocab)
 
-    x = random.choice(vocabList)
-    y = random.choice(vocabList)
+    for x in vocabList:
+      for y in vocabList:
+        prob = 0
+        for z in vocabList:
+          prob += self.wbProbXYZ(x, y, z)
+        print prob
 
-    for z in vocabList:
-      prob += self.wbProbXYZ(x, y, z)
-    print prob
-
-    prob = 0
-    for z in vocabList:
-      prob += self.wbProbYZ(y, z)
-    print prob
+    for y in vocabList:
+      prob = 0
+      for z in vocabList:
+        prob += self.wbProbYZ(y, z)
+      print prob
 
     prob = 0
     for z in vocabList:
       prob += self.wbProbZ(z)
     print prob
-
-
 
   def calculateU(self, x, y, z):
     if (x, y, z) in self.logProb:
@@ -326,7 +329,7 @@ class LanguageModel:
         bestSentScore = fTheta + candSent.loglinear
         bestSent = candSent
 
-    print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1]) + "\\\\"
+    print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1]) # + "\\\\"
     return wordNum, wordNum * bestSent.errRate
 
   def readSpeechFile(self, filename):
@@ -367,7 +370,9 @@ class LanguageModel:
     self.types_after = {}
     self.bigrams = []
     self.trigrams = []
-    self.probDP = {}  # clean before training
+    self.probDP = {}    # clean before training
+    self.wbProbDP = {}
+    self.alphaNorm = {}
 
     # While training, we'll keep track of all the trigram and bigram types
     # we observe.  You'll need these lists only for Witten-Bell backoff.
@@ -386,6 +391,9 @@ class LanguageModel:
     # count the BOS context
     self.tokens[(x, y)] = 1
     self.tokens[y] = 1
+    self.types_after[x] = 1
+    self.types_after[''] = 1
+    self.bigrams.append((x, y))
 
     tokens_list = [x, y]  # the corpus saved as a list
     corpus = self.open_corpus(filename)
@@ -405,10 +413,13 @@ class LanguageModel:
     tokens_list.append(EOS)   # append a end-of-sequence symbol 
     sys.stderr.write('\n')    # done printing progress dots "...."
     self.count(x, y, EOS)     # count EOS "end of sequence" token after the final context
+
+
     corpus.close()
 
     self.N = len(tokens_list) - 2  # number of training instances, excluding BOS, but including EOS
 
+    self.computeAlpha()
     if self.smoother == 'LOGLINEAR': 
       # Train the log-linear model using SGD.
 
@@ -469,11 +480,15 @@ class LanguageModel:
         print ""
         print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
+
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
   def calculateFTheta(self, tokenList):
     self.probDP = {}
     self.logProb = {}
+    tokenList.insert(0, BOS)
+    tokenList.insert(0, BOS)
+    tokenList.append(EOS)
     fTheta = 0
     for i in range(2, len(tokenList)):
       x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
@@ -503,8 +518,15 @@ class LanguageModel:
 
     self.tokens[''] = self.tokens.get('', 0) + 1  # the zero-gram
 
-    self.tcount[(x, y)].add((x, y, z))
-    self.tcount[y].add((y, z))
+
+    # self.tcount[(x, y)].add(z)
+    # self.tcount[y].add(z)
+
+    # for Witten-Bell backoff
+    # if y != OOV:
+    #   self.tcount[y].add((y, z))
+    #   if x != OOV and z != OOV:
+    #     self.tcount[(x, y)].add((x, y, z))
 
   def set_vocab_size(self, *files):
     """When you do text categorization, call this function on the two
@@ -589,7 +611,7 @@ class LanguageModel:
                  DEFAULT_TRAINING_DIR + filename))
     return corpus
 
-  def show_progress(self, freq=5000):
+  def show_progress(self, freq=10000):
     """Print a dot to stderr every 5000 calls (frequency can be changed)."""
     self.progress += 1
     if self.progress % freq == 1:
@@ -622,13 +644,13 @@ if __name__=="__main__":
     lm.read_vectors(lexicon)
     lm.set_vocab_size(corpus)
     lm.train(corpus)
+    #
+    result = map(lm.speechRec, testingFiles)
+    errData = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), result)
 
-    # result = map(lm.speechRec, testingFiles)
-    # errData = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), result)
+    print "%.3f %s" % (float(errData[1]) / errData[0], "OVERALL")
 
-    # print "%.3f %s" % (errData[1] / errData[0], "OVERALL")
-
-    lm.testWB()
+    # lm.testWB()   # test for sum to 1
 
     # preScore = sys.maxint
     # tryTime = 100
@@ -642,4 +664,3 @@ if __name__=="__main__":
     #     bestLambda = lm.lambdap
     #   lm.lambdap *= 0.99
     # print "best lambda:", lm.lambdap
-
