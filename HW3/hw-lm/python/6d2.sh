@@ -1,10 +1,10 @@
-exec 2>/dev/null
+#exec 2>/dev/null
 for C in 8
   do
     for len in 40
     do
     printf "current lexicon length is $len \n"
-      for tran_len in 1K 2K 5K 10K 20K
+      for tran_len in 10K
         do
           printf "$tran_len \n" 
           test1=$(./textcat.py loglinear$C ../lexicons/chars-$len.txt en.$tran_len sp.$tran_len ../english_spanish/test/english/*/* | cut -d ' ' -f 1)

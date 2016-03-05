@@ -293,7 +293,6 @@ class LanguageModel:
 
           # update gamma
           gamma = gamma0 / (1.0 + gamma0 * updateTimes * self.lambdap / self.N)
-
           # update self.U, self.V
           x, y, z = tokens_list[i - 2], tokens_list[i - 1], tokens_list[i]
           vecX = self.vectors.get(x, OOLVec)
@@ -311,8 +310,8 @@ class LanguageModel:
           self.V += gamma * partialDeV
 
           updateTimes += 1
-        #  print ""
-        #  print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
+        # print ""
+        # print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
