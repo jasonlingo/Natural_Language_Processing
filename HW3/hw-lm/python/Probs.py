@@ -32,7 +32,7 @@ OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in
 class LanguageModel:
   def __init__(self):
     # The variables below all correspond to quantities discussed in the assignment.
-    # For log-linear or Witten-Bell smoothing, you will need to define some 
+    # For log-linear or Witten-Bell smoothing, you will need to define some
     # additional global variables.
     self.smoother = None       # type of smoother we're using
     self.lambdap = None        # lambda or C parameter used by some smoothers
@@ -52,7 +52,7 @@ class LanguageModel:
 
     self.bigrams = None
     self.trigrams = None
-    
+
     # the two weight matrices U and V used in log linear model
     # They are initialized in train() function and represented as two
     # dimensional lists.
@@ -243,15 +243,15 @@ class LanguageModel:
         if self.smoother == 'LOGLINEAR' and z not in self.vectors:
           z = OOL
         self.count(x, y, z)
-        self.show_progress()
+        # self.show_progress()
         x=y; y=z
         tokens_list.append(z)
-    tokens_list.append(EOS)   # append a end-of-sequence symbol 
+    tokens_list.append(EOS)   # append a end-of-sequence symbol
     sys.stderr.write('\n')    # done printing progress dots "...."
     self.count(x, y, EOS)     # count EOS "end of sequence" token after the final context
     corpus.close()
 
-    if self.smoother == 'LOGLINEAR': 
+    if self.smoother == 'LOGLINEAR':
       # Train the log-linear model using SGD.
 
       # Initialize parameters
@@ -285,7 +285,7 @@ class LanguageModel:
       OOLVec = self.vectors[OOL]
       for epoch in range(epochs):
         for i in range(2, len(tokens_list)):   # loop over summands of (21)
-          self.show_progress()
+          # self.show_progress()
 
           self.probDP = {}
           self.logProb = {}
@@ -310,8 +310,8 @@ class LanguageModel:
           self.V += gamma * partialDeV
 
           updateTimes += 1
-        print ""
-        print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
+        #  print ""
+        #  print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
@@ -343,7 +343,7 @@ class LanguageModel:
 
     self.tokens[z] = self.tokens.get(z, 0) + 1
     if self.tokens[z] == 1:         # first time we've seen unigram z
-      self.types_after[''] = self.types_after.get('', 0) + 1 
+      self.types_after[''] = self.types_after.get('', 0) + 1
 
     self.tokens[''] = self.tokens.get('', 0) + 1  # the zero-gram
 
@@ -363,7 +363,7 @@ class LanguageModel:
       for line in corpus:
         for z in line.split():
           count[z] = count.get(z, 0) + 1
-          self.show_progress()
+          # self.show_progress()
       corpus.close()
 
     self.vocab = set(w for w in count if count[w] >= OOV_THRESHOLD)

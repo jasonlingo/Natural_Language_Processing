@@ -59,7 +59,9 @@ trainpath is the location of the training corpus
   # log base e to log base 2 at print time, by dividing by log(2).
 
   for testfile in argv:
-    print "%g\t%s" % (lm.filelogprob(testfile) / math.log(2), testfile)
+    str = testfile.split(".")
+
+    print "%g\t%s" % (lm.filelogprob(testfile) / (math.log(2) * float(str[-2])), testfile)
 
 
 if __name__ ==  "__main__":
