@@ -14,7 +14,7 @@
 import math
 import sys
 
-import Probs
+import speechrec
 
 # Computes the log probability of the sequence of tokens in file,
 # according to a trigram model.  The training source is specified by
@@ -36,10 +36,16 @@ def main():
   if not argv:
     print "warning: no input files specified"
 
-  lm = Probs.LanguageModel()
-  lm.set_smoother(smoother)
-  lm.read_vectors(lexicon)
-  lm.set_vocab_size(train_file1, train_file2)
+  enlm = speechrec.LanguageModel()
+  enlm.set_smoother(smoother)
+  enlm.read_vectors(lexicon)
+  enlm.set_vocab_size(train_file1, train_file2)
+
+  splm = speechrec.LanguageModel()
+  splm.set_smoother(smoother)
+  splm.read_vectors(lexicon)
+  splm.set_vocab_size(train_file1, train_file2)
+
 
 
   # We use natural log for our internal computations and that's
@@ -51,23 +57,23 @@ def main():
   result2 = []
   files = []
 
-  lm.train(train_file1)
+  enlm.train(train_file1)
   for testfile in argv:
     files.append(testfile)
-    result1.append((lm.filelogprob(testfile))/ math.log(2))
+    result1.append(enlm.filelogprob(testfile) / math.log(2))
 
-  lm.train(train_file2)
+  splm.train(train_file2)
   for testfile in argv:
-    result2.append(lm.filelogprob(testfile) / math.log(2))
+    result2.append(splm.filelogprob(testfile) / math.log(2))
 
   type1 = type2 = 0
   for i in range(0, len(result1)):
     if result1[i] > result2[i]:
       type1 += 1
-      print train_file1, '\t', files[i]
+      #print train_file1, '\t', files[i]
     else:
       type2 += 1
-      print train_file2, '\t', files[i]
+      #print train_file2, '\t', files[i]
 
 
   print '%d looked more like %s (%.2f%%)' % (type1, train_file1, type1 * 100.0 / (type1 + type2))

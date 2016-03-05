@@ -16,6 +16,7 @@ import sys
 import copy
 import numpy as np
 import argparse
+import collections
 
 
 # TODO for TA: Currently, we use the same token for BOS and EOS as we only have
@@ -25,7 +26,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = ""
+DEFAULT_TRAINING_DIR = "/usr/local/data/cs465/hw-lm/All_Training/"
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -47,11 +48,16 @@ class LanguageModel:
     self.vocab = None    # set of words included in the vocabulary
     self.vocab_size = None  # V: the total vocab size including OOV.
 
+    # for Witten-Bell backoff
+    self.tcount = None
+    self.alphaNorm = None
+
     self.tokens = None      # the c(...) function
     self.types_after = None # the T(...) function
 
     self.progress = 0        # for the progress bar
 
+    self.ngram = None
     self.bigrams = None
     self.trigrams = None
     
@@ -62,6 +68,7 @@ class LanguageModel:
 
     # for prob
     self.probDP = {}
+    self.wbProbDP = {}
 
     # self.tokens[(x, y, z)] = # of times that xyz was observed during training.
     # self.tokens[(y, z)]    = # of times that yz was observed during training.
@@ -78,12 +85,21 @@ class LanguageModel:
     """Computes a smoothed estimate of the trigram probability p(z | x,y)
     according to the language model.
     """
+    bigram = unigram = False
+
+    if self.ngram == "unigram":
+      bigram = unigram = True
+
+    elif self.ngram == "bigram":
+      bigram = True
+
     if self.smoother == "UNIFORM":
       return float(1) / self.vocab_size
+
     elif self.smoother == "ADDL":
-      if x not in self.vocab:
+      if x not in self.vocab or bigram or unigram:
         x = OOV
-      if y not in self.vocab:
+      if y not in self.vocab or unigram:
         y = OOV
       if z not in self.vocab:
         z = OOV
@@ -111,15 +127,14 @@ class LanguageModel:
       if x == '':
         if ('', '', z) in self.probDP:
           return self.probDP[('', '', z)]
-        # result = (self.tokens.get((z), 0) + self.lambdap) / \
         result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
         self.probDP[('', '', z)] = result
         return result
 
-      if x not in self.vocab:
+      if x not in self.vocab or bigram or unigram:
         x = OOV
-      if y not in self.vocab:
+      if y not in self.vocab or unigram:
         y = OOV
       if z not in self.vocab:
         z = OOV
@@ -142,7 +157,20 @@ class LanguageModel:
       return result
 
     elif self.smoother == "BACKOFF_WB":
-      sys.exit("BACKOFF_WB is not implemented yet (that's your job!)")
+
+      if x not in self.vocab:
+        x = OOV
+      if y not in self.vocab:
+        y = OOV
+      if z not in self.vocab:
+        z = OOV
+
+      if (x, y, z) in self.probDP:
+        return self.probDP[(x, y, z)]
+
+      p = self.wbProbXYZ(x, y, z)
+      self.probDP[(x, y, z)] = p
+      return p
 
     elif self.smoother == "LOGLINEAR":
       if (x, y, z) in self.probDP:
@@ -156,6 +184,111 @@ class LanguageModel:
 
     else:
       sys.exit("%s has some weird value" % self.smoother)
+
+
+  def computeAlphaXY(self, x, y):
+    otherProb = sum([self.discProbXYZ(x, y, zp) for zp in self.vocab if self.tokens.get((x, y, zp), 0) > 0])
+    if otherProb > 1:
+      sys.stderr.write("computeAlphaXY err: otherProb = %f" % otherProb)
+    return (1 - otherProb) / (1 - sum([self.wbProbYZ(y, zp) for zp in self.vocab if self.tokens.get((x, y, zp), 0) > 0]))
+
+  def computeAlphaY(self, y):
+    otherProb = sum([self.discProbYZ(y, zp) for zp in self.vocab if self.tokens.get((y, zp), 0) > 0])
+    if otherProb > 1:
+      sys.stderr.write("computeAlphaY err: otherProb = %f" % otherProb)
+    return (1 - otherProb) / (1 - sum([self.wbProbZ(zp) for zp in self.vocab if self.tokens.get((y, zp), 0) > 0]))
+
+  def computeAlpha(self):
+    otherProb = sum([self.discProbZ(zp) for zp in self.vocab if self.tokens.get(zp, 0) > 0])
+    if otherProb > 1:
+      sys.stderr.write("computeAlpha err: otherProb = %f" % otherProb)
+
+    # deal with 0/0 situation
+    if self.vocab_size - self.types_after[''] == 0:
+      self.vocab.add("#FUTUREWORD#")
+      self.vocab_size += 1
+
+    return (1 - otherProb) / (self.vocab_size - self.types_after[''])
+
+  def discProbXYZ(self, x, y, z):
+    return float(self.tokens.get((x, y, z), 0)) / (self.tokens.get((x, y), 0) + self.types_after.get((x, y), 0))
+
+  def discProbYZ(self, y, z):
+    return float(self.tokens.get((y, z), 0)) / (self.tokens.get(y, 0) + self.types_after.get(y, 0))
+
+  def discProbZ(self, z):
+    return float(self.tokens.get(z, 0)) / (self.tokens.get('', 0) + self.types_after.get('', 0))  # extract 1 for OOV in self.vocab
+
+  def wbProbXYZ(self, x, y, z):
+    if (x, y, z) in self.wbProbDP:
+      return self.wbProbDP[(x, y, z)]
+
+    if self.tokens.get((x, y, z), 0) > 0:
+      self.wbProbDP[(x, y, z)] = self.discProbXYZ(x, y, z)
+      return self.wbProbDP[(x, y, z)]
+    else:
+      if (x, y) in self.alphaNorm:
+        tmpAlpha = self.alphaNorm[(x, y)]
+      else:
+        tmpAlpha = self.computeAlphaXY(x, y)
+        self.alphaNorm[(x, y)] = tmpAlpha
+      self.wbProbDP[(x, y, z)] = tmpAlpha * self.wbProbYZ(y, z)
+      return self.wbProbDP[(x, y, z)]
+
+  def wbProbYZ(self, y, z):
+    if (y, z) in self.wbProbDP:
+      return self.wbProbDP[(y, z)]
+
+    if self.tokens.get((y, z), 0) > 0:
+      self.wbProbDP[(y, z)] = self.discProbYZ(y, z)
+      return self.wbProbDP[(y, z)]
+    else:
+      if y in self.alphaNorm:
+        tmpAlpha = self.alphaNorm[y]
+      else:
+        tmpAlpha = self.computeAlphaY(y)
+        self.alphaNorm[y] = tmpAlpha
+      self.wbProbDP[(y, z)] = tmpAlpha * self.wbProbZ(z)
+      return self.wbProbDP[(y, z)]
+
+  def wbProbZ(self, z):
+    if z in self.wbProbDP:
+      return self.wbProbDP[z]
+
+    if self.tokens.get(z, 0) > 0:
+      self.wbProbDP[z] = self.discProbZ(z)
+      return self.wbProbDP[z]
+    else:
+      if "allAlpha" in self.alphaNorm:
+        tmpAlpha = self.alphaNorm["allAlpha"]
+      else:
+        tmpAlpha = self.computeAlpha()
+        self.alphaNorm["allAlpha"] = tmpAlpha
+      self.wbProbDP[z] = tmpAlpha
+      return tmpAlpha
+
+  def testWB(self):
+
+    self.computeAlpha()
+    vocabList = list(self.vocab)
+
+    for x in vocabList:
+      for y in vocabList:
+        prob = 0
+        for z in vocabList:
+          prob += self.wbProbXYZ(x, y, z)
+        print prob
+
+    for y in vocabList:
+      prob = 0
+      for z in vocabList:
+        prob += self.wbProbYZ(y, z)
+      print prob
+
+    prob = 0
+    for z in vocabList:
+      prob += self.wbProbZ(z)
+    print prob
 
   def calculateU(self, x, y, z):
     if (x, y, z) in self.logProb:
@@ -196,7 +329,7 @@ class LanguageModel:
         bestSentScore = fTheta + candSent.loglinear
         bestSent = candSent
 
-    print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1])
+    print "%.3f %s" % (bestSent.errRate, filename.split("/")[-1]) # + "\\\\"
     return wordNum, wordNum * bestSent.errRate
 
   def readSpeechFile(self, filename):
@@ -212,6 +345,7 @@ class LanguageModel:
     """Read word vectors from an external file.  The vectors are saved as
     arrays in a dictionary self.vectors.
     """
+    print filename
     with open(filename) as infile:
       header = infile.readline()
       self.dim = int(header.split()[-1])
@@ -236,7 +370,9 @@ class LanguageModel:
     self.types_after = {}
     self.bigrams = []
     self.trigrams = []
-    self.probDP = {}  # clean before training
+    self.probDP = {}    # clean before training
+    self.wbProbDP = {}
+    self.alphaNorm = {}
 
     # While training, we'll keep track of all the trigram and bigram types
     # we observe.  You'll need these lists only for Witten-Bell backoff.
@@ -255,6 +391,9 @@ class LanguageModel:
     # count the BOS context
     self.tokens[(x, y)] = 1
     self.tokens[y] = 1
+    self.types_after[x] = 1
+    self.types_after[''] = 1
+    self.bigrams.append((x, y))
 
     tokens_list = [x, y]  # the corpus saved as a list
     corpus = self.open_corpus(filename)
@@ -274,8 +413,13 @@ class LanguageModel:
     tokens_list.append(EOS)   # append a end-of-sequence symbol 
     sys.stderr.write('\n')    # done printing progress dots "...."
     self.count(x, y, EOS)     # count EOS "end of sequence" token after the final context
+
+
     corpus.close()
 
+    self.N = len(tokens_list) - 2  # number of training instances, excluding BOS, but including EOS
+
+    self.computeAlpha()
     if self.smoother == 'LOGLINEAR': 
       # Train the log-linear model using SGD.
 
@@ -286,8 +430,6 @@ class LanguageModel:
       # Optimization parameters
       gamma0 = 0.1  # initial learning rate, used to compute actual learning rate
       epochs = 10  # number of passes
-
-      self.N = len(tokens_list) - 2  # number of training instances
 
       # ******** COMMENT *********
       # In log-linear model, you will have to do some additional computation at
@@ -338,11 +480,15 @@ class LanguageModel:
         print ""
         print "epoch %d: F=%f" % (epoch + 1, self.calculateFTheta(tokens_list))
 
+
     sys.stderr.write("Finished training on %d tokens\n" % self.tokens[""])
 
   def calculateFTheta(self, tokenList):
     self.probDP = {}
     self.logProb = {}
+    tokenList.insert(0, BOS)
+    tokenList.insert(0, BOS)
+    tokenList.append(EOS)
     fTheta = 0
     for i in range(2, len(tokenList)):
       x, y, z = tokenList[i - 2], tokenList[i - 1], tokenList[i]
@@ -373,6 +519,15 @@ class LanguageModel:
     self.tokens[''] = self.tokens.get('', 0) + 1  # the zero-gram
 
 
+    # self.tcount[(x, y)].add(z)
+    # self.tcount[y].add(z)
+
+    # for Witten-Bell backoff
+    # if y != OOV:
+    #   self.tcount[y].add((y, z))
+    #   if x != OOV and z != OOV:
+    #     self.tcount[(x, y)].add((x, y, z))
+
   def set_vocab_size(self, *files):
     """When you do text categorization, call this function on the two
     corpora in order to set the global vocab_size to the size
@@ -381,7 +536,7 @@ class LanguageModel:
     NOTE: This function is not useful for the loglinear model, since we have
     a given lexicon.
      """
-    count = {} # count of each word
+    count = {}  # count of each word
 
     for filename in files:
       corpus = self.open_corpus(filename)
@@ -408,9 +563,10 @@ class LanguageModel:
     """Sets smoother type and lambda from a string passed in by the user on the
     command line.
     """
-    r = re.compile('^(.*?)-?([0-9.]*)$')
+    # r = re.compile('^(.*?)-?([0-9.]*)$')
+    r = re.compile('^(.*?)-?([0-9.]*)-?([a-zA-Z]*)$')
     m = r.match(arg)
-    
+
     if not m.lastindex:
       sys.exit("Smoother regular expression failed for %s" % arg)
     else:
@@ -420,6 +576,12 @@ class LanguageModel:
         self.lambdap = float(lambda_arg)
       else:
         self.lambdap = None
+      if m.lastindex >= 3 and len(m.group(3)):
+        self.ngram = m.group(3)
+
+      if self.lambdap is None:
+        smoother_name += self.ngram
+        self.ngram = ""
 
     if smoother_name.lower() == 'uniform':
       self.smoother = "UNIFORM"
@@ -449,13 +611,12 @@ class LanguageModel:
                  DEFAULT_TRAINING_DIR + filename))
     return corpus
 
-  def show_progress(self, freq=5000):
+  def show_progress(self, freq=10000):
     """Print a dot to stderr every 5000 calls (frequency can be changed)."""
     self.progress += 1
     if self.progress % freq == 1:
       self.progress = 1
       sys.stderr.write('.')
-
 
 class SpeechCandidate(object):
 
@@ -477,14 +638,29 @@ if __name__=="__main__":
     lexicon = args.lexicon
     corpus = args.corpus
     testingFiles = args.testing
-    
+
     lm = LanguageModel()
     lm.set_smoother(smoother)
     lm.read_vectors(lexicon)
     lm.set_vocab_size(corpus)
     lm.train(corpus)
-    
+    #
     result = map(lm.speechRec, testingFiles)
     errData = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), result)
-    print "%.3f %s" % (errData[1] / errData[0], "OVERALL")
-    
+
+    print "%.3f %s" % (float(errData[1]) / errData[0], "OVERALL")
+
+    # lm.testWB()   # test for sum to 1
+
+    # preScore = sys.maxint
+    # tryTime = 100
+    # bestLambda = None
+    # while lm.lambdap > 0.0001:
+    #   result = map(lm.speechRec, testingFiles)
+    #   errData = reduce(lambda x, y: (x[0] + y[0], x[1] + y[1]), result)
+    #   print "%.3f %s, %f" % (errData[1] / errData[0], "OVERALL", lm.lambdap)
+    #   if errData[1] / errData[0] < preScore:
+    #     preScore = errData[1] / errData[0]
+    #     bestLambda = lm.lambdap
+    #   lm.lambdap *= 0.99
+    # print "best lambda:", lm.lambdap
