@@ -23,3 +23,5 @@
 # python python/textcat2.py backoff_wb lexicons/chars-10.txt All_Training/en.1K All_Training/sp.1K english_spanish/test/english/*/*
 # python python/textcat2.py backoff_wb lexicons/chars-10.txt All_Training/en.1K All_Training/sp.1K english_spanish/test/spanish/*/*
 
+
+python python/textcat2.py backoff_wb /usr/local/data/cs465/hw-lm/lexicons/chars-10.txt /usr/local/data/cs465/hw-lm/All_Training/en.1K /usr/local/data/cs465/hw-lm/All_Training/sp.1K /usr/local/data/cs465/hw-lm/english_spanish/test/english/*/*
