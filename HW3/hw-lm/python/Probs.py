@@ -23,7 +23,7 @@ BOS = 'EOS'   # special word type for context at Beginning Of Sequence
 EOS = 'EOS'   # special word type for observed token at End Of Sequence
 OOV = 'OOV'    # special word type for all Out-Of-Vocabulary words
 OOL = 'OOL'    # special word type for all Out-Of-Lexicon words
-DEFAULT_TRAINING_DIR = "../All_Training/"
+DEFAULT_TRAINING_DIR = "/usr/local/data/cs465/hw-lm/All_Training/"
 OOV_THRESHOLD = 3  # minimum number of occurrence for a word to be considered in-vocabulary
 
 
@@ -109,7 +109,6 @@ class LanguageModel:
       if x == '':
         if ('', '', z) in self.probDP:
           return self.probDP[('', '', z)]
-        # result = (self.tokens.get((z), 0) + self.lambdap) / \
         result = (self.tokens.get((z), 0) + self.lambdap * self.vocab_size * self.prob('', '', '')) / \
                 (self.tokens.get((''), 0) + self.lambdap * self.vocab_size)
         self.probDP[('', '', z)] = result
