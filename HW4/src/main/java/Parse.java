@@ -30,8 +30,18 @@ public class Parse {
             String line = br.readLine();
 
             while (line != null) {
-
-//                sentences.add(line);
+                String[] splits = line.split("\t");
+                int weight = Integer.parseInt(splits[0]);
+                String lhs = splits[1];
+                String [] rhs = splits[2].split(" ");
+                if (!grammars.containsKey(lhs)) {
+                    ArrayList<Rule> tmp = new ArrayList<Rule>();
+                    tmp.add(new Rule(weight, lhs, rhs));
+                    grammars.put(lhs, tmp);
+                } else {
+                    List<Rule> tmp = grammars.get(lhs);
+                    tmp.add(new Rule(weight, lhs, rhs));
+                }
                 line = br.readLine();
             }
 
@@ -47,9 +57,20 @@ public class Parse {
     public static  void main(String[] args) throws IOException {
 //        System.out.println(System.getProperty("user.dir"));
         Parse p = new Parse(args[0], args[1]);
-        for (String s:p.sentences) {
-            System.out.println(s);
 
-        }
+//        //test IO
+//        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {
+//
+//            List<Rule> tmp = entry.getValue();
+//            for (Rule r : tmp) {
+//                System.out.print(entry.getKey() + "\t");
+//                System.out.print(r.getWeight() + "\t" + r.getLhs());
+//                for (String s: r.getRhs())
+//                    System.out.print(" " + s);
+//                System.out.print("\n");
+//            }
+//        }
+
+        
     }
 }
