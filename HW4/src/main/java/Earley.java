@@ -21,7 +21,7 @@ public class Earley {
 
     public void setRules(Map<String, List<Rule>> rules) {
         this.rules = rules;
-        this.chartHead = new DottedRule(0, );
+//        chartHead = new DottedRule(0, );
     }
 
     public void parse(List<String> sentences) {
