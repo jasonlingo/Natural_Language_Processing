@@ -27,11 +27,14 @@ public class DottedRule {
         this.rule = rule;
     }
 
+    public DottedRule next;
+
 
     public DottedRule(int dotPosition, Rule rule, int weight) {
         this.dotPosition = dotPosition;
         this.rule = rule;
         this.weight = weight;
+        this.next = null;
     }
 
     private int dotPosition;
