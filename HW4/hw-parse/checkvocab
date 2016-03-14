@@ -17,7 +17,7 @@ close(GRAMMAR);
 while (<>) {
   chomp;
   @bad = grep(!$seen{$_}, split);
-  $bad=1, warn join(", ", @bad)." not in $grammar; won't be able to parse: $_\n" if @bad;
+  $bad=1, warn join(", ", @bad)." not in $grammar; won't be able to Parse: $_\n" if @bad;
 }
 
 exit($bad);

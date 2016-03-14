@@ -5,13 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>edu.jhu.cs.nlp</groupId>
-<<<<<<< HEAD
-    <artifactId>nlp_hw4_parsing</artifactId>
-    <version>1.0</version>
-=======
     <artifactId>nlp.hw4.parsing</artifactId>
     <version>0.1</version>
->>>>>>> 1763d4590f48d0b56bc9b2b61423363d3bae8c4b
-
 
 </project>
