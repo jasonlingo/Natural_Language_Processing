@@ -1,5 +1,6 @@
 import java.util.HashMap;
-import Rule;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Jason on 3/13/16.
@@ -12,20 +13,23 @@ public class Earley {
     Rule chartTail;
 
     public Earley() {
-        this.check = new HashMap<>();
+        this.check = new HashMap<String, List<Rule>>();
         this.chartHead = null;
         this.chartTail = null;
         this.rules = null;
     }
 
-
-    public void addRules(Map<String, List<Rule>> rules) {
+    public void setRules(Map<String, List<Rule>> rules) {
         this.rules = rules;
+//        chartHead = new DottedRule(0, );
     }
 
-    /*
-     For each non-terminal 
-     */
+    public void parse(List<String> sentences) {
+        if (this.rules == null) {
+            System.out.println("No grammar!");
+        }
+    }
+
     private void predict() {
 
     }
