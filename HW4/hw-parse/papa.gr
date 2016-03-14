@@ -12,3 +12,19 @@
 1	P	with
 1	Det	the
 1	Det	a
+
+PP	1	PP P NP
+P	1	P with
+NP	1	NP Det N
+NP	1	NP NP PP
+NP	1	NP Papa
+Det	1	Det the
+Det	1	Det a
+S	1	S NP VP
+ROOT	1	ROOT S
+V	1	V ate
+VP	1	VP V NP
+VP	1	VP VP PP
+N	1	N caviar
+N	1	N spoon
+
