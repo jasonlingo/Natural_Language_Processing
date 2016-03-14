@@ -1,5 +1,4 @@
-import java.util.HashMap;
-import Rule;
+imoprt java.util.*;
 
 /**
  * Created by Jason on 3/13/16.
