@@ -33,6 +33,7 @@ public class Parse {
                 String[] splits = line.split("\t");
                 double weight = - (Math.log(Double.parseDouble(splits[0])) / Math.log(2));
                 String lhs = splits[1];
+
                 String [] rhs = splits[2].split(" ");
                 if (!grammars.containsKey(lhs)) {
                     ArrayList<Rule> tmp = new ArrayList<Rule>();
@@ -52,10 +53,6 @@ public class Parse {
         }
 
     }
-
-
-
-
 
     public static  void main(String[] args) throws IOException {
         Parse p = new Parse(args[0], args[1]);
