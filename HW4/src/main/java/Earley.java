@@ -130,7 +130,7 @@ public class Earley {
                 // the initial dotted rule predicted should be 0
                 // once the dot moves to the right, add the weight of rules
                 // on the left
-                DottedRule next = new DottedRule(colNum, 0, rule, 0);  //TODO: check parameters
+                DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());  //TODO: check parameters
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
                 // dottedRule = dottedRule.next;
@@ -173,27 +173,12 @@ public class Earley {
         DottedRule scannedRule = new DottedRule(colNum, dotPosition, rule, rule.getWeight()); //TODO: check add previous weight
 
         addToChart(scannedRule, colNum + 1);
-
-        // Update the HashMap check
-//        String checkKey = genCheckKey(colNum + 1, scannedRule, genPredictKey(scannedRule));
-
-//        if (!check.containsKey(checkKey)) {
-//            List<DottedRule> temp = new ArrayList<DottedRule>();
-//            temp.add(scannedRule);
-//            check.put(checkKey, temp);
-//        }
-//        else {
-//            List<DottedRule> temp = check.get(checkKey);
-//            temp.add(scannedRule);
-//            check.put(checkKey, temp);
-//        }
     }
 
     private void attach(DottedRule dottedRule, int colNum) {
 //        List<DottedRule> attached = new ArrayList<DottedRule>();
         String match = dottedRule.getRule().getLhs();
         DottedRule head = chartList.get(dottedRule.getStartPosition());
-
 
         /*
          From the startPos column, find the DottedRules that have the same grammar at the right of the dot.
