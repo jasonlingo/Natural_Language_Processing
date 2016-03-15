@@ -31,7 +31,7 @@ public class Parse {
 
             while (line != null) {
                 String[] splits = line.split("\t");
-                int weight = Integer.parseInt(splits[0]);
+                double weight = - (Math.log(Double.parseDouble(splits[0])) / Math.log(2));
                 String lhs = splits[1];
                 String [] rhs = splits[2].split(" ");
                 if (!grammars.containsKey(lhs)) {
