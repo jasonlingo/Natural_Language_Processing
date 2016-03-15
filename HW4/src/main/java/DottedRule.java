@@ -27,13 +27,6 @@ public class DottedRule {
         this.rule = rule;
     }
 
-//    public DottedRule(int dotPosition, Rule rule, int weight) {
-//        this.dotPosition = dotPosition;
-//        this.rule = rule;
-//        this.weight = weight;
-//        this.next = null;
-//    }
-
     public int getStartPosition() {
         return startPosition;
     }
@@ -42,11 +35,12 @@ public class DottedRule {
         this.startPosition = startPosition;
     }
 
-
     public DottedRule next;
+    public DottedRule previous;
     private int startPosition;
     private int dotPosition;
     private Rule rule;
+    private double weight;
 
     public DottedRule(int startPosition, int dotPosition, Rule rule, double weight) {
         this.startPosition = startPosition;
@@ -54,7 +48,4 @@ public class DottedRule {
         this.rule = rule;
         this.weight = weight;
     }
-
-    private double weight;
-
 }
