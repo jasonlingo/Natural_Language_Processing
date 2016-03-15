@@ -29,7 +29,7 @@ public class Parse {
         try {
             String line = br.readLine();
 
-            while (line != null) {
+            while (line != null && !line.equals("")) {
                 String[] splits = line.split("\t");
                 double weight = - (Math.log(Double.parseDouble(splits[0])) / Math.log(2));
                 String lhs = splits[1];
