@@ -33,9 +33,11 @@ public class Earley {
     }
 
     private String decode(String[] sen) {
-        check = new HashMap<String, List<DottedRule>>();
+        System.out.println(Arrays.toString(sen));
+
         chartList = new ArrayList<DottedRule>();
         chartTail = new ArrayList<DottedRule>();
+        check = new HashMap<String, List<DottedRule>>();
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -52,8 +54,7 @@ public class Earley {
 
         for (int i = 0; i <= sen.length; i++) {
             if (i >= chartList.size()) {
-                System.out.println("NONE");
-                return "";
+                return "None";
             }
             DottedRule head = chartList.get(i);
             while (head != null) {
@@ -85,16 +86,23 @@ public class Earley {
             }
             curr = curr.next;
         }
-        if ( bestScore >= Double.MAX_VALUE ) {
-            System.out.println("NONE");
+
+        if (bestParse == null) {
+            return "None";
+        } else {
+            System.out.println("best weight:" + Double.toString(bestScore));
             return "";
         }
-        for (int i = 0; i < sen.length; i++) {
-            System.out.print(sen[i] + ' ');
-        }
-        System.out.println( "best weight:" + Double.toString(bestScore));
-
-        return "";
+//        if ( bestScore >= Double.MAX_VALUE ) {
+//            System.out.println("NONE");
+//            return "";
+//        }
+//        for (int i = 0; i < sen.length; i++) {
+//            System.out.print(sen[i] + ' ');
+//        }
+//        System.out.println( "best weight:" + Double.toString(bestScore));
+//
+//        return "";
 
     }
 
@@ -122,10 +130,11 @@ public class Earley {
 
     private void predict(int colNum, DottedRule dottedRule) {
 
-        DottedRule current = dottedRule;
+//        DottedRule current = dottedRule;
 
         // the name of lhs for prediciton, which is the rhs pointed by the dotPosition
-        String predictKey = genPredictKey(current);
+//        String predictKey = genPredictKey(current);
+        String predictKey = genPredictKey(dottedRule);
 
         // unique key for each entry in the Early chart
         String checkKey = genCheckKey(colNum, dottedRule, predictKey);
@@ -182,6 +191,7 @@ public class Earley {
 
         DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), dotPosition, rule, dottedRule.getWeight()); //TODO: check add previous weight
 
+//        System.out.println("scan add to chart" + rule.getLhs() + "-" + Arrays.toString(rule.getRhs()));
         addToChart(scannedRule, colNum + 1);
     }
 
@@ -200,9 +210,9 @@ public class Earley {
             String[] rhs = rule.getRhs();
             if (dotPos < rhs.length && match.equals(rhs[dotPos])) {
                 DottedRule newDottedRule = new DottedRule(head.getStartPosition(),
-                        head.getDotPosition() + 1,
-                        rule,
-                        head.getWeight() + dottedRule.getWeight());
+                                                          head.getDotPosition() + 1,
+                                                          rule,
+                                                          head.getWeight() + dottedRule.getWeight());
                 String attachCheckKey = genAttachCheckKey(colNum, newDottedRule);
                 if (!check.containsKey(attachCheckKey)) {
                     addToChart(newDottedRule, colNum);
@@ -212,6 +222,7 @@ public class Earley {
             head = head.next;
         }
     }
+
 
 
     /*
@@ -226,6 +237,18 @@ public class Earley {
             tail.next = dottedRule;
             chartTail.set(colNum, tail.next);
         }
+        printChart(colNum);
+    }
+
+    private void printChart(int colNum) {
+        for(int i = colNum; i < chartList.size(); i++) {
+            System.out.println("-----" + Integer.toString(i) + "th column -----");
+            DottedRule h = chartList.get(i);
+            while (h != null) {
+                System.out.println(h.toString());
+                h = h.next;
+            }
+        }
     }
 
     private String genPredictKey(DottedRule dottedRule) {
@@ -239,11 +262,9 @@ public class Earley {
 
     private String genAttachCheckKey(int colNum, DottedRule dottedRule) {
         return Integer.toString(colNum) + "_" +
-                Integer.toString(dottedRule.getStartPosition()) + "_" +
-                Integer.toString(dottedRule.getDotPosition()) + "_" +
-                dottedRule.getRule().getLhs() + "_" +
-                Arrays.toString(dottedRule.getRule().getRhs());
-
+               Integer.toString(dottedRule.getStartPosition()) + "_" +
+               Integer.toString(dottedRule.getDotPosition()) + "_" +
+               dottedRule.getRule().getLhs() + "_" +
+               Arrays.toString(dottedRule.getRule().getRhs());
     }
-
 }

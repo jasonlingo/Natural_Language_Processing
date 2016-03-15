@@ -3,6 +3,22 @@
  */
 public class DottedRule {
 
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        int dotPos = getDotPosition();
+        String[] rhs = getRule().getRhs();
+        for(int i = 0; i < rhs.length; i++) {
+            if (i == dotPos) {
+                sb.append(".");
+            }
+            sb.append(rhs[i]);
+        }
+        if (dotPos >= rhs.length) {
+            sb.append(".");
+        }
+        return Integer.toString(getStartPosition()) + " " + getRule().getLhs() + " " + sb.toString();
+    }
+
     public double getWeight() {
         return weight;
     }
