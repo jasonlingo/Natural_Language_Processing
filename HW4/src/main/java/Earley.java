@@ -33,7 +33,7 @@ public class Earley {
     }
 
     private String decode(String[] sen) {
-
+        check = new HashMap<String, List<DottedRule>>();
         chartList = new ArrayList<DottedRule>();
         chartTail = new ArrayList<DottedRule>();
 
@@ -51,6 +51,10 @@ public class Earley {
 
 
         for (int i = 0; i <= sen.length; i++) {
+            if (i >= chartList.size()) {
+                System.out.println("NONE");
+                return "";
+            }
             DottedRule head = chartList.get(i);
             while (head != null) {
                 if (isComplete(head)) {
@@ -81,8 +85,14 @@ public class Earley {
             }
             curr = curr.next;
         }
-
-        System.out.println("best weight:" + Double.toString(bestScore));
+        if ( bestScore >= Double.MAX_VALUE ) {
+            System.out.println("NONE");
+            return "";
+        }
+        for (int i = 0; i < sen.length; i++) {
+            System.out.print(sen[i] + ' ');
+        }
+        System.out.println( "best weight:" + Double.toString(bestScore));
 
         return "";
 
@@ -170,7 +180,7 @@ public class Earley {
 
         //if (terminal.equals(words[colNum + 1])) {
 
-        DottedRule scannedRule = new DottedRule(colNum, dotPosition, rule, rule.getWeight()); //TODO: check add previous weight
+        DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), dotPosition, rule, dottedRule.getWeight()); //TODO: check add previous weight
 
         addToChart(scannedRule, colNum + 1);
     }
