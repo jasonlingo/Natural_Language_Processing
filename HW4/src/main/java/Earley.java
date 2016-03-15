@@ -93,6 +93,17 @@ public class Earley {
             System.out.println("best weight:" + Double.toString(bestScore));
             return "";
         }
+//        if ( bestScore >= Double.MAX_VALUE ) {
+//            System.out.println("NONE");
+//            return "";
+//        }
+//        for (int i = 0; i < sen.length; i++) {
+//            System.out.print(sen[i] + ' ');
+//        }
+//        System.out.println( "best weight:" + Double.toString(bestScore));
+//
+//        return "";
+
     }
 
     /*
@@ -178,31 +189,16 @@ public class Earley {
 
         //if (terminal.equals(words[colNum + 1])) {
 
-        DottedRule scannedRule = new DottedRule(colNum, dotPosition, rule, rule.getWeight()); //TODO: check add previous weight
+        DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), dotPosition, rule, dottedRule.getWeight()); //TODO: check add previous weight
 
 //        System.out.println("scan add to chart" + rule.getLhs() + "-" + Arrays.toString(rule.getRhs()));
         addToChart(scannedRule, colNum + 1);
-
-        // Update the HashMap check
-//        String checkKey = genCheckKey(colNum + 1, scannedRule, genPredictKey(scannedRule));
-
-//        if (!check.containsKey(checkKey)) {
-//            List<DottedRule> temp = new ArrayList<DottedRule>();
-//            temp.add(scannedRule);
-//            check.put(checkKey, temp);
-//        }
-//        else {
-//            List<DottedRule> temp = check.get(checkKey);
-//            temp.add(scannedRule);
-//            check.put(checkKey, temp);
-//        }
     }
 
     private void attach(DottedRule dottedRule, int colNum) {
 //        List<DottedRule> attached = new ArrayList<DottedRule>();
         String match = dottedRule.getRule().getLhs();
         DottedRule head = chartList.get(dottedRule.getStartPosition());
-
 
         /*
          From the startPos column, find the DottedRules that have the same grammar at the right of the dot.
@@ -258,7 +254,6 @@ public class Earley {
     private String genPredictKey(DottedRule dottedRule) {
         return dottedRule.getRule().getRhs()[dottedRule.getDotPosition()];
     }
-
 
     private String genCheckKey(int colNum, DottedRule dottedRule, String predictKey) {
 //        return Integer.toString(colNum) + "_" + Integer.toString(dottedRule.getStartPosition()) + "_" + Integer.toString(dottedRule.getDotPosition()) + "_" + predictKey;
