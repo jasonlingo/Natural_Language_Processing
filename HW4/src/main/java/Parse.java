@@ -14,7 +14,8 @@ public class Parse {
             String line = br.readLine();
 
             while (line != null) {
-                sentences.add(line);
+                if (line.length() > 0)
+                    sentences.add(line);
                 line = br.readLine();
             }
 
@@ -60,12 +61,12 @@ public class Parse {
         e.setRules(p.grammars);
         e.parse(p.sentences);
 
-//        //test IO
+        //test IO
 //        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {
 //
 //            List<Rule> tmp = entry.getValue();
 //            for (Rule r : tmp) {
-//                System.out.print(entry.getKey() + "\t");
+//                // System.out.print(entry.getKey() + "\t");
 //                System.out.print(r.getWeight() + "\t" + r.getLhs());
 //                for (String s: r.getRhs())
 //                    System.out.print(" " + s);
