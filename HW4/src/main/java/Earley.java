@@ -33,6 +33,7 @@ public class Earley {
     }
 
     private String decode(String[] sen) {
+
         List<DottedRule> chartList = new ArrayList<DottedRule>();
         List<DottedRule> chartTail = new ArrayList<DottedRule>();
 
@@ -48,25 +49,42 @@ public class Earley {
         chartList.add(dummy.next);
         chartTail.add(curr);
 
-        int colNum = 0;
+
         for (int i = 0; i < sen.length; i++) {
             DottedRule head = chartList.get(i);
             while (head != null) {
                 if (isComplete(head)) {
-                    attach(head);
+                    attach(head, i);
                 } else {
                     if (!nextIsCat(head)) {
                         // The current rule (at the right of the dot) is a grammar that
                         // can be expanded to other grammar.
-                        predict(colNum, head);
+                        predict(i, head);
                     } else {
-                        scan(i, head, sen); // is i the column number?
+                        scan(i, head, sen);
                     }
                 }
                 head = head.next;
             }
-            colNum++;
         }
+
+        // From the last column, find the ROOT constituent with the lowest log probability
+        curr = chartList.get(chartList.size() - 1);
+        DottedRule bestParse = null;
+        double bestScore = Double.MAX_VALUE;
+        while (curr != null) {
+            if (curr.getStartPosition() == 0 && curr.getRule().getLhs().equals("ROOT")) {
+                if (curr.getWeight() < bestScore) {
+                    bestParse = curr;
+                    bestScore = curr.getWeight();
+                }
+            }
+            curr = curr.next;
+        }
+
+        System.out.println("best weight:" + Double.toString(bestScore));
+
+        return "";
 
     }
 
@@ -78,6 +96,7 @@ public class Earley {
     }
 
     private Boolean nextIsCat(DottedRule dottedRule) {
+
         String[] rhs = dottedRule.getRule().getRhs();
         int keyIdx = dottedRule.getDotPosition();
         try {
@@ -87,6 +106,7 @@ public class Earley {
             e.printStackTrace();
             System.exit(1);
         }
+        return false;
     }
 
 
@@ -107,8 +127,10 @@ public class Earley {
             List<DottedRule> dottedPredictResult = new ArrayList<DottedRule>();
 
             for (Rule rule : predictResult) {
-                // dottedRule.next = new DottedRule(colNum, 0, rule, rule.getWeight() + current.getWeight());
-                DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight() + current.getWeight());
+                // the initial dotted rule predicted should be 0
+                // once the dot moves to the right, add the weight of rules
+                // on the left
+                DottedRule next = new DottedRule(colNum, 0, rule, 0);
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
                 // dottedRule = dottedRule.next;
@@ -122,55 +144,78 @@ public class Earley {
 
     private void scan(int colNum, DottedRule dottedRule, String[] words) {
 
-        Rule rule = dottedRule.getRule();
-        int dotPosition = dottedRule.getDotPosition();
-        String terminal = rule.getRhs()[dotPosition];
-
-
-        if (terminal.equals(words[colNum + 1])) {
-            double weight = dottedRule.getWeight();
-
-            //TODO is weight correct here?
-            DottedRule scannedRule = new DottedRule(colNum, dotPosition + 1, rule, weight);
-
-            addToChart(scannedRule, colNum + 1);
-
-            // Update the HashMap check
-            String checkKey = genCheckKey(colNum + 1, scannedRule, genPredictKey(scannedRule));
-
-            //TODO: only one DottedRule for each checkKey entry?
-
-            if (!check.containsKey(checkKey)) {
-                List<DottedRule> temp = new ArrayList<DottedRule>();
-                temp.add(scannedRule);
-                check.put(checkKey, temp);
-            }
-            else {
-                List<DottedRule> temp = check.get(checkKey);
-                temp.add(scannedRule);
-                check.put(checkKey, temp);
-            }
-
+        if (colNum + 1 >= words.length) {
+            return;
         }
 
+        Rule rule = dottedRule.getRule();
+        int dotPosition = dottedRule.getDotPosition(); // Is the position always 0?
+        // no for cases like NP -> a majority of N?
+        String[] rhs = rule.getRhs();
+        ArrayList<String> terminals = new ArrayList<String>();
 
+        while (!rules.containsKey(rhs[dotPosition])) {
+            terminals.add(rhs[dotPosition]);
+            dotPosition++;
 
-        //chartList.add(dottedRule);
+        }
+        //String terminal = rule.getRhs()[dotPosition];
+
+        // check if all terminals match the sentence
+        for (int i = 0; i < terminals.size(); i++) {
+            if (!terminals.get(i).equals(words[colNum + i + 1])) {
+                return;
+            }
+        }
+
+        //if (terminal.equals(words[colNum + 1])) {
+
+        DottedRule scannedRule = new DottedRule(colNum, dotPosition + 1, rule, rule.getWeight());
+
+        addToChart(scannedRule, colNum + 1);
+
+        // Update the HashMap check
+        String checkKey = genCheckKey(colNum + 1, scannedRule, genPredictKey(scannedRule));
+
+        if (!check.containsKey(checkKey)) {
+            List<DottedRule> temp = new ArrayList<DottedRule>();
+            temp.add(scannedRule);
+            check.put(checkKey, temp);
+        }
+        else {
+            List<DottedRule> temp = check.get(checkKey);
+            temp.add(scannedRule);
+            check.put(checkKey, temp);
+        }
+
+        //}
+
 
     }
 
-    private void attach(DottedRule dottedRule) {
-        Rule rule = dottedRule.getRule();
-        int dotPosition = dottedRule.getDotPosition();
-        int startPos = dottedRule.getStartPosition();
+    private void attach(DottedRule dottedRule, int colNum) {
+        List<DottedRule> attached = new ArrayList<DottedRule>();
+        String match = dottedRule.getRule().getLhs();
+        int dotPos = dottedRule.getDotPosition();
+        DottedRule head = chartList.get(dottedRule.getStartPosition());
 
-        DottedRule head = chartList.get(startPos);
+
+        /*
+         From the startPos column, find the DottedRules that have the same grammar at the right of the dot.
+         Attached the found DottedRule in the current column.
+         */
         while (head != null) {
-
+            Rule rule = head.getRule();
+            String[] rhs = rule.getRhs();
+            if (match.equals(rhs[dotPos])) {
+                DottedRule newDottedRule = new DottedRule(head.getStartPosition(),
+                        head.getDotPosition() + 1,
+                        rule,
+                        head.getWeight() + dottedRule.getWeight());
+                addToChart(newDottedRule, colNum);
+            }
+            head = head.next;
         }
-
-
-
     }
 
 
