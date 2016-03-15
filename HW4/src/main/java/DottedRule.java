@@ -3,11 +3,11 @@
  */
 public class DottedRule {
 
-    public int getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
@@ -27,17 +27,44 @@ public class DottedRule {
         this.rule = rule;
     }
 
+<<<<<<< HEAD
+=======
+//    public DottedRule(int dotPosition, Rule rule, int weight) {
+//        this.dotPosition = dotPosition;
+//        this.rule = rule;
+//        this.weight = weight;
+//        this.next = null;
+//    }
 
-    public DottedRule(int dotPosition, Rule rule, int weight) {
+    public int getStartPosition() {
+        return startPosition;
+    }
+
+    public void setStartPosition(int startPosition) {
+        this.startPosition = startPosition;
+    }
+
+>>>>>>> master
+
+    public DottedRule next;
+    private int startPosition;
+    private int dotPosition;
+    private Rule rule;
+
+    public DottedRule(int startPosition, int dotPosition, Rule rule, double weight) {
+        this.startPosition = startPosition;
         this.dotPosition = dotPosition;
         this.rule = rule;
         this.weight = weight;
-        this.next = null;
     }
 
+<<<<<<< HEAD
     private int dotPosition;
     private Rule rule;
     private int weight;
     public DottedRule next;
+=======
+    private double weight;
+>>>>>>> master
 
 }

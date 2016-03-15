@@ -27,7 +27,7 @@ public class Earley {
         }
 
         for (String orgSen: sentences) {
-            String[] sen = orgSen.split();
+            String[] sen = orgSen.split(" ");
             System.out.println(decode(sen));
         }
     }
@@ -39,17 +39,17 @@ public class Earley {
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
 
-        DottedRule dummy = new DottedRule(0, null, 0);
+        DottedRule dummy = new DottedRule(0, 0, null, 0);
         DottedRule curr = dummy;
         for (Rule r: root) {
-            curr.next = new DottedRule(0, r, r.getWeight());
+            curr.next = new DottedRule(0, 0, r, r.getWeight());
             curr = curr.next;
         }
         chartList.add(dummy.next);
         chartTail.add(curr);
 
         int colNum = 0;
-        for (int i = 0; i < sen.length(); i++) {
+        for (int i = 0; i < sen.length; i++) {
             DottedRule head = chartList.get(i);
             while (head != null) {
                 if (isComplete(head)) {
@@ -60,7 +60,7 @@ public class Earley {
                         // can be expanded to other grammar.
                         predict(colNum, head);
                     } else {
-                        scan(head, sen); // Need pass sentence to it
+                        scan(i, head, sen); // is i the column number?
                     }
                 }
                 head = head.next;
@@ -73,10 +73,6 @@ public class Earley {
     /*
      Check whether this DottedRule is complete, i.e. the dot is at the end of the rule.
      */
-    private Boolean isComplete(DottedRule dottedRule) {
-        return dottedRule.getRule().getRhs().length == dottedRule.getDotPosition();
-    }
-
     private Boolean nextIsCat(DottedRule dottedRule) {
         String[] rhs = dottedRule.getRule().getRhs();
         int keyIdx = dottedRule.getDotPosition();
@@ -89,6 +85,12 @@ public class Earley {
         }
     }
 
+    /*
+     Check whether this DottedRule is complete, i.e. the dot is at the end of the rule.
+     */
+    private Boolean isComplete(DottedRule dottedRule) {
+        return dottedRule.getRule().getRhs().length == dottedRule.getDotPosition();
+    }
 
     private void predict(int colNum, DottedRule dottedRule) {
 
@@ -116,7 +118,18 @@ public class Earley {
 
             check.put(checkKey, dottedPredictResult);
         }
+    }
 
+    private Boolean nextIsCat(DottedRule dottedRule) {
+        String[] rhs = dottedRule.getRule().getRhs();
+        int keyIdx = dottedRule.getDotPosition();
+        try {
+            String key = rhs[keyIdx];
+            return rules.containsKey(key);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 
 
@@ -139,8 +152,6 @@ public class Earley {
             String checkKey = genCheckKey(colNum + 1, scannedRule, genPredictKey(scannedRule));
 
             //TODO: only one DottedRule for each checkKey entry?
-            List<DottedRule> temp = new ArrayList<DottedRule>();
-            temp.add(scannedRule);
 
             if (!check.containsKey(checkKey)) {
                 List<DottedRule> temp = new ArrayList<DottedRule>();
@@ -152,13 +163,7 @@ public class Earley {
                 temp.add(scannedRule);
                 check.put(checkKey, temp);
             }
-
         }
-
-
-
-        //chartList.add(dottedRule);
-
     }
 
     private void attach(DottedRule dottedRule) {
@@ -167,8 +172,9 @@ public class Earley {
         int startPos = dottedRule.getStartPosition();
 
         DottedRule head = chartList.get(startPos);
+        while (head != null) {
 
-
+        }
 
     }
 
@@ -194,7 +200,7 @@ public class Earley {
 
 
     private String genCheckKey(int colNum, DottedRule dottedRule, String predictKey) {
-        return "" + Integer.toString(colNum) + dottedRule.getStartPosition() + dottedRule.getDotPosition() + predictKey;
+        return Integer.toString(colNum) + "_" + Integer.toString(dottedRule.getStartPosition()) + "_" + Integer.toString(dottedRule.getDotPosition()) + "_" + predictKey;
     }
 
 }

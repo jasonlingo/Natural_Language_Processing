@@ -3,7 +3,7 @@ import java.util.*;
 
 public class Parse {
     HashMap<String, List<Rule>> grammars = new HashMap<String, List<Rule>> ();
-    HashMap<String, List<DottedRule>> entries = new HashMap<String, List<DottedRule>>();
+//    HashMap<String, List<DottedRule>> entries = new HashMap<String, List<DottedRule>>();
     List<String> sentences = new ArrayList<String>();
 
 
@@ -51,12 +51,17 @@ public class Parse {
             br.close();
         }
 
-
     }
 
+
+
+
+
     public static  void main(String[] args) throws IOException {
-//        System.out.println(System.getProperty("user.dir"));
         Parse p = new Parse(args[0], args[1]);
+        Earley e = new Earley();
+        e.setRules(p.grammars);
+        e.parse(p.sentences);
 
 //        //test IO
 //        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {

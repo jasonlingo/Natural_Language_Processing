@@ -1,10 +1,10 @@
 public class Rule {
 
-    public int getWeight() {
+    public double getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(double weight) {
         this.weight = weight;
     }
 
@@ -25,13 +25,13 @@ public class Rule {
     }
 
 
-    public Rule(int weight, String lhs, String[] rhs) {
+    public Rule(double weight, String lhs, String[] rhs) {
         this.weight = weight;
         this.rhs = rhs;
         this.lhs = lhs;
     }
 
-    private int weight; // NP -> a majority . of N
+    private double weight; // NP -> a majority . of N
     private String lhs;
     private String[] rhs;
 
