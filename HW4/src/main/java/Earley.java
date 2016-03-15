@@ -33,9 +33,11 @@ public class Earley {
     }
 
     private String decode(String[] sen) {
+        System.out.println(Arrays.toString(sen));
 
         chartList = new ArrayList<DottedRule>();
         chartTail = new ArrayList<DottedRule>();
+        check = new HashMap<String, List<DottedRule>>();
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -51,6 +53,9 @@ public class Earley {
 
 
         for (int i = 0; i <= sen.length; i++) {
+            if (i >= chartList.size()) {
+                return "None";
+            }
             DottedRule head = chartList.get(i);
             while (head != null) {
                 if (isComplete(head)) {
@@ -82,10 +87,12 @@ public class Earley {
             curr = curr.next;
         }
 
-        System.out.println("best weight:" + Double.toString(bestScore));
-
-        return "";
-
+        if (bestParse == null) {
+            return "None";
+        } else {
+            System.out.println("best weight:" + Double.toString(bestScore));
+            return "";
+        }
     }
 
     /*
@@ -112,10 +119,11 @@ public class Earley {
 
     private void predict(int colNum, DottedRule dottedRule) {
 
-        DottedRule current = dottedRule;
+//        DottedRule current = dottedRule;
 
         // the name of lhs for prediciton, which is the rhs pointed by the dotPosition
-        String predictKey = genPredictKey(current);
+//        String predictKey = genPredictKey(current);
+        String predictKey = genPredictKey(dottedRule);
 
         // unique key for each entry in the Early chart
         String checkKey = genCheckKey(colNum, dottedRule, predictKey);
@@ -130,7 +138,7 @@ public class Earley {
                 // the initial dotted rule predicted should be 0
                 // once the dot moves to the right, add the weight of rules
                 // on the left
-                DottedRule next = new DottedRule(colNum, 0, rule, 0);  //TODO: check parameters
+                DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());  //TODO: check parameters
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
                 // dottedRule = dottedRule.next;
@@ -172,6 +180,7 @@ public class Earley {
 
         DottedRule scannedRule = new DottedRule(colNum, dotPosition, rule, rule.getWeight()); //TODO: check add previous weight
 
+//        System.out.println("scan add to chart" + rule.getLhs() + "-" + Arrays.toString(rule.getRhs()));
         addToChart(scannedRule, colNum + 1);
 
         // Update the HashMap check
@@ -205,9 +214,9 @@ public class Earley {
             String[] rhs = rule.getRhs();
             if (dotPos < rhs.length && match.equals(rhs[dotPos])) {
                 DottedRule newDottedRule = new DottedRule(head.getStartPosition(),
-                        head.getDotPosition() + 1,
-                        rule,
-                        head.getWeight() + dottedRule.getWeight());
+                                                          head.getDotPosition() + 1,
+                                                          rule,
+                                                          head.getWeight() + dottedRule.getWeight());
                 String attachCheckKey = genAttachCheckKey(colNum, newDottedRule);
                 if (!check.containsKey(attachCheckKey)) {
                     addToChart(newDottedRule, colNum);
@@ -217,6 +226,7 @@ public class Earley {
             head = head.next;
         }
     }
+
 
 
     /*
@@ -230,6 +240,18 @@ public class Earley {
             DottedRule tail = chartTail.get(colNum);
             tail.next = dottedRule;
             chartTail.set(colNum, tail.next);
+        }
+        printChart(colNum);
+    }
+
+    private void printChart(int colNum) {
+        for(int i = colNum; i < chartList.size(); i++) {
+            System.out.println("-----" + Integer.toString(i) + "th column -----");
+            DottedRule h = chartList.get(i);
+            while (h != null) {
+                System.out.println(h.toString());
+                h = h.next;
+            }
         }
     }
 
@@ -249,7 +271,5 @@ public class Earley {
                Integer.toString(dottedRule.getDotPosition()) + "_" +
                dottedRule.getRule().getLhs() + "_" +
                Arrays.toString(dottedRule.getRule().getRhs());
-
     }
-
 }
