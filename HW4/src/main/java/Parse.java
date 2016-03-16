@@ -14,14 +14,8 @@ public class Parse {
             String line = br.readLine();
 
             while (line != null) {
-<<<<<<< HEAD
-                if (!line.equals("")) {
-                    sentences.add(line);
-                }
-=======
                 if (line.length() > 0)
                     sentences.add(line);
->>>>>>> master
                 line = br.readLine();
             }
 
@@ -36,7 +30,6 @@ public class Parse {
         try {
             String line = br.readLine();
 
-<<<<<<< HEAD
             while (line != null) {
                 if (!line.equals("")) {
                     String[] splits = line.split("\t");
@@ -51,21 +44,6 @@ public class Parse {
                         List<Rule> tmp = grammars.get(lhs);
                         tmp.add(new Rule(weight, lhs, rhs));
                     }
-=======
-            while (line != null && !line.equals("")) {
-                String[] splits = line.split("\t");
-                double weight = - (Math.log(Double.parseDouble(splits[0])) / Math.log(2));
-                String lhs = splits[1];
-
-                String [] rhs = splits[2].split(" ");
-                if (!grammars.containsKey(lhs)) {
-                    ArrayList<Rule> tmp = new ArrayList<Rule>();
-                    tmp.add(new Rule(weight, lhs, rhs));
-                    grammars.put(lhs, tmp);
-                } else {
-                    List<Rule> tmp = grammars.get(lhs);
-                    tmp.add(new Rule(weight, lhs, rhs));
->>>>>>> master
                 }
                 line = br.readLine();
             }
@@ -83,8 +61,8 @@ public class Parse {
         Earley e = new Earley();
         e.setRules(p.grammars);
         e.parse(p.sentences);
-
         //test IO
+
 //        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {
 //
 //            List<Rule> tmp = entry.getValue();

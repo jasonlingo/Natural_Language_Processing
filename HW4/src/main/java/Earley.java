@@ -167,36 +167,18 @@ public class Earley {
         }
 
         Rule rule = dottedRule.getRule();
-        int dotPosition = dottedRule.getDotPosition(); // Is the position always 0?
-        // no for cases like NP -> a majority of N?
+        int dotPosition = dottedRule.getDotPosition();
         String[] rhs = rule.getRhs();
-        ArrayList<String> terminals = new ArrayList<String>();
+        String terminal = rhs[dotPosition];
 
-        while (dotPosition < rhs.length && !rules.containsKey(rhs[dotPosition])) {
-            terminals.add(rhs[dotPosition]);
-            dotPosition++;
+        if (!terminal.equals(words[colNum])) return;
 
-        }
-        //String terminal = rule.getRhs()[dotPosition];
+        DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), ++dotPosition, rule, dottedRule.getWeight()); //TODO: check add previous weight
 
-        // check if all terminals match the sentence
-        for (int i = 0; i < terminals.size(); i++) {
-//            if (!terminals.get(i).equals(words[colNum + i + 1])) {
-            if (!terminals.get(i).equals(words[colNum + i])) {
-                return;
-            }
-        }
-
-        //if (terminal.equals(words[colNum + 1])) {
-
-        DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), dotPosition, rule, dottedRule.getWeight()); //TODO: check add previous weight
-
-//        System.out.println("scan add to chart" + rule.getLhs() + "-" + Arrays.toString(rule.getRhs()));
         addToChart(scannedRule, colNum + 1);
     }
 
     private void attach(DottedRule dottedRule, int colNum) {
-//        List<DottedRule> attached = new ArrayList<DottedRule>();
         String match = dottedRule.getRule().getLhs();
         DottedRule head = chartList.get(dottedRule.getStartPosition());
 
