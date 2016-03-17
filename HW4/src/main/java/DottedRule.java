@@ -3,6 +3,7 @@
  */
 public class DottedRule {
 
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int dotPos = getDotPosition();
@@ -11,6 +12,7 @@ public class DottedRule {
             if (i == dotPos) {
                 sb.append(".");
             }
+
             sb.append(rhs[i]);
         }
         if (dotPos >= rhs.length) {
