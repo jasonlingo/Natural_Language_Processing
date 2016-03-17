@@ -64,8 +64,8 @@ public class DottedRule {
                 this.getStartPosition() == other.getStartPosition());
     }
 
-    public DottedRule next;
-    public DottedRule previous;
+    public DottedRule next;       //next dottedRule in the same column
+    public DottedRule previous;   //parsed from previous dottedRule
     private int startPosition;
     private int dotPosition;
     private Rule rule;

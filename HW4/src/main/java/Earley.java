@@ -7,14 +7,16 @@ public class Earley {
 
     private Map<String, List<DottedRule>> check;  //for checking duplicated rule in one column
     private Map<String, List<Rule>> rules;
-    private List<DottedRule> chartHead;  // keep the first DottedRule of each column
+    private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
+    private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
 
     public Earley() {
         this.check = new HashMap<String, List<DottedRule>>();
         this.chartHead = new ArrayList<DottedRule>();
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
+        this.dottedRulePos = new HashMap<String, DottedRule>();
     }
 
     public void setRules(Map<String, List<Rule>> rules) {
@@ -35,9 +37,10 @@ public class Earley {
     private String decode(String[] sen) {
         System.out.println(Arrays.toString(sen));
 
-        chartHead = new ArrayList<DottedRule>();
-        chartTail = new ArrayList<DottedRule>();
-        check = new HashMap<String, List<DottedRule>>();
+        chartHead.clear();
+        chartTail.clear();
+        check.clear();
+        dottedRulePos.clear();
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -49,7 +52,9 @@ public class Earley {
             curr = curr.next;
         }
         chartHead.add(dummy.next);
+        dottedRulePos.put("0" + "_" + dummy.next.toString(), dummy.next);
         chartTail.add(curr);
+        dottedRulePos.put("0" + "_" + curr.toString(), curr);
 
 
         for (int i = 0; i <= sen.length; i++) {
@@ -145,6 +150,7 @@ public class Earley {
                 // once the dot moves to the right, add the weight of rules
                 // on the left
                 DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
+                next.previous = dottedRule;
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
             }
@@ -156,7 +162,7 @@ public class Earley {
             for (Rule rule : predictResult) {
 
                 DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
-                next.previous = dottedRule;
+//                next.previous = dottedRule;
                 dottedPredictResult.add(next);
                 if (replaceDottedRule(next, colNum)) {
                     updated = true;
@@ -208,8 +214,6 @@ public class Earley {
                 if (!check.containsKey(attachCheckKey)) {
                     newDottedRule.previous = head;
                     addToChart(newDottedRule, colNum);
-                    // ArrayList<DottedRule> attached = new ArrayList<DottedRule>();
-                    // attached.add(newDottedRule);
                     check.put(attachCheckKey, null);
                 } else {
                     //replace if the weight is better
@@ -225,17 +229,16 @@ public class Earley {
      Check the given DottedRule is better than the same rule in the specified column.
      */
     private boolean replaceDottedRule(DottedRule dottedRule, int colNum) {
-        DottedRule curr = chartHead.get(colNum);
-
-        while (curr != null) {
-            if (curr.equals(dottedRule) && dottedRule.getWeight() < curr.getWeight()) {
-                dottedRule.previous = curr.previous;
-                dottedRule.next = curr.next;
-                curr.previous = null;
-                curr.next = null;
+        String key = String.valueOf(colNum) + "_" + dottedRule.toString();
+        if (dottedRulePos.containsKey(key)) {
+            DottedRule curr = dottedRulePos.get(key);
+            if (dottedRule.getWeight() < curr.getWeight()) {
+                curr.setWeight(dottedRule.getWeight());
+                curr.previous = dottedRule.previous;
                 return true;
             }
-            curr = curr.next;
+        } else {
+            System.out.println("not found dottedRule for replacing");
         }
         return false;
     }
@@ -247,10 +250,12 @@ public class Earley {
         if (colNum >= chartTail.size()) {
             chartHead.add(dottedRule);
             chartTail.add(dottedRule);
+            dottedRulePos.put(String.valueOf(chartHead.size()) + "_" + dottedRule.toString(), dottedRule);
         } else {
             DottedRule tail = chartTail.get(colNum);
             tail.next = dottedRule;
             chartTail.set(colNum, tail.next);
+            dottedRulePos.put(String.valueOf(colNum) + "_" + dottedRule.toString(), dottedRule);
         }
 //        printChart(colNum);
     }
