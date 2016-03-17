@@ -82,6 +82,11 @@ public class Earley {
                 if (curr.getWeight() < bestScore) {
                     bestParse = curr;
                     bestScore = curr.getWeight();
+//                    DottedRule temp = curr;
+//                    while (temp != null) {
+//                        System.out.print(temp.getRule().getLhs() + " -> ");
+//                    }
+//                    System.out.println();
                 }
             }
             curr = curr.next;
@@ -145,6 +150,7 @@ public class Earley {
                 // once the dot moves to the right, add the weight of rules
                 // on the left
                 DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
+                next.previous = dottedRule;
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
             }
@@ -152,14 +158,19 @@ public class Earley {
             check.put(checkKey, dottedPredictResult);
 
         } else {
+            boolean updated = false;
             for (Rule rule : predictResult) {
 
                 DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
                 next.previous = dottedRule;
                 dottedPredictResult.add(next);
-                replaceDottedRule(next, colNum);
+                if (replaceDottedRule(next, colNum)) {
+                    updated = true;
+                }
             }
-            check.put(checkKey, dottedPredictResult);
+            if (updated) {
+                check.put(checkKey, dottedPredictResult);
+            }
         }
     }
 
@@ -219,21 +230,20 @@ public class Earley {
     /*
      Check the given DottedRule is better than the same rule in the specified column.
      */
-    private void replaceDottedRule(DottedRule dottedRule, int colNum) {
+    private boolean replaceDottedRule(DottedRule dottedRule, int colNum) {
         DottedRule curr = chartHead.get(colNum);
 
         while (curr != null) {
-            if (curr.dottedRuleEquals(dottedRule)) {
-                if (dottedRule.getWeight() < curr.getWeight()) {
-                    dottedRule.previous = curr.previous;
-                    dottedRule.next = curr.next;
-                    curr.previous = null;
-                    curr.next = null;
-                }
-                break;
+            if (curr.equals(dottedRule) && dottedRule.getWeight() < curr.getWeight()) {
+                dottedRule.previous = curr.previous;
+                dottedRule.next = curr.next;
+                curr.previous = null;
+                curr.next = null;
+                return true;
             }
             curr = curr.next;
         }
+        return false;
     }
 
     /*

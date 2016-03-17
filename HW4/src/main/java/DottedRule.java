@@ -53,6 +53,19 @@ public class DottedRule {
         this.startPosition = startPosition;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof DottedRule))
+            return false;
+        if (obj == this)
+            return true;
+
+        DottedRule other = (DottedRule) obj;
+        return (this.rule.equals(other) &&
+                this.getDotPosition() == other.getDotPosition() &&
+                this.getStartPosition() == other.getStartPosition());
+    }
+
     public DottedRule next;
     public DottedRule previous;
     private int startPosition;
