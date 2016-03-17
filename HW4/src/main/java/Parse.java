@@ -33,6 +33,7 @@ public class Parse {
         br = new BufferedReader(new FileReader(grFile));
         try {
             String line = br.readLine();
+
             while (line != null) {
                 if (!line.equals("")) {
                     String[] splits = line.split("\t");
@@ -64,8 +65,8 @@ public class Parse {
         Earley e = new Earley();
         e.setRules(p.grammars);
         e.parse(p.sentences);
-
         //test IO
+
 //        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {
 //
 //            List<Rule> tmp = entry.getValue();
