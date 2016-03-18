@@ -68,6 +68,8 @@ public class DottedRule {
 
     public DottedRule next;       //next dottedRule in the same column
     public DottedRule previous;   //parsed from previous dottedRule
+    public DottedRule previousColumn;   // Second backpointer to track where the attached rule
+                                        // is from (which entry in the previous column)
     private int startPosition;
     private int dotPosition;
     private Rule rule;

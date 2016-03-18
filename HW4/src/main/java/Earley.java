@@ -10,6 +10,7 @@ public class Earley {
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
+    private DottedRule previouslyAttached;
 
     public Earley() {
         this.check = new HashMap<String, List<DottedRule>>();
@@ -17,6 +18,8 @@ public class Earley {
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
         this.dottedRulePos = new HashMap<String, DottedRule>();
+
+        this.previouslyAttached = null;
     }
 
     public void setRules(Map<String, List<Rule>> rules) {
@@ -87,11 +90,6 @@ public class Earley {
                 if (curr.getWeight() < bestScore) {
                     bestParse = curr;
                     bestScore = curr.getWeight();
-//                    DottedRule temp = curr;
-//                    while (temp != null) {
-//                        System.out.print(temp.getRule().getLhs() + " -> ");
-//                    }
-//                    System.out.println();
                 }
             }
             curr = curr.next;
@@ -100,19 +98,12 @@ public class Earley {
         if (bestParse == null) {
             return "None";
         } else {
+            printEntry(bestParse);
+
+            System.out.println();
             System.out.println("best weight:" + Double.toString(bestScore));
             return "";
         }
-//        if ( bestScore >= Double.MAX_VALUE ) {
-//            System.out.println("NONE");
-//            return "";
-//        }
-//        for (int i = 0; i < sen.length; i++) {
-//            System.out.print(sen[i] + ' ');
-//        }
-//        System.out.println( "best weight:" + Double.toString(bestScore));
-//
-//        return "";
 
     }
 
@@ -136,7 +127,6 @@ public class Earley {
         }
         return false;
     }
-
 
     private void predict(int colNum, DottedRule dottedRule) {
         // the name of lhs for prediciton, which is the rhs pointed by the dotPosition
@@ -162,20 +152,6 @@ public class Earley {
 
             check.put(checkKey, dottedPredictResult);
 
-        } else {
-            boolean updated = false;
-            for (Rule rule : predictResult) {
-
-                DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
-//                next.previous = dottedRule;
-                dottedPredictResult.add(next);
-                if (replaceDottedRule(next, colNum)) {
-                    updated = true;
-                }
-            }
-            if (updated) {
-                check.put(checkKey, dottedPredictResult);
-            }
         }
     }
 
@@ -194,6 +170,9 @@ public class Earley {
         if (!terminal.equals(words[colNum])) return;
 
         DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), ++dotPosition, rule, dottedRule.getWeight());
+
+        // Add second backpoint
+        scannedRule.previousColumn = dottedRule;
 
         addToChart(scannedRule, colNum + 1);
     }
@@ -216,13 +195,18 @@ public class Earley {
                         rule,
                         head.getWeight() + dottedRule.getWeight());
                 String attachCheckKey = genAttachCheckKey(colNum, newDottedRule);
+                // Track the previous column
+                newDottedRule.previousColumn = head;
+
                 if (!check.containsKey(attachCheckKey)) {
-                    newDottedRule.previous = head;
+
+                    newDottedRule.previous = dottedRule;
+
                     addToChart(newDottedRule, colNum);
                     check.put(attachCheckKey, null);
                 } else {
                     //replace if the weight is better
-                    replaceDottedRule(newDottedRule, colNum);
+                        replaceDottedRule(newDottedRule, colNum);
                 }
             }
             head = head.next;
@@ -239,7 +223,10 @@ public class Earley {
             DottedRule curr = dottedRulePos.get(key);
             if (dottedRule.getWeight() < curr.getWeight()) {
                 curr.setWeight(dottedRule.getWeight());
-                curr.previous = dottedRule.previous;
+
+                previouslyAttached = curr;
+                curr.next = null;
+
                 return true;
             }
         } else {
@@ -265,12 +252,56 @@ public class Earley {
 //        printChart(colNum);
     }
 
+    private void printEntry(DottedRule bestParse) {
+        int numOfBracket = 0;
+        while (bestParse != null) {
+
+            if (bestParse.getDotPosition() > 1) {
+
+                // Test if the rule before dot is terminal
+                String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
+
+                if (!rules.containsKey(ruleBeforeDot)) {
+                    printEntry(bestParse.previousColumn.previous);
+                    System.out.print(" " + ruleBeforeDot + " ");
+
+
+                }
+                else {
+                    System.out.print("(" + bestParse.getRule().getLhs() + " ");
+                    numOfBracket++;
+                    printEntry(bestParse.previousColumn);
+                }
+
+            }
+            else {
+                System.out.print("(" + bestParse.getRule().getLhs() + " ");
+
+                //TODO: could it be more than 1 terminals correspond to one particular rule?
+                if (!rules.containsKey(bestParse.getRule().getRhs()[0])) {
+                    System.out.print(bestParse.getRule().getRhs()[0]);
+                }
+                numOfBracket++;
+            }
+            bestParse = bestParse.previous;
+        }
+
+        for (int i = 0; i < numOfBracket; i++) {
+            System.out.print(")");
+        }
+
+    }
+
     private void printChart(int colNum) {
         for (int i = colNum; i < chartHead.size(); i++) {
             System.out.println("-----" + Integer.toString(i) + "th column -----");
             DottedRule h = chartHead.get(i);
             while (h != null) {
                 System.out.println(h.toString());
+                if (h.previousColumn != null) {
+                    System.out.print("  previous column is " + h.previousColumn.toString());
+                    System.out.println();
+                }
                 h = h.next;
             }
         }
