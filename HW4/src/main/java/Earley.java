@@ -10,7 +10,6 @@ public class Earley {
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
-    private DottedRule previouslyAttached;
 
     public Earley() {
         this.check = new HashMap<String, List<DottedRule>>();
@@ -19,7 +18,6 @@ public class Earley {
         this.rules = null;
         this.dottedRulePos = new HashMap<String, DottedRule>();
 
-        this.previouslyAttached = null;
     }
 
     public void setRules(Map<String, List<Rule>> rules) {
@@ -223,9 +221,7 @@ public class Earley {
             DottedRule curr = dottedRulePos.get(key);
             if (dottedRule.getWeight() < curr.getWeight()) {
                 curr.setWeight(dottedRule.getWeight());
-
-                previouslyAttached = curr;
-                curr.next = null;
+                curr.previous = dottedRule.previous;
 
                 return true;
             }
@@ -261,10 +257,16 @@ public class Earley {
                 // Test if the rule before dot is terminal
                 String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
 
+                // TODO:
                 if (!rules.containsKey(ruleBeforeDot)) {
-                    printEntry(bestParse.previousColumn.previous);
-                    System.out.print(" " + ruleBeforeDot + " ");
+                    if (bestParse.previousColumn.previous == null) {
+                        printEntry(bestParse.previousColumn);
+                    }
+                    else {
+                        printEntry(bestParse.previousColumn.previous);
+                    }
 
+                    System.out.print(" " + ruleBeforeDot + " ");
 
                 }
                 else {
