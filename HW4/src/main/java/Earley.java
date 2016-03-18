@@ -93,10 +93,14 @@ public class Earley {
             curr = curr.next;
         }
 
+//        for (int i = 0; i < chartHead.size(); i++) {
+//            printChart(i);
+//        }
+
         if (bestParse == null) {
             return "None";
         } else {
-            printEntry(bestParse);
+            printEntry(bestParse, true);
 
             System.out.println();
             System.out.println("best weight:" + Double.toString(bestScore));
@@ -248,50 +252,82 @@ public class Earley {
 //        printChart(colNum);
     }
 
-    private void printEntry(DottedRule bestParse) {
-        int numOfBracket = 0;
-        while (bestParse != null) {
+//    private void printEntry(DottedRule bestParse) {
+//        int numOfBracket = 0;
+//        while (bestParse != null) {
+//
+//            if (bestParse.getDotPosition() > 1) {
+//
+//                // Test if the rule before dot is terminal
+//                StringBuilder sb = new StringBuilder();
+//                for (int i = bestParse.getDotPosition() - 1; i >=0; i--) {
+////                    String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
+//                    String ruleBeforeDot = bestParse.getRule().getRhs()[i];
+//                    if (!rules.containsKey(ruleBeforeDot)) {
+//                        sb.insert(0, ruleBeforeDot);
+//                    } else {
+//                        break;
+//                    }
+//                }
+//
+//                // TODO:
+////                if (!rules.containsKey(ruleBeforeDot)) {
+//                if (sb.length() > 0) {
+//                    if (bestParse.previousColumn.previous == null) {
+//                        printEntry(bestParse.previousColumn);
+//                    }
+//                    else {
+//                        printEntry(bestParse.previousColumn.previous);
+//                    }
+//
+////                    System.out.print(" " + ruleBeforeDot + " ");
+//                    System.out.print(" " + sb.toString() + " ");
+//                }
+//                else {
+//
+//                    System.out.print("(" + bestParse.getRule().getLhs() + " ");
+//                    numOfBracket++;
+//                    printEntry(bestParse.previousColumn);
+////                    System.out.print(" " + sb.toString() + " ");
+//
+//                }
+//
+//            }
+//            else {
+//                System.out.print("(" + bestParse.getRule().getLhs() + " ");
+//
+//                //TODO: could it be more than 1 terminals correspond to one particular rule?
+//                if (!rules.containsKey(bestParse.getRule().getRhs()[0])) {
+//                    System.out.print(bestParse.getRule().getRhs()[0]);
+//                }
+//                numOfBracket++;
+//            }
+//            bestParse = bestParse.previous;
+//        }
+//
+//        for (int i = 0; i < numOfBracket; i++) {
+//            System.out.print(")");
+//        }
+//    }
 
-            if (bestParse.getDotPosition() > 1) {
-
-                // Test if the rule before dot is terminal
-                String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
-
-                // TODO:
-                if (!rules.containsKey(ruleBeforeDot)) {
-                    if (bestParse.previousColumn.previous == null) {
-                        printEntry(bestParse.previousColumn);
-                    }
-                    else {
-                        printEntry(bestParse.previousColumn.previous);
-                    }
-
-                    System.out.print(" " + ruleBeforeDot + " ");
-
+    private void printEntry(DottedRule bestParse, boolean start) {
+        if (bestParse.previousColumn == null) {
+            System.out.print("(" + bestParse.getRule().getLhs() + " ");
+        } else {
+            printEntry(bestParse.previousColumn, false);
+            if (bestParse.previous == null) {
+                int i = bestParse.getDotPosition() - 1;
+                if (i >= 0) {
+                    System.out.print(" " + bestParse.getRule().getRhs()[i] + " ");
                 }
-                else {
-                    System.out.print("(" + bestParse.getRule().getLhs() + " ");
-                    numOfBracket++;
-                    printEntry(bestParse.previousColumn);
-                }
-
+            } else {
+                printEntry(bestParse.previous, false);
+                System.out.print(")");
             }
-            else {
-                System.out.print("(" + bestParse.getRule().getLhs() + " ");
-
-                //TODO: could it be more than 1 terminals correspond to one particular rule?
-                if (!rules.containsKey(bestParse.getRule().getRhs()[0])) {
-                    System.out.print(bestParse.getRule().getRhs()[0]);
-                }
-                numOfBracket++;
-            }
-            bestParse = bestParse.previous;
         }
-
-        for (int i = 0; i < numOfBracket; i++) {
-            System.out.print(")");
+        if (start) {
+            System.out.println(")");
         }
-
     }
 
     private void printChart(int colNum) {
@@ -302,6 +338,10 @@ public class Earley {
                 System.out.println(h.toString());
                 if (h.previousColumn != null) {
                     System.out.print("  previous column is " + h.previousColumn.toString());
+                    if (h.previous != null) {
+                        System.out.println();
+                        System.out.print("  previous is " + h.previous.toString());
+                    }
                     System.out.println();
                 }
                 h = h.next;
