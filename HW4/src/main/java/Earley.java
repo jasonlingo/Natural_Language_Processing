@@ -93,6 +93,10 @@ public class Earley {
             curr = curr.next;
         }
 
+//        for (int i = 0; i < chartHead.size(); i++) {
+//            printChart(i);
+//        }
+
         if (bestParse == null) {
             return "None";
         } else {
@@ -204,7 +208,7 @@ public class Earley {
                     check.put(attachCheckKey, null);
                 } else {
                     //replace if the weight is better
-                        replaceDottedRule(newDottedRule, colNum);
+                    replaceDottedRule(newDottedRule, colNum);
                 }
             }
             head = head.next;
@@ -255,24 +259,45 @@ public class Earley {
             if (bestParse.getDotPosition() > 1) {
 
                 // Test if the rule before dot is terminal
-                String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
+                StringBuilder sb = new StringBuilder();
+                int i = bestParse.getDotPosition() - 1;
+                int terminalCount = 0;
+                DottedRule temp = bestParse;
+                for (; i >=0; i--) {
+//                    String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
+                    String ruleBeforeDot = bestParse.getRule().getRhs()[i];
+                    if (!rules.containsKey(ruleBeforeDot)) {
+//                        bestParse = bestParse.previousColumn;
+                        sb.insert(0, ruleBeforeDot + " ");
+                        terminalCount++;
+                    } else {
+                        break;
+                    }
+                }
 
-                // TODO:
-                if (!rules.containsKey(ruleBeforeDot)) {
-                    if (bestParse.previousColumn.previous == null) {
-                        printEntry(bestParse.previousColumn);
+                if (terminalCount > 0) {
+                    while (terminalCount > 0) {
+                        temp = temp.previousColumn;
+                        terminalCount--;
+                    }
+                    if (rules.containsKey(temp.getRule().getRhs()[temp.getDotPosition() - 1])) {
+                        printEntry(temp.previous);
+                        printEntry(temp.previousColumn);
                     }
                     else {
-                        printEntry(bestParse.previousColumn.previous);
+                        printEntry(temp);
+                        System.out.print("caonima");
                     }
 
-                    System.out.print(" " + ruleBeforeDot + " ");
 
+                    System.out.print(" " + sb.toString() + " ");
                 }
                 else {
+
                     System.out.print("(" + bestParse.getRule().getLhs() + " ");
                     numOfBracket++;
                     printEntry(bestParse.previousColumn);
+
                 }
 
             }
@@ -294,6 +319,17 @@ public class Earley {
 
     }
 
+    private void printEntry2(DottedRule bestParse) {
+        if (bestParse == null){
+            return;
+        }
+
+        if (bestParse.previousColumn != null) {
+            printEntry2(bestParse.previousColumn);
+        }
+
+    }
+
     private void printChart(int colNum) {
         for (int i = colNum; i < chartHead.size(); i++) {
             System.out.println("-----" + Integer.toString(i) + "th column -----");
@@ -302,6 +338,10 @@ public class Earley {
                 System.out.println(h.toString());
                 if (h.previousColumn != null) {
                     System.out.print("  previous column is " + h.previousColumn.toString());
+                    if (h.previous != null) {
+                        System.out.println();
+                        System.out.print("  previous is " + h.previous.toString());
+                    }
                     System.out.println();
                 }
                 h = h.next;
