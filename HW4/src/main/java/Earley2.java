@@ -3,7 +3,7 @@ import java.util.*;
 /**
  * Created by Jason on 3/13/16.
  */
-public class Earley {
+public class Earley2 {
 
     private Map<String, List<DottedRule>> check;  //for checking duplicated rule in one column
     private Map<String, List<Rule>> rules;
@@ -11,7 +11,9 @@ public class Earley {
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
 
-    public Earley() {
+    private Map<String, List<Rule>> tempRules;
+
+    public Earley2() {
         this.check = new HashMap<String, List<DottedRule>>();
         this.chartHead = new ArrayList<DottedRule>();
         this.chartTail = new ArrayList<DottedRule>();
@@ -29,8 +31,14 @@ public class Earley {
             System.out.println("No grammar!");
         }
 
+        tempRules = new HashMap<String, List<Rule>>(rules);
         for (String orgSen : sentences) {
             String[] sen = orgSen.split(" ");
+
+
+            rules = new HashMap<String, List<Rule>>(tempRules);
+            deleteUnusedTerminals(sen, rules);
+
             long startTime = System.nanoTime();
             System.out.println(decode(sen));
             long endTime = System.nanoTime();
@@ -300,6 +308,24 @@ public class Earley {
                 }
                 h = h.next;
             }
+        }
+    }
+
+    public void deleteUnusedTerminals(String[] sen, Map<String, List<Rule>> rules) {
+        List<String> wordList = Arrays.asList(sen);
+
+        for(Map.Entry<String, List<Rule>> entry : rules.entrySet()) {
+            List<Rule> ruleList = new ArrayList<Rule>(entry.getValue());
+            for (int i = 0; i < ruleList.size(); i++) {
+                Rule rule = ruleList.get(i);
+                if (rule.getRhs().length == 1 && !rules.containsKey(rule.getRhs()[0])) {
+                    if (!wordList.contains(rule.getRhs()[0])) {
+                        ruleList.remove(i);
+                        i--;
+                    }
+                }
+            }
+            rules.put(entry.getKey(), ruleList);
         }
     }
 

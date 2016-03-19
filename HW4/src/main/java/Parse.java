@@ -57,14 +57,14 @@ public class Parse {
         }finally {
             br.close();
         }
-
     }
 
     public static  void main(String[] args) throws IOException {
         Parse p = new Parse(args[0], args[1]);
-        Earley e = new Earley();
+        Earley2 e = new Earley2();
         e.setRules(p.grammars);
         e.parse(p.sentences);
+
         //test IO
 
 //        for (Map.Entry<String, List<Rule>> entry : p.grammars.entrySet()) {
