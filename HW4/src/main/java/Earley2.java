@@ -3,22 +3,22 @@ import java.util.*;
 /**
  * Created by Jason on 3/13/16.
  */
-public class Earley {
+public class Earley2 {
 
     private Map<String, List<DottedRule>> check;  //for checking duplicated rule in one column
     private Map<String, List<Rule>> rules;
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
-//    private List<Boolean> processed;
+    private Map<String, List<DottedRule>> attachMap;
 
-    public Earley() {
+    public Earley2() {
         this.check = new HashMap<String, List<DottedRule>>();
         this.chartHead = new ArrayList<DottedRule>();
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
         this.dottedRulePos = new HashMap<String, DottedRule>();
-//        this.processed = new ArrayList<Boolean>();
+        this.attachMap = new HashMap<String, List<DottedRule>>();
 
     }
 
@@ -40,11 +40,12 @@ public class Earley {
     private String decode(String[] sen) {
         System.out.println(Arrays.toString(sen));
 
+        // initialize data structures used to record decode process
         chartHead.clear();
         chartTail.clear();
         check.clear();
         dottedRulePos.clear();
-//        processed.clear();
+
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -65,6 +66,7 @@ public class Earley {
             if (i >= chartHead.size()) {
                 return "None";
             }
+            attachMap.clear();
             DottedRule head = chartHead.get(i);
             while (head != null) {
                 if (isComplete(head)) {
@@ -207,9 +209,22 @@ public class Earley {
                 if (!check.containsKey(attachCheckKey)) {
                     addToChart(newDottedRule, colNum);
                     check.put(attachCheckKey, null);
+
+                    String parentKey = dottedRule.toString();
+                    if (attachMap.containsKey(parentKey)){
+                        List<DottedRule> child = attachMap.get(parentKey);
+                        child.add(newDottedRule);
+                    } else {
+                        List<DottedRule> child = new ArrayList<DottedRule>();
+                        child.add(newDottedRule);
+                        attachMap.put(parentKey, child);
+                    }
                 } else {
                     //replace if the weight is better
-                    replaceDottedRule(newDottedRule, colNum);
+                    String replaced = replaceDottedRule(newDottedRule, colNum);
+                    if (replaced.length() > 0) {
+                        updateAttach(replaced);
+                    }
                 }
             }
             head = head.next;
@@ -219,7 +234,7 @@ public class Earley {
     /*
      Check the given DottedRule is better than the same rule in the specified column.
      */
-    private boolean replaceDottedRule(DottedRule dottedRule, int colNum) {
+    private String replaceDottedRule(DottedRule dottedRule, int colNum) {
         String key = String.valueOf(colNum) + "_" + dottedRule.toString();
         if (dottedRulePos.containsKey(key)) {
             DottedRule curr = dottedRulePos.get(key);
@@ -227,12 +242,26 @@ public class Earley {
                 curr.setWeight(dottedRule.getWeight());
                 curr.previous = dottedRule.previous;
                 curr.previousColumn = dottedRule.previousColumn;
-                return true;
+                return curr.toString();
             }
         } else {
             System.out.println("not found dottedRule for replacing");
         }
-        return false;
+        return "";
+    }
+
+    private void updateAttach(String parentKey) {
+
+        if (!attachMap.containsKey(parentKey)) {
+            return;
+        }
+
+        for (DottedRule dottedRule : attachMap.get(parentKey)) {
+            double org = dottedRule.getWeight();
+            double neww = dottedRule.previous.getWeight() + dottedRule.previousColumn.getWeight();
+            dottedRule.setWeight(dottedRule.previous.getWeight() + dottedRule.previousColumn.getWeight());
+            updateAttach(dottedRule.toString());
+        }
     }
 
     /*
