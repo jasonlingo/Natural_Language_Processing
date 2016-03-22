@@ -61,7 +61,7 @@ public class Parse {
 
     public static  void main(String[] args) throws IOException {
         Parse p = new Parse(args[0], args[1]);
-        Earley2 e = new Earley2();
+        Earley3 e = new Earley3();
         e.setRules(p.grammars);
         e.parse(p.sentences);
 
