@@ -1,0 +1,9 @@
+Type
+    java Parse wallstreet.gr wallstreet.sen
+to run the first version of the parser (without any speed-up)
+
+To run the speed-up version, type
+    java Parse2 wallstreet.gr wallstreet.sen
+
+To run the parser that tries to fix the bug in problem 2, type:
+    java Parse3 wallstreet.gr wallstreet.sen

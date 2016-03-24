@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class Parse {
+public class Parse2 {
     HashMap<String, List<Rule>> grammars = new HashMap<String, List<Rule>> ();
+//    HashMap<String, List<DottedRule>> entries = new HashMap<String, List<DottedRule>>();
     List<String> sentences = new ArrayList<String>();
 
 
-    public Parse(String grFile, String senFile) throws IOException {
+    public Parse2(String grFile, String senFile) throws IOException {
         //Initialize input sentence as an array
         BufferedReader br = new BufferedReader(new FileReader(senFile));
         try {
@@ -59,8 +60,8 @@ public class Parse {
     }
 
     public static  void main(String[] args) throws IOException {
-        Parse p = new Parse(args[0], args[1]);
-        Earley e = new Earley();
+        Parse2 p = new Parse2(args[0], args[1]);
+        Earley2 e = new Earley2();
         e.setRules(p.grammars);
         e.parse(p.sentences);
 

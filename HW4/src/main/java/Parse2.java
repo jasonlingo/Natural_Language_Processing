@@ -8,9 +8,6 @@ import java.util.List;
 public class Parse2 {
     HashMap<String, List<Rule>> grammars = new HashMap<String, List<Rule>> ();
     List<String> sentences = new ArrayList<String>();
-
-
-
     public Parse2(String grFile, String senFile) throws IOException {
         //Initialize input sentence as an array
         BufferedReader br = new BufferedReader(new FileReader(senFile));
@@ -61,9 +58,9 @@ public class Parse2 {
 
     public static  void main(String[] args) throws IOException {
         Parse p = new Parse(args[0], args[1]);
-
         Earley2 e = new Earley2();
         e.setRules(p.grammars);
         e.parse(p.sentences);
+
     }
 }
