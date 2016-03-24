@@ -31,13 +31,11 @@ public class Earley6 {
     }
 
     public void parse(List<String> sentences) {
-//        if (this.rules == null) {
-//            System.out.println("No grammar!");
-//        }
-
+        // for speed up purpose, delete unused terminal
         tempRules = new HashMap<String, List<Rule>>(rules);
+
         for (String orgSen : sentences) {
-            System.out.println(orgSen);
+//            System.out.println(orgSen);
             String[] sen = orgSen.split(" ");
 
             // initialization
@@ -50,10 +48,10 @@ public class Earley6 {
             rules = new HashMap<String, List<Rule>>(tempRules);
             deleteUnusedTerminals(sen, rules);
 
-            long startTime = System.nanoTime();
+//            long startTime = System.nanoTime();
             System.out.println(decode(sen));
-            long endTime = System.nanoTime();
-            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
+//            long endTime = System.nanoTime();
+//            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
 
         }
     }
@@ -63,7 +61,6 @@ public class Earley6 {
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
-//        List<DottedRule> rootList = new ArrayList<DottedRule>();
 
         DottedRule dummy = new DottedRule(0, 0, null, 0);
         DottedRule curr = dummy;
@@ -76,7 +73,6 @@ public class Earley6 {
         chartTail.add(curr);
         dottedRulePos.put(genAttachCheckKey(0, curr), curr);
 
-
         for (int i = 0; i <= sen.length; i++) {
             if (i >= chartHead.size()) {
                 return "None";
@@ -84,7 +80,6 @@ public class Earley6 {
             DottedRule head = chartHead.get(i);
             attachMap.clear();
             dottedRulePos.clear();
-//            System.out.print(i);
             while (head != null) {
                 if (isComplete(head)) {
                     attach(head, i);
@@ -122,8 +117,9 @@ public class Earley6 {
             printEntry(bestParse, true);
             System.out.println(sb.toString().trim());
 
-            System.out.println();
-            System.out.println("best weight:" + String.valueOf(bestScore));
+//            System.out.println();
+//            System.out.println("best weight:" + String.valueOf(bestScore));
+            System.out.println(String.valueOf(bestScore));
             return "";
         }
     }
@@ -156,7 +152,6 @@ public class Earley6 {
         // unique key for each entry in the Early chart
         String checkKey = genCheckKey(colNum, predictKey);
 
-
         // Check if the predicted rule is already in the column
         if (!check.contains(checkKey)) {
 
@@ -173,7 +168,6 @@ public class Earley6 {
             }
 
             check.add(checkKey);
-
         }
     }
 
@@ -192,6 +186,9 @@ public class Earley6 {
         if (!terminal.equals(words[colNum])) return;
 
         DottedRule scannedRule = new DottedRule(dottedRule.getStartPosition(), ++dotPosition, rule, dottedRule.getWeight());
+
+        String scanKey = genScanKey(dottedRule);
+        dottedRulePos.put(scanKey, scannedRule);
 
         // Add second backpoint
         scannedRule.previousColumn = dottedRule;
@@ -217,16 +214,19 @@ public class Earley6 {
                         rule,
                         head.getWeight() + dottedRule.getWeight());
                 String attachCheckKey = genAttachCheckKey(colNum, newDottedRule);
+
                 // Track the previous column
                 newDottedRule.previousColumn = head;
                 newDottedRule.previous = dottedRule;
+
+                // Keep track of previous and previousColumn pair for updating weights
                 String preColKey = genPreColKey(colNum, dottedRule, newDottedRule);
                 attachMap.put(preColKey, head);
+
                 if (!check.contains(attachCheckKey)) {
                     addToChart(newDottedRule, colNum);
                     check.add(attachCheckKey);
                     dottedRule.childCnt++;
-//                    dottedRulePos.put(String.valueOf(colNum) + "_" + dottedRule.toString() + "_child_" + String.valueOf(dottedRule.childCnt), newDottedRule);
                     dottedRulePos.put(genChildKey(colNum, dottedRule, dottedRule.childCnt), newDottedRule);
                 } else {
                     //replace if the weight is better
@@ -247,12 +247,15 @@ public class Earley6 {
         if (dottedRulePos.containsKey(key)) {
             DottedRule curr = dottedRulePos.get(key);
 
+            // keep track of the child
             org.childCnt++;
-//            dottedRulePos.put(String.valueOf(colNum) + "_" + org.toString() + "_child_" + String.valueOf(org.childCnt), curr);
             dottedRulePos.put(genChildKey(colNum, org, org.childCnt), curr);
+
             if (dottedRule.getWeight() < curr.getWeight()) {
                 curr.setWeight(dottedRule.getWeight());
                 updateChildWeight(colNum, curr);
+                updateScanRuleWeight(curr);
+
                 curr.previous = dottedRule.previous;
                 curr.previousColumn = dottedRule.previousColumn;
                 return true;
@@ -264,10 +267,17 @@ public class Earley6 {
         return false;
     }
 
+    private void updateScanRuleWeight(DottedRule previousCol) {
+        String scanKey = previousCol.toString();
+        DottedRule scanRule = dottedRulePos.get(scanKey);
+        if (scanRule != null) {
+            scanRule.setWeight(previousCol.getWeight());
+        }
+
+    }
+
     private boolean updateChildWeight(int colNum, DottedRule previous) {
-//        boolean update = true;
         for (int i = 1; i <= previous.childCnt; i++) {
-//            String childKey = String.valueOf(colNum) + "_" + previous.toString() + "_child_" + String.valueOf(i);
             String childKey = genChildKey(colNum, previous, i);
             DottedRule child = dottedRulePos.get(childKey);
             String preColKey = genPreColKey(colNum, previous, child);
@@ -278,6 +288,7 @@ public class Earley6 {
                 child.setWeight(newWeight);
                 child.previousColumn = preCol;
                 child.previous = previous;
+                updateScanRuleWeight(child);
                 if (child.childCnt > 0) {
                     updateChildWeight(colNum, child);
                 }
@@ -372,19 +383,20 @@ public class Earley6 {
     }
 
     private String genAttachCheckKey(int colNum, DottedRule dottedRule) {
-//        return Integer.toString(colNum) + "_" +
-//                Integer.toString(dottedRule.getStartPosition()) + "_" +
-//                Integer.toString(dottedRule.getDotPosition()) + "_" +
-//                dottedRule.getRule().getLhs() + "_" +
-//                Arrays.toString(dottedRule.getRule().getRhs());
         return String.valueOf(colNum) + "_" + dottedRule.toString();
     }
 
     private String genPreColKey(int colNum, DottedRule dottedRule, DottedRule newDottedRule) {
-        return String.valueOf(colNum) + "_" + dottedRule.toString() + "_" + newDottedRule.toString();
+//        return String.valueOf(colNum) + "_" + dottedRule.toString() + "_" + newDottedRule.toString();
+        return dottedRule.toString() + "_" + newDottedRule.toString();
     }
 
     private String genChildKey(int colNum, DottedRule previous, int childNum) {
-        return String.valueOf(colNum) + "_" + previous.toString() + "_c" + String.valueOf(childNum);
+//        return String.valueOf(colNum) + "_" + previous.toString() + "_c" + String.valueOf(childNum);
+        return previous.toString() + "_c" + String.valueOf(childNum);
+    }
+
+    private String genScanKey(DottedRule previousCol) {
+        return previousCol.toString();
     }
 }
