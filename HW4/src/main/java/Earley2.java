@@ -5,7 +5,7 @@ import java.util.*;
  */
 public class Earley2 {
 
-    private Map<String, List<DottedRule>> check;  //for checking duplicated rule in one column
+    private Map<String, List<DottedRule>> checkDuplicate;  //for checking duplicated rule in one column
     private Map<String, List<Rule>> rules;
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
@@ -14,7 +14,7 @@ public class Earley2 {
     private Map<String, List<Rule>> tempRules;
 
     public Earley2() {
-        this.check = new HashMap<String, List<DottedRule>>();
+        this.checkDuplicate = new HashMap<String, List<DottedRule>>();
         this.chartHead = new ArrayList<DottedRule>();
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
@@ -32,6 +32,7 @@ public class Earley2 {
         }
 
         tempRules = new HashMap<String, List<Rule>>(rules);
+        long totalStartTime = System.nanoTime();
         for (String orgSen : sentences) {
             String[] sen = orgSen.split(" ");
 
@@ -45,6 +46,8 @@ public class Earley2 {
             System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
 
         }
+        long totalEndTime = System.nanoTime();
+        System.out.println("Total Running time: " + (totalEndTime - totalStartTime)/1000000 + " ms");
     }
 
     private String decode(String[] sen) {
@@ -52,7 +55,7 @@ public class Earley2 {
 
         chartHead.clear();
         chartTail.clear();
-        check.clear();
+        checkDuplicate.clear();
         dottedRulePos.clear();
 
         // initialize root dottedRule
@@ -147,7 +150,7 @@ public class Earley2 {
 
 
         // Check if the predicted rule is already in the column
-        if (!check.containsKey(checkKey)) {
+        if (!checkDuplicate.containsKey(checkKey)) {
 
             List<Rule> predictResult = rules.get(predictKey);
             List<DottedRule> dottedPredictResult = new ArrayList<DottedRule>();
@@ -161,7 +164,7 @@ public class Earley2 {
                 dottedPredictResult.add(next);
             }
 
-            check.put(checkKey, dottedPredictResult);
+            checkDuplicate.put(checkKey, dottedPredictResult);
 
         }
     }
@@ -208,10 +211,10 @@ public class Earley2 {
                 // Track the previous column
                 newDottedRule.previousColumn = head;
                 newDottedRule.previous = dottedRule;
-                if (!check.containsKey(attachCheckKey)) {
+                if (!checkDuplicate.containsKey(attachCheckKey)) {
 
                     addToChart(newDottedRule, colNum);
-                    check.put(attachCheckKey, null);
+                    checkDuplicate.put(attachCheckKey, null);
                 } else {
                     //replace if the weight is better
                     replaceDottedRule(newDottedRule, colNum);
@@ -263,13 +266,13 @@ public class Earley2 {
 
     private void printEntry(DottedRule bestParse, boolean start) {
         if (bestParse.previousColumn == null) {
-            System.out.print("(" + bestParse.getRule().getLhs() + " ");
+            System.out.print(" (" + bestParse.getRule().getLhs() + " ");
         } else {
             printEntry(bestParse.previousColumn, false);
             if (bestParse.previous == null) {
                 int i = bestParse.getDotPosition() - 1;
                 if (i >= 0) {
-                    System.out.print(" " + bestParse.getRule().getRhs()[i] + " ");
+                    System.out.print(bestParse.getRule().getRhs()[i]);
                 }
             } else {
                 printEntry(bestParse.previous, false);

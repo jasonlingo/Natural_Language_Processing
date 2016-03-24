@@ -7,6 +7,12 @@ public class DottedRule {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         int dotPos = getDotPosition();
+
+        sb.append(String.valueOf(getStartPosition()));
+        sb.append(" ");
+        sb.append(getRule().getLhs());
+        sb.append(" ");
+
         String[] rhs = getRule().getRhs();
         for(int i = 0; i < rhs.length; i++) {
             if (i == dotPos) {
@@ -18,7 +24,13 @@ public class DottedRule {
         if (dotPos >= rhs.length) {
             sb.append(".");
         }
-        return Integer.toString(getStartPosition()) + " " + getRule().getLhs() + " " + sb.toString();
+//
+//        sb.insert(0, " ");
+//        sb.insert(0, getRule().getLhs());
+//        sb.insert(0, " ");
+//        sb.insert(0,Integer.toString(getDotPosition()));
+        return sb.toString();
+//        return String.valueOf(getStartPosition()) + " " + getRule().getLhs() + " " + sb.toString();
     }
 
     public double getWeight() {
