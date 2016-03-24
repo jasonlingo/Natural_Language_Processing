@@ -258,11 +258,9 @@ public class Earley5 {
 
     private boolean updateChildWeight(int colNum, DottedRule previous, double preWeight) {
 //        boolean update = true;
-        List<DottedRule> children = new ArrayList<DottedRule>();
         for (int i = 1; i <= previous.childCnt; i++) {
             String childKey = String.valueOf(colNum) + "_" + previous.toString() + "_child_" + String.valueOf(i);
             DottedRule child = dottedRulePos.get(childKey);
-            children.add(child);
             double newWeight = child.previousColumn.getWeight() + preWeight;
             if (newWeight < child.getWeight()) {
                 child.setWeight(newWeight);
