@@ -1,0 +1,57 @@
+John is happy .
+(ROOT (S (NP (NPR (NNP John))) (VP (VBZ is) (ADJP-PRD (JJ happy))) (PUNC. .)))
+
+best weight:34.23009829121644
+
+Running time: 147 ms
+The very biggest companies are not likely to go under .
+(ROOT (S (NP (DT The) (ADJP (RB very) (JJS biggest)) (NNS companies)) (VP (VBP are) (RB not) (ADVP (RB likely)) (VP (TO to) (VP (VB go) (PP (IN under))))) (PUNC. .)))
+
+best weight:104.9127063447996
+
+Running time: 3171 ms
+The market is wondering what General Motors has done .
+(ROOT (S (NP (DT The) (NN market)) (VP (VBZ is) (VP (VBG wondering) (SBAR (WHNP (WP what)) (S (NP (NPRS (NNP General) (NNPS Motors))) (VP (VBZ has) (VP (VBN done))))))) (PUNC. .)))
+
+best weight:94.58911666062929
+
+Running time: 1232 ms
+In recent years , pay surged as demand rose while workers left for easier jobs .
+(ROOT (S (PP (IN In) (NP (JJ recent) (NNS years))) , (NP (NN pay)) (VP (VBD surged) (SBAR (IN as) (S (NP (NN demand)) (VP (VBD rose) (SBAR (IN while) (S (NP (NNS workers)) (VP (VBN left) (PP (IN for) (NP (JJR easier) (NNS jobs)))))))))) (PUNC. .)))
+
+best weight:161.82310999236503
+
+Running time: 17435 ms
+caught off guard , Ford Motor Co. had no choice except to follow suit with financing deals .
+(ROOT (S (S-ADV (VP (VBN caught) (PRT (RP off)) (NP (NN guard)))) , (NP (NPR (NNP Ford) (NNP Motor) (NNP Co.))) (VP (VBD had) (NP (DT no) (NN choice)) (PP (IN except) (S-NOM (VP (TO to) (VP (VB follow) (NP (NN suit)))))) (PP (IN with) (NP (NN financing) (NNS deals)))) (PUNC. .)))
+
+best weight:191.38739453307656
+
+Running time: 34945 ms
+data show that pay was flat for the third consecutive quarter after a rash of 4 % to 5 % annualized increases .
+(ROOT (S (NP (NNS data)) (VP (VBP show) (SBAR (WHNP (WDT that)) (S (VP (VB pay) (VP (VBD was) (ADJP-PRD (JJ flat) (PP (IN for) (NP (NP (DT the) (JJ third) (JJ consecutive) (NN quarter)) (PP (IN after) (NP (DT a) (NN rash)))))) (PP (IN of) (NP (QP (QP (CD 4)) (NN %) (PP (TO to) (NP (QP (CD 5)) (NN %)))) (JJ annualized) (NNS increases)))))))) (PUNC. .)))
+
+best weight:212.54870459790703
+
+Running time: 46531 ms
+
+running the combined companies , projected to have nearly 22 million subscribers by the time the deal is slated to close in a year , is likely to pose extraordinary management questions , according to Wall Street analysts .
+(ROOT (S (VP (VBG running) (S (NP (DT the) (JJ combined) (NNS companies)) , (S-ADV (VP (VBD projected) (VP (TO to) (VP (VBP have) (RB nearly) (NP-PRD (NP (QP (CD 22) (CD million)) (NNS subscribers)) (PP (IN by) (NP (DT the) (NN time))) (SBAR (S (NP (DT the) (NN deal)) (VP (VBZ is) (VP (VBN slated) (VP (TO to) (VP (VB close) (PP (IN in) (NP (DT a) (NN year)))))))))))))) , (VP (VBZ is) (RB likely) (VP (TO to) (VP (VB pose) (NP (JJ extraordinary) (NN management) (NNS questions)) , (S-ADV (VP (VBG according) (PP (TO to) (NP (NPR (NNP Wall) (NNP Street)) (NP (NNS analysts))))))))) (PUNC. .)))))
+
+best weight:350.5614874061691
+
+Running time: 349889 ms
+
+a senior intelligence official said the administration considered how strongly it was criticized for issuing a similar less than specific warning on Oct. 11 , then decided the information was too serious to keep under cover .
+(ROOT (S (NP (DT a) (JJ senior) (NN intelligence) (NN official)) (VP (VBD said) (SBAR (S (NP (DT the) (NN administration)) (VP (VBN considered) (S (SBAR-TMP (WHADVP (WRB how) (RB strongly)) (S (NP (PRP it)) (VP (VBD was) (VP (VBN criticized) (PP (IN for) (S-NOM (VP (VBG issuing) (NP (DT a) (JJ similar) (ADJP (ADVP (RBR less) (IN than)) (JJ specific)) (NN warning)) (PP (IN on) (NP (NPR (NNP Oct.)) (QP (CD 11))))))))))) , (NP (ADJP (RB then) (VBN decided)) (DT the) (NN information)) (VP (VBD was) (RB too) (ADJP-PRD (JJ serious) (S (VP (TO to) (VP (VB keep) (PP (IN under) (S-NOM (VP (VB cover))))))))) (PUNC. .))))))))
+
+best weight:385.78365809294445
+
+`` It 's very real , otherwise we would n't be doing it , '' this official said .
+(ROOT (S (PUNC`` ``) (S-TPC (NP (PRP It)) (VP (VP (VBZ 's) (ADJP-PRD (RB very) (JJ real))) , (ADVP (RB otherwise) (NP (PRP we))) (VP (MD would) (RB n't) (VP (VB be) (VP (VBG doing) (NP (PRP it))))))) , (PUNC'' '') (NP (DT this) (NN official)) (VP (VBD said)) (PUNC. .)))
+
+best weight:144.1326859306041
+
+Running time: 12131 ms
+
+Running time: 294522 ms

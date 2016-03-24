@@ -1,4 +1,3 @@
-import java.lang.reflect.Array;
 import java.util.*;
 
 /**
@@ -328,10 +327,11 @@ public class Earley3 {
     }
 
     private String genAttachCheckKey(int colNum, DottedRule dottedRule) {
-        return Integer.toString(colNum) + "_" +
-                Integer.toString(dottedRule.getStartPosition()) + "_" +
-                Integer.toString(dottedRule.getDotPosition()) + "_" +
-                dottedRule.getRule().getLhs() + "_" +
-                Arrays.toString(dottedRule.getRule().getRhs());
+//        return Integer.toString(colNum) + "_" +
+//                Integer.toString(dottedRule.getStartPosition()) + "_" +
+//                Integer.toString(dottedRule.getDotPosition()) + "_" +
+//                dottedRule.getRule().getLhs() + "_" +
+//                Arrays.toString(dottedRule.getRule().getRhs());
+        return String.valueOf(colNum) + "_" + dottedRule.toString();
     }
 }
