@@ -2,9 +2,7 @@
          (VP (VBZ is)
              (ADJP-PRD (JJ happy)))
          (PUNC. .)))
-
-weight:34.23009829121644
-best possibility:4.962650148042205E-11
+34.23009829121644
 
 (ROOT (S (NP (DT The)
              (ADJP (RB very)
@@ -17,9 +15,7 @@ best possibility:4.962650148042205E-11
                  (VP (VB go)
                      (PP (IN under)))))
          (PUNC. .)))
-
-weight:104.9127063447996
-best possibility:2.618957579019186E-32
+104.9127063447996
 
 (ROOT (S (NP (DT The)
              (NN market))
@@ -31,9 +27,7 @@ best possibility:2.618957579019186E-32
                           (VP (VBZ has)
                               (VP (VBN done)))))))
          (PUNC. .)))
-
-weight:94.58911666062929
-best possibility:3.35612881666397E-29
+94.58911666062929
 
 (ROOT (S (PP (IN In)
              (NP (JJ recent)
@@ -51,11 +45,7 @@ best possibility:3.35612881666397E-29
                                            (NP (JJR easier)
                                                (NNS jobs))))))))))
          (PUNC. .)))
-
-
-weight:161.82310999236503
-best possibility:1.9337035773175507E-49
-
+161.82310999236503
 
 (ROOT (S (S-ADV (VP (VBN caught)
                     (PRT (RP off))
@@ -75,10 +65,7 @@ best possibility:1.9337035773175507E-49
                  (NP (NN financing)
                      (NNS deals))))
          (PUNC. .)))
-
-weight:191.38739453307656
-best possibility:2.4358663366714863E-58
-
+191.38739453307656
 
 (ROOT (S (NP (NNS data))
          (VP (VBP show)
@@ -103,13 +90,7 @@ best possibility:2.4358663366714863E-58
                                               (JJ annualized)
                                               (NNS increases))))))))))
          (PUNC. .)))
-
-weight:212.54870459790703
-best possibility:1.0386384034465268E-64
-
-Running time: 235907 ms
-[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
-(ROOT (S (VP (VBG  running )(S (NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(VP (TO  to )(VP (VB  close )(PP (IN  in )(NP (DT  a )(NN  year )))))))))))))) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions )) , (S-ADV (VP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))(NP (NNS  analysts )))))))))(PUNC.  . )))))
+212.54870459790703
 
 (ROOT (S (VP (VBG running)
              (S (NP (DT the)
@@ -150,12 +131,8 @@ Running time: 235907 ms
                                                     (NNP Street))
                                                (NP (NNS analysts)))))))))
                 (PUNC. .)))))
+349.14148269036076
 
-weight:349.14148269036076
-best possibility:7.905711824846585E-106
-
-
-(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(SBAR (S (NP (DT  the )(NN  administration ))(VP (VBN  considered )(S (SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized )(PP (IN  for )(S-NOM (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (JJR  less )(PP (IN  than )(NP (JJ  specific )(NN  warning )))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 ))))))))))) , (NP (ADJP (RB  then )(VBN  decided ))(DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(PP (IN  under )(S-NOM (VP (VB  cover )))))))))(PUNC.  . ))))))))
 (ROOT (S (NP (DT a)
              (JJ senior)
              (NN intelligence)
@@ -173,10 +150,10 @@ best possibility:7.905711824846585E-106
                                                       (S-NOM (VP (VBG issuing)
                                                                  (NP (DT a)
                                                                      (JJ similar)
-                                                                     (ADJP (JJR less)
-                                                                           (PP (IN than)
-                                                                               (NP (JJ specific)
-                                                                                   (NN warning)))))
+                                                                     (ADJP (ADVP (RBR less)
+                                                                                 (IN than))
+                                                                           (JJ specific))
+                                                                     (NN warning))
                                                                  (PP (IN on)
                                                                      (NP (NPR (NNP Oct.))
                                                                          (QP (CD 11)))))))))))
@@ -193,11 +170,7 @@ best possibility:7.905711824846585E-106
                                                       (PP (IN under)
                                                           (S-NOM (VP (VB cover)))))))))
                              (PUNC. .))))))))
-
-
-weight:384.2306535672188
-best possibility:2.1629576824341772E-116
-
+385.78365809294445
 
 (ROOT (S (PUNC`` ``)
          (S-TPC (NP (PRP It))
@@ -218,10 +191,4 @@ best possibility:2.1629576824341772E-116
              (NN official))
          (VP (VBD said))
          (PUNC. .)))
-
-
-
-weight:144.1326859306041
-best possibility:4.090140053621487E-44
-
-
+144.1326859306041

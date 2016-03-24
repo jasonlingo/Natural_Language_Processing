@@ -1,0 +1,55 @@
+[John, is, happy, .]
+(ROOT (S (NP (NPR (NNP  John )))(VP (VBZ  is )(ADJP-PRD (JJ  happy )))(PUNC.  . )))
+
+best weight:34.23009829121644
+
+Running time: 383 ms
+[The, very, biggest, companies, are, not, likely, to, go, under, .]
+(ROOT (S (NP (DT  The )(ADJP (RB  very )(JJS  biggest ))(NNS  companies ))(VP (VBP  are )(RB  not )(ADVP (RB  likely ))(VP (TO  to )(VP (VB  go )(PP (IN  under )))))(PUNC.  . )))
+
+best weight:104.9127063447996
+
+Running time: 2233 ms
+[The, market, is, wondering, what, General, Motors, has, done, .]
+(ROOT (S (NP (DT  The )(NN  market ))(VP (VBZ  is )(ADJP-PRD (VBG  wondering ))(SBAR (WHNP (WP  what ))(S (NP (NPRS (NNP  General )(NNPS  Motors )))(VP (VBZ  has )(VP (VBN  done ))))))(PUNC.  . )))
+
+best weight:100.06911268797393
+
+Running time: 2050 ms
+[In, recent, years, ,, pay, surged, as, demand, rose, while, workers, left, for, easier, jobs, .]
+(ROOT (S (PP (IN  In )(NP (JJ  recent )(NNS  years ))) , (NP (NN  pay ))(VP (VBD  surged )(SBAR (IN  as )(S (NP (NN  demand ))(VP (VBD  rose )(SBAR (IN  while )(S (NP (NNS  workers ))(VP (VBN  left )(PP (IN  for )(NP (JJR  easier )(NNS  jobs ))))))))))(PUNC.  . )))
+
+best weight:165.00010971179964
+
+Running time: 8294 ms
+[caught, off, guard, ,, Ford, Motor, Co., had, no, choice, except, to, follow, suit, with, financing, deals, .]
+(ROOT (S (S-ADV (VP (VBN  caught )(PRT (RP  off ))(NP (NN  guard )))) , (NP (NPR (NNP  Ford )(NNP  Motor )(NNP  Co. )))(VP (VBD  had )(NP (DT  no )(NN  choice ))(SBAR-TMP (IN  except )(S-NOM (VP (TO  to )(VP (VB  follow )(NP (NN  suit ))(PP (IN  with )(NP (NN  financing )(NNS  deals ))))))))(PUNC.  . )))
+
+best weight:198.97739380087015
+
+Running time: 9999 ms
+[data, show, that, pay, was, flat, for, the, third, consecutive, quarter, after, a, rash, of, 4, %, to, 5, %, annualized, increases, .]
+(ROOT (S (NP (NNS  data ))(VP (VB  show )(PP (IN  that )(S-NOM (VP (VB  pay )(VP (VBD  was )(ADJP-PRD (JJ  flat )(PP (IN  for )(NP (DT  the )(JJ  third )(JJ  consecutive )(NN  quarter ))))(PP (IN  after )(NP (DT  a )(NN  rash )))))))(PP (IN  of )(NP (QP (QP (CD  4 ))(NN  % )(PP (TO  to )(NP (QP (CD  5 ))(NN  % ))))(JJ  annualized )(NNS  increases ))))(PUNC.  . )))
+
+best weight:215.84270413300968
+
+Running time: 20263 ms
+[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
+(ROOT (S (VP (VBG  running )(NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(PP (TO  to )(NP (ADJP (ADJP (JJ  close )(PP (IN  in )(NP (NP (DT  a )(NN  year )) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions ))))) , )))(PP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))))))(NNS  analysts )))))(PUNC.  . )))))))))))
+
+best weight:362.45248313454255
+
+Running time: 118196 ms
+[a, senior, intelligence, official, said, the, administration, considered, how, strongly, it, was, criticized, for, issuing, a, similar, less, than, specific, warning, on, Oct., 11, ,, then, decided, the, information, was, too, serious, to, keep, under, cover, .]
+(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(NP (NP (DT  the )(NN  administration ))(VP (VBN  considered )(SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized ))))))(SBAR (IN  for )(S (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (ADVP (RBR  less )(IN  than ))(JJ  specific ))(NN  warning ))))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 )))) , (S-ADV (ADVP (RB  then ))(VP (VBD  decided )(SBAR (S (NP (DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(SBAR (IN  under )(S (VP (VB  cover )))))))))(PUNC.  . ))))))))
+
+best weight:397.82966357604397
+
+Running time: 94659 ms
+[``, It, 's, very, real, ,, otherwise, we, would, n't, be, doing, it, ,, '', this, official, said, .]
+(ROOT (S (PUNC``  `` )(S-TPC (S (NP (PRP  It ))(VP (VBZ  's )(ADJP-PRD (RB  very )(JJ  real )))) , (S (ADVP (RB  otherwise )(NP (PRP  we )))(VP (MD  would )(RB  n't )(VP (VB  be )(VP (VBG  doing )(NP (PRP  it ))))))) , (PUNC''  '' )(NP (DT  this )(NN  official ))(VP (VBD  said ))(PUNC.  . )))
+
+best weight:151.09168836107165
+
+Running time: 6695 ms
+293.512u 2.178s 4:22.95 112.4%  0+0k 0+320io 0pf+0w
