@@ -31,16 +31,16 @@ public class Earley {
 
         for (String orgSen : sentences) {
             String[] sen = orgSen.split(" ");
-            long startTime = System.nanoTime();
+//            long startTime = System.nanoTime();
             System.out.println(decode(sen));
-            long endTime = System.nanoTime();
-            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
+//            long endTime = System.nanoTime();
+//            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
 
         }
     }
 
     private String decode(String[] sen) {
-        System.out.println(Arrays.toString(sen));
+//        System.out.println(Arrays.toString(sen));
 
         chartHead.clear();
         chartTail.clear();
@@ -102,8 +102,9 @@ public class Earley {
         } else {
             printEntry(bestParse, true);
 
-            System.out.println();
-            System.out.println("best weight:" + Double.toString(bestScore));
+//            System.out.println();
+//            System.out.println("best weight:" + Double.toString(bestScore));
+            System.out.println(Double.toString(bestScore));
             return "";
         }
 

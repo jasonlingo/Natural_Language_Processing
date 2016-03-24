@@ -18,19 +18,6 @@ public class DottedRule {
         return sb.toString();
     }
 
-//    private void genKey() {
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(String.valueOf(getStartPosition()));
-//        sb.append(" ");
-//        sb.append(String.valueOf(getDotPosition()));
-//        sb.append(" ");
-//        sb.append(getRule().getLhs());
-//        sb.append(" ");
-//        sb.append(Arrays.toString(rule.getRhs()));
-//        this.key = sb.toString();
-//
-//    }
-
     public double getWeight() {
         return weight;
     }

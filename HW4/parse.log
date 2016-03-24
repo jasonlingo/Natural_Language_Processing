@@ -1,0 +1,369 @@
+/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/bin/java -Didea.launcher.port=7533 "-Didea.launcher.bin.path=/Applications/IntelliJ IDEA 15 CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jaccess.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/tools.jar:/Users/Jinyi/Dropbox/Natural_Language_Processing/HW4/target/classes:/Applications/IntelliJ IDEA 15 CE.app/Contents/lib/idea_rt.jar" com.intellij.rt.execution.application.AppMain Parse ./hw-parse/wallstreet.gr ./hw-parse/wallstreet.sen
+
+[John, is, happy, .]
+(ROOT (S (NP (NPR (NNP  John )))(VP (VBZ  is )(ADJP-PRD (JJ  happy )))(PUNC.  . )))
+
+best weight:34.23009829121644
+
+[The, very, biggest, companies, are, not, likely, to, go, under, .]
+(ROOT (S (NP (DT  The )(ADJP (RB  very )(JJS  biggest ))(NNS  companies ))(VP (VBP  are )(RB  not )(ADVP (RB  likely ))(VP (TO  to )(VP (VB  go )(PP (IN  under )))))(PUNC.  . )))
+
+best weight:104.9127063447996
+
+[The, market, is, wondering, what, General, Motors, has, done, .]
+(ROOT (S (NP (DT  The )(NN  market ))(VP (VBZ  is )(ADJP-PRD (VBG  wondering ))(SBAR (WHNP (WP  what ))(S (NP (NPRS (NNP  General )(NNPS  Motors )))(VP (VBZ  has )(VP (VBN  done ))))))(PUNC.  . )))
+
+best weight:100.06911268797393
+
+[In, recent, years, ,, pay, surged, as, demand, rose, while, workers, left, for, easier, jobs, .]
+(ROOT (S (PP (IN  In )(NP (JJ  recent )(NNS  years ))) , (NP (NN  pay ))(VP (VBD  surged )(SBAR (IN  as )(S (NP (NN  demand ))(VP (VBD  rose )(SBAR (IN  while )(S (NP (NNS  workers ))(VP (VBN  left )(PP (IN  for )(NP (JJR  easier )(NNS  jobs ))))))))))(PUNC.  . )))
+
+best weight:165.00010971179964
+
+[caught, off, guard, ,, Ford, Motor, Co., had, no, choice, except, to, follow, suit, with, financing, deals, .]
+(ROOT (S (S-ADV (VP (VBN  caught )(PRT (RP  off ))(NP (NN  guard )))) , (NP (NPR (NNP  Ford )(NNP  Motor )(NNP  Co. )))(VP (VBD  had )(NP (DT  no )(NN  choice ))(SBAR-TMP (IN  except )(S-NOM (VP (TO  to )(VP (VB  follow )(NP (NN  suit ))(PP (IN  with )(NP (NN  financing )(NNS  deals ))))))))(PUNC.  . )))
+
+best weight:198.97739380087015
+
+[data, show, that, pay, was, flat, for, the, third, consecutive, quarter, after, a, rash, of, 4, %, to, 5, %, annualized, increases, .]
+(ROOT (S (NP (NNS  data ))(VP (VB  show )(PP (IN  that )(S-NOM (VP (VB  pay )(VP (VBD  was )(ADJP-PRD (JJ  flat )(PP (IN  for )(NP (DT  the )(JJ  third )(JJ  consecutive )(NN  quarter ))))(PP (IN  after )(NP (DT  a )(NN  rash )))))))(PP (IN  of )(NP (QP (QP (CD  4 ))(NN  % )(PP (TO  to )(NP (QP (CD  5 ))(NN  % ))))(JJ  annualized )(NNS  increases ))))(PUNC.  . )))
+
+best weight:215.84270413300968
+
+[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
+(ROOT (S (VP (VBG  running )(NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(PP (TO  to )(NP (ADJP (ADJP (JJ  close )(PP (IN  in )(NP (NP (DT  a )(NN  year )) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions ))))) , )))(PP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))))))(NNS  analysts )))))(PUNC.  . )))))))))))
+
+best weight:362.45248313454255
+
+[a, senior, intelligence, official, said, the, administration, considered, how, strongly, it, was, criticized, for, issuing, a, similar, less, than, specific, warning, on, Oct., 11, ,, then, decided, the, information, was, too, serious, to, keep, under, cover, .]
+(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(NP (NP (DT  the )(NN  administration ))(VP (VBN  considered )(SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized ))))))(SBAR (IN  for )(S (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (ADVP (RBR  less )(IN  than ))(JJ  specific ))(NN  warning ))))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 )))) , (S-ADV (ADVP (RB  then ))(VP (VBD  decided )(SBAR (S (NP (DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(SBAR (IN  under )(S (VP (VB  cover )))))))))(PUNC.  . ))))))))
+
+best weight:397.82966357604397
+
+[``, It, 's, very, real, ,, otherwise, we, would, n't, be, doing, it, ,, '', this, official, said, .]
+(ROOT (S (PUNC``  `` )(S-TPC (S (NP (PRP  It ))(VP (VBZ  's )(ADJP-PRD (RB  very )(JJ  real )))) , (S (ADVP (RB  otherwise )(NP (PRP  we )))(VP (MD  would )(RB  n't )(VP (VB  be )(VP (VBG  doing )(NP (PRP  it ))))))) , (PUNC''  '' )(NP (DT  this )(NN  official ))(VP (VBD  said ))(PUNC.  . )))
+
+best weight:151.09168836107165
+
+
+Process finished with exit code 0
+
+Official Solution
+
+
+(ROOT (S (NP (NPR (NNP John))) (VP (VBZ is) (ADJP-PRD (JJ happy))) (PUNC. .)))
+# p(sentence)= 5.186888626e-11
+# p(best_parse)= 4.98573726e-11
+# p(best_parse|sentence)= 0.9612192627
+# time_in_ms= 36
+
+(ROOT (S (NP (DT The) (ADJP (RB very) (JJS biggest)) (NNS companies)) (VP (VBP are) (RB not) (ADVP (RB likely)) (VP (TO to) (VP (VB go) (PP (IN under))))) (PUNC. .)))
+# p(sentence)= 2.254274094e-31
+# p(best_parse)= 2.626246278e-32
+# p(best_parse|sentence)= 0.1165007523
+# time_in_ms= 220
+
+(ROOT (S (NP (DT The) (NN market)) (VP (VBZ is) (VP (VBG wondering) (SBAR (WHNP (WP what)) (S (NP (NPRS (NNP General) (NNPS Motors))) (VP (VBZ has) (VP (VBN done))))))) (PUNC. .)))
+# p(sentence)= 1.951840079e-28
+# p(best_parse)= 3.374707425e-29
+# p(best_parse|sentence)= 0.1728987667
+# time_in_ms= 170
+
+(ROOT (S (PP (IN In) (NP (JJ recent) (NNS years))) , (NP (NN pay)) (VP (VBD surged) (SBAR (IN as) (S (NP (NN demand)) (VP (VBD rose) (SBAR (IN while) (S (NP (NNS workers)) (VP (VBN left) (PP (IN for) (NP (JJR easier) (NNS jobs)))))))))) (PUNC. .)))
+# p(sentence)= 4.558173377e-48
+# p(best_parse)= 1.938037056e-49
+# p(best_parse|sentence)= 0.04251784424
+# time_in_ms= 655
+
+(ROOT (S (S-ADV (VP (VBN caught) (PRT (RP off)) (NP (NN guard)))) , (NP (NPR (NNP Ford) (NNP Motor) (NNP Co.))) (VP (VBD had) (NP (DT no) (NN choice)) (PP (IN except) (S-NOM (VP (TO to) (VP (VB follow) (NP (NN suit)))))) (PP (IN with) (NP (NN financing) (NNS deals)))) (PUNC. .)))
+# p(sentence)= 1.366777548e-56
+# p(best_parse)= 2.431237783e-58
+# p(best_parse|sentence)= 0.01778810155
+# time_in_ms= 862
+
+(ROOT (S (NP (NNS data)) (VP (VBP show) (SBAR (WHNP (WDT that)) (S (VP (VB pay) (VP (VBD was) (ADJP-PRD (JJ flat) (PP (IN for) (NP (NP (DT the) (JJ third) (JJ consecutive) (NN quarter)) (PP (IN after) (NP (DT a) (NN rash)))))) (PP (IN of) (NP (QP (QP (CD 4)) (NN %) (PP (TO to) (NP (QP (CD 5)) (NN %)))) (JJ annualized) (NNS increases)))))))) (PUNC. .)))
+# p(sentence)= 3.417350019e-62
+# p(best_parse)= 1.047863421e-64
+# p(best_parse|sentence)= 0.003066304053
+# time_in_ms= 2397
+
+(ROOT (S (VP (VBG running) (S (NP (DT the) (JJ combined) (NNS companies)) , (S-ADV (VP (VBD projected) (VP (TO to) (VP (VBP have) (RB nearly) (NP-PRD (NP (QP (CD 22) (CD million)) (NNS subscribers)) (PP (IN by) (NP (DT the) (NN time))) (SBAR (S (NP (DT the) (NN deal)) (VP (VBZ is) (VP (VBN slated) (VP (TO to) (VP (VB close) (PP (IN in) (NP (DT a) (NN year)))))))))))))) , (VP (VBZ is) (RB likely) (VP (TO to) (VP (VB pose) (NP (JJ extraordinary) (NN management) (NNS questions)) , (S-ADV (VP (VBG according) (PP (TO to) (NP (NPR (NNP Wall) (NNP Street)) (NP (NNS analysts))))))))) (PUNC. .)))))
+# p(sentence)= 2.66797712e-101
+# p(best_parse)= 7.961079472e-106
+# p(best_parse|sentence)= 2.983938435e-05
+# time_in_ms= 11722
+
+(ROOT (S (NP (DT a) (JJ senior) (NN intelligence) (NN official)) (VP (VBD said) (SBAR (S (NP (DT the) (NN administration)) (VP (VBN considered) (S (SBAR-TMP (WHADVP (WRB how) (RB strongly)) (S (NP (PRP it)) (VP (VBD was) (VP (VBN criticized) (PP (IN for) (S-NOM (VP (VBG issuing) (NP (DT a) (JJ similar) (ADJP (ADVP (RBR less) (IN than)) (JJ specific)) (NN warning)) (PP (IN on) (NP (NPR (NNP Oct.)) (QP (CD 11))))))))))) , (NP (ADJP (RB then) (VBN decided)) (DT the) (NN information)) (VP (VBD was) (RB too) (ADJP-PRD (JJ serious) (S (VP (TO to) (VP (VB keep) (PP (IN under) (S-NOM (VP (VB cover))))))))) (PUNC. .))))))))
+
+
+
+# p(sentence)= 2.439288449e-111
+# p(best_parse)= 7.514832222e-117
+# p(best_parse|sentence)= 3.080747677e-06
+# time_in_ms= 9306
+
+(ROOT (S (PUNC`` ``) (S-TPC (NP (PRP It)) (VP (VP (VBZ 's) (ADJP-PRD (RB very) (JJ real))) , (ADVP (RB otherwise) (NP (PRP we))) (VP (MD would) (RB n't) (VP (VB be) (VP (VBG doing) (NP (PRP it))))))) , (PUNC'' '') (NP (DT this) (NN official)) (VP (VBD said)) (PUNC. .)))
+# p(sentence)= 3.736540659e-43
+# p(best_parse)= 4.126948933e-44
+# p(best_parse|sentence)= 0.1104483882
+# time_in_ms= 1086
+
+# cross-entropy = 9.138634493 bits = -(-1617.538305 log-prob. / 177 words)
+[jguo32@ugrad11 hw-grammar]$ 
+
+
+
+
+With timing
+
+/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/bin/java -Didea.launcher.port=7537 "-Didea.launcher.bin.path=/Applications/IntelliJ IDEA 15 CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jaccess.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/tools.jar:/Users/Jinyi/Dropbox/Natural_Language_Processing/HW4/target/classes:/Applications/IntelliJ IDEA 15 CE.app/Contents/lib/idea_rt.jar" com.intellij.rt.execution.application.AppMain Parse ./hw-parse/wallstreet.gr ./hw-parse/wallstreet.sen
+[John, is, happy, .]
+(ROOT (S (NP (NPR (NNP  John )))(VP (VBZ  is )(ADJP-PRD (JJ  happy )))(PUNC.  . )))
+
+best weight:34.23009829121644
+
+Running time: 872 ms
+[The, very, biggest, companies, are, not, likely, to, go, under, .]
+(ROOT (S (NP (DT  The )(ADJP (RB  very )(JJS  biggest ))(NNS  companies ))(VP (VBP  are )(RB  not )(ADVP (RB  likely ))(VP (TO  to )(VP (VB  go )(PP (IN  under )))))(PUNC.  . )))
+
+best weight:104.9127063447996
+
+Running time: 4347 ms
+[The, market, is, wondering, what, General, Motors, has, done, .]
+(ROOT (S (NP (DT  The )(NN  market ))(VP (VBZ  is )(ADJP-PRD (VBG  wondering ))(SBAR (WHNP (WP  what ))(S (NP (NPRS (NNP  General )(NNPS  Motors )))(VP (VBZ  has )(VP (VBN  done ))))))(PUNC.  . )))
+
+best weight:100.06911268797393
+
+Running time: 4525 ms
+[In, recent, years, ,, pay, surged, as, demand, rose, while, workers, left, for, easier, jobs, .]
+(ROOT (S (PP (IN  In )(NP (JJ  recent )(NNS  years ))) , (NP (NN  pay ))(VP (VBD  surged )(SBAR (IN  as )(S (NP (NN  demand ))(VP (VBD  rose )(SBAR (IN  while )(S (NP (NNS  workers ))(VP (VBN  left )(PP (IN  for )(NP (JJR  easier )(NNS  jobs ))))))))))(PUNC.  . )))
+
+best weight:165.00010971179964
+
+Running time: 14780 ms
+[caught, off, guard, ,, Ford, Motor, Co., had, no, choice, except, to, follow, suit, with, financing, deals, .]
+(ROOT (S (S-ADV (VP (VBN  caught )(PRT (RP  off ))(NP (NN  guard )))) , (NP (NPR (NNP  Ford )(NNP  Motor )(NNP  Co. )))(VP (VBD  had )(NP (DT  no )(NN  choice ))(SBAR-TMP (IN  except )(S-NOM (VP (TO  to )(VP (VB  follow )(NP (NN  suit ))(PP (IN  with )(NP (NN  financing )(NNS  deals ))))))))(PUNC.  . )))
+
+best weight:198.97739380087015
+
+Running time: 18983 ms
+[data, show, that, pay, was, flat, for, the, third, consecutive, quarter, after, a, rash, of, 4, %, to, 5, %, annualized, increases, .]
+(ROOT (S (NP (NNS  data ))(VP (VB  show )(PP (IN  that )(S-NOM (VP (VB  pay )(VP (VBD  was )(ADJP-PRD (JJ  flat )(PP (IN  for )(NP (DT  the )(JJ  third )(JJ  consecutive )(NN  quarter ))))(PP (IN  after )(NP (DT  a )(NN  rash )))))))(PP (IN  of )(NP (QP (QP (CD  4 ))(NN  % )(PP (TO  to )(NP (QP (CD  5 ))(NN  % ))))(JJ  annualized )(NNS  increases ))))(PUNC.  . )))
+
+best weight:215.84270413300968
+
+Running time: 37651 ms
+[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
+(ROOT (S (VP (VBG  running )(NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(PP (TO  to )(NP (ADJP (ADJP (JJ  close )(PP (IN  in )(NP (NP (DT  a )(NN  year )) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions ))))) , )))(PP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))))))(NNS  analysts )))))(PUNC.  . )))))))))))
+
+best weight:362.45248313454255
+
+Running time: 223937 ms
+[a, senior, intelligence, official, said, the, administration, considered, how, strongly, it, was, criticized, for, issuing, a, similar, less, than, specific, warning, on, Oct., 11, ,, then, decided, the, information, was, too, serious, to, keep, under, cover, .]
+(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(NP (NP (DT  the )(NN  administration ))(VP (VBN  considered )(SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized ))))))(SBAR (IN  for )(S (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (ADVP (RBR  less )(IN  than ))(JJ  specific ))(NN  warning ))))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 )))) , (S-ADV (ADVP (RB  then ))(VP (VBD  decided )(SBAR (S (NP (DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(SBAR (IN  under )(S (VP (VB  cover )))))))))(PUNC.  . ))))))))
+
+best weight:397.82966357604397
+
+Running time: 162519 ms
+[``, It, 's, very, real, ,, otherwise, we, would, n't, be, doing, it, ,, '', this, official, said, .]
+(ROOT (S (PUNC``  `` )(S-TPC (S (NP (PRP  It ))(VP (VBZ  's )(ADJP-PRD (RB  very )(JJ  real )))) , (S (ADVP (RB  otherwise )(NP (PRP  we )))(VP (MD  would )(RB  n't )(VP (VB  be )(VP (VBG  doing )(NP (PRP  it ))))))) , (PUNC''  '' )(NP (DT  this )(NN  official ))(VP (VBD  said ))(PUNC.  . )))
+
+best weight:151.09168836107165
+
+Running time: 12091 ms
+
+Process finished with exit code 0
+
+=====================================
+
+First Speed-up
+
+/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/bin/java -Didea.launcher.port=7537 "-Didea.launcher.bin.path=/Applications/IntelliJ IDEA 15 CE.app/Contents/bin" -Dfile.encoding=UTF-8 -classpath "/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/charsets.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/deploy.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/cldrdata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/dnsns.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jaccess.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/jfxrt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/localedata.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/nashorn.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunec.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunjce_provider.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/sunpkcs11.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/ext/zipfs.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/javaws.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jce.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfr.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jfxswt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/jsse.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/management-agent.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/plugin.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/resources.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/jre/lib/rt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/ant-javafx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/dt.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/javafx-mx.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/jconsole.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/packager.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/sa-jdi.jar:/Library/Java/JavaVirtualMachines/jdk1.8.0_65.jdk/Contents/Home/lib/tools.jar:/Users/Jinyi/Dropbox/Natural_Language_Processing/HW4/target/classes:/Applications/IntelliJ IDEA 15 CE.app/Contents/lib/idea_rt.jar" com.intellij.rt.execution.application.AppMain Parse ./hw-parse/wallstreet.gr ./hw-parse/wallstreet.sen
+[John, is, happy, .]
+(ROOT (S (NP (NPR (NNP  John )))(VP (VBZ  is )(ADJP-PRD (JJ  happy )))(PUNC.  . )))
+
+best weight:34.23009829121644
+
+Running time: 824 ms
+[The, very, biggest, companies, are, not, likely, to, go, under, .]
+(ROOT (S (NP (DT  The )(ADJP (RB  very )(JJS  biggest ))(NNS  companies ))(VP (VBP  are )(RB  not )(ADVP (RB  likely ))(VP (TO  to )(VP (VB  go )(PP (IN  under )))))(PUNC.  . )))
+
+best weight:104.9127063447996
+
+Running time: 3302 ms
+[The, market, is, wondering, what, General, Motors, has, done, .]
+(ROOT (S (NP (DT  The )(NN  market ))(VP (VBZ  is )(ADJP-PRD (VBG  wondering ))(SBAR (WHNP (WP  what ))(S (NP (NPRS (NNP  General )(NNPS  Motors )))(VP (VBZ  has )(VP (VBN  done ))))))(PUNC.  . )))
+
+best weight:100.06911268797393
+
+Running time: 1740 ms
+[In, recent, years, ,, pay, surged, as, demand, rose, while, workers, left, for, easier, jobs, .]
+(ROOT (S (PP (IN  In )(NP (JJ  recent )(NNS  years ))) , (NP (NN  pay ))(VP (VBD  surged )(SBAR (IN  as )(S (NP (NN  demand ))(VP (VBD  rose )(SBAR (IN  while )(S (NP (NNS  workers ))(VP (VBN  left )(PP (IN  for )(NP (JJR  easier )(NNS  jobs ))))))))))(PUNC.  . )))
+
+best weight:165.00010971179964
+
+Running time: 10164 ms
+[caught, off, guard, ,, Ford, Motor, Co., had, no, choice, except, to, follow, suit, with, financing, deals, .]
+(ROOT (S (S-ADV (VP (VBN  caught )(PRT (RP  off ))(NP (NN  guard )))) , (NP (NPR (NNP  Ford )(NNP  Motor )(NNP  Co. )))(VP (VBD  had )(NP (DT  no )(NN  choice ))(SBAR-TMP (IN  except )(S-NOM (VP (TO  to )(VP (VB  follow )(NP (NN  suit ))(PP (IN  with )(NP (NN  financing )(NNS  deals ))))))))(PUNC.  . )))
+
+best weight:198.97739380087015
+
+Running time: 11980 ms
+[data, show, that, pay, was, flat, for, the, third, consecutive, quarter, after, a, rash, of, 4, %, to, 5, %, annualized, increases, .]
+(ROOT (S (NP (NNS  data ))(VP (VB  show )(PP (IN  that )(S-NOM (VP (VB  pay )(VP (VBD  was )(ADJP-PRD (JJ  flat )(PP (IN  for )(NP (DT  the )(JJ  third )(JJ  consecutive )(NN  quarter ))))(PP (IN  after )(NP (DT  a )(NN  rash )))))))(PP (IN  of )(NP (QP (QP (CD  4 ))(NN  % )(PP (TO  to )(NP (QP (CD  5 ))(NN  % ))))(JJ  annualized )(NNS  increases ))))(PUNC.  . )))
+
+best weight:215.84270413300968
+
+Running time: 27615 ms
+[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
+(ROOT (S (VP (VBG  running )(NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(PP (TO  to )(NP (ADJP (ADJP (JJ  close )(PP (IN  in )(NP (NP (DT  a )(NN  year )) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions ))))) , )))(PP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))))))(NNS  analysts )))))(PUNC.  . )))))))))))
+
+best weight:362.45248313454255
+
+Running time: 173184 ms
+[a, senior, intelligence, official, said, the, administration, considered, how, strongly, it, was, criticized, for, issuing, a, similar, less, than, specific, warning, on, Oct., 11, ,, then, decided, the, information, was, too, serious, to, keep, under, cover, .]
+(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(NP (NP (DT  the )(NN  administration ))(VP (VBN  considered )(SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized ))))))(SBAR (IN  for )(S (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (ADVP (RBR  less )(IN  than ))(JJ  specific ))(NN  warning ))))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 )))) , (S-ADV (ADVP (RB  then ))(VP (VBD  decided )(SBAR (S (NP (DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(SBAR (IN  under )(S (VP (VB  cover )))))))))(PUNC.  . ))))))))
+
+best weight:397.82966357604397
+
+Running time: 129249 ms
+[``, It, 's, very, real, ,, otherwise, we, would, n't, be, doing, it, ,, '', this, official, said, .]
+(ROOT (S (PUNC``  `` )(S-TPC (S (NP (PRP  It ))(VP (VBZ  's )(ADJP-PRD (RB  very )(JJ  real )))) , (S (ADVP (RB  otherwise )(NP (PRP  we )))(VP (MD  would )(RB  n't )(VP (VB  be )(VP (VBG  doing )(NP (PRP  it ))))))) , (PUNC''  '' )(NP (DT  this )(NN  official ))(VP (VBD  said ))(PUNC.  . )))
+
+best weight:151.09168836107165
+
+Running time: 7541 ms
+
+Process finished with exit code 0
+
+
+
+1   ROOT    EXPR
+0.333333    EXPR    EXPR + TERM
+0.333333    EXPR    EXPR - TERM
+0.333333    EXPR    TERM
+0.333333    TERM    TERM * FACTOR
+0.333333    TERM    TERM / FACTOR
+0.333333    TERM    FACTOR
+0.333333    FACTOR  Num
+0.333333    FACTOR  { EXPR }
+0.333333    FACTOR  sqrt { EXPR }
+0.076923    Num 0
+0.076923    Num 1
+0.076923    Num 2
+0.076923    Num 3
+0.076923    Num 4
+0.076923    Num 5
+0.076923    Num 6
+0.076923    Num 7
+0.076923    Num 8
+0.076923    Num 9
+0.076923    Num pi
+0.076923    Num e
+0.076923    Num 0.5
+
+Correct results on ugrads
+
+[John, is, happy, .]
+(ROOT (S (NP (NPR (NNP  John )))(VP (VBZ  is )(ADJP-PRD (JJ  happy )))(PUNC.  . )))
+
+weight:34.23009829121644
+best possibility:4.962650148042205E-11
+
+Running time: 1269 ms
+[The, very, biggest, companies, are, not, likely, to, go, under, .]
+(ROOT (S (NP (DT  The )(ADJP (RB  very )(JJS  biggest ))(NNS  companies ))(VP (VBP  are )(RB  not )(ADVP (RB  likely ))(VP (TO  to )(VP (VB  go )(PP (IN  under )))))(PUNC.  . )))
+
+weight:104.9127063447996
+best possibility:2.618957579019186E-32
+
+Running time: 15940 ms
+[The, market, is, wondering, what, General, Motors, has, done, .]
+(ROOT (S (NP (DT  The )(NN  market ))(VP (VBZ  is )(VP (VBG  wondering )(SBAR (WHNP (WP  what ))(S (NP (NPRS (NNP  General )(NNPS  Motors )))(VP (VBZ  has )(VP (VBN  done )))))))(PUNC.  . )))
+
+weight:94.58911666062929
+best possibility:3.35612881666397E-29
+
+Running time: 16997 ms
+[In, recent, years, ,, pay, surged, as, demand, rose, while, workers, left, for, easier, jobs, .]
+(ROOT (S (PP (IN  In )(NP (JJ  recent )(NNS  years ))) , (NP (NN  pay ))(VP (VBD  surged )(SBAR (IN  as )(S (NP (NN  demand ))(VP (VBD  rose )(SBAR (IN  while )(S (NP (NNS  workers ))(VP (VBN  left )(PP (IN  for )(NP (JJR  easier )(NNS  jobs ))))))))))(PUNC.  . )))
+
+weight:161.82310999236503
+best possibility:1.9337035773175507E-49
+
+Running time: 88353 ms
+[caught, off, guard, ,, Ford, Motor, Co., had, no, choice, except, to, follow, suit, with, financing, deals, .]
+(ROOT (S (S-ADV (VP (VBN  caught )(PRT (RP  off ))(NP (NN  guard )))) , (NP (NPR (NNP  Ford )(NNP  Motor )(NNP  Co. )))(VP (VBD  had )(NP (DT  no )(NN  choice ))(PP (IN  except )(S-NOM (VP (TO  to )(VP (VB  follow )(NP (NN  suit ))))))(PP (IN  with )(NP (NN  financing )(NNS  deals ))))(PUNC.  . )))
+
+weight:191.38739453307656
+best possibility:2.4358663366714863E-58
+
+Running time: 117338 ms
+[data, show, that, pay, was, flat, for, the, third, consecutive, quarter, after, a, rash, of, 4, %, to, 5, %, annualized, increases, .]
+(ROOT (S (NP (NNS  data ))(VP (VBP  show )(SBAR (WHNP (WDT  that ))(S (VP (VB  pay )(VP (VBD  was )(ADJP-PRD (JJ  flat )(PP (IN  for )(NP (DT  the )(JJ  third )(JJ  consecutive )(NN  quarter ))))(PP (IN  after )(NP (NP (DT  a )(NN  rash ))(PP (IN  of )(NP (QP (QP (CD  4 ))(NN  % )(PP (TO  to )(NP (QP (CD  5 ))(NN  % ))))(JJ  annualized )(NNS  increases ))))))))))(PUNC.  . )))
+
+weight:212.54870459790703
+best possibility:1.0386384034465268E-64
+
+Running time: 235907 ms
+[running, the, combined, companies, ,, projected, to, have, nearly, 22, million, subscribers, by, the, time, the, deal, is, slated, to, close, in, a, year, ,, is, likely, to, pose, extraordinary, management, questions, ,, according, to, Wall, Street, analysts, .]
+(ROOT (S (VP (VBG  running )(S (NP (DT  the )(JJ  combined )(NNS  companies )) , (S-ADV (VP (VBD  projected )(VP (TO  to )(VP (VBP  have )(RB  nearly )(NP-PRD (NP (QP (CD  22 )(CD  million ))(NNS  subscribers ))(PP (IN  by )(NP (DT  the )(NN  time )))(SBAR (S (NP (DT  the )(NN  deal ))(VP (VBZ  is )(VP (VBN  slated )(VP (TO  to )(VP (VB  close )(PP (IN  in )(NP (DT  a )(NN  year )))))))))))))) , (VP (VBZ  is )(RB  likely )(VP (TO  to )(VP (VB  pose )(NP (JJ  extraordinary )(NN  management )(NNS  questions )) , (S-ADV (VP (VBG  according )(PP (TO  to )(NP (NPR (NNP  Wall )(NNP  Street ))(NP (NNS  analysts )))))))))(PUNC.  . )))))
+
+weight:349.14148269036076
+best possibility:7.905711824846585E-106
+
+Running time: 2217286 ms
+[a, senior, intelligence, official, said, the, administration, considered, how, strongly, it, was, criticized, for, issuing, a, similar, less, than, specific, warning, on, Oct., 11, ,, then, decided, the, information, was, too, serious, to, keep, under, cover, .]
+(ROOT (S (NP (DT  a )(JJ  senior )(NN  intelligence )(NN  official ))(VP (VBD  said )(SBAR (S (NP (DT  the )(NN  administration ))(VP (VBN  considered )(S (SBAR-TMP (WHADVP (WRB  how )(RB  strongly ))(S (NP (PRP  it ))(VP (VBD  was )(VP (VBN  criticized )(PP (IN  for )(S-NOM (VP (VBG  issuing )(NP (DT  a )(JJ  similar )(ADJP (JJR  less )(PP (IN  than )(NP (JJ  specific )(NN  warning )))))(PP (IN  on )(NP (NPR (NNP  Oct. ))(QP (CD  11 ))))))))))) , (NP (ADJP (RB  then )(VBN  decided ))(DT  the )(NN  information ))(VP (VBD  was )(RB  too )(ADJP-PRD (JJ  serious )(S (VP (TO  to )(VP (VB  keep )(PP (IN  under )(S-NOM (VP (VB  cover )))))))))(PUNC.  . ))))))))
+
+weight:384.2306535672188
+best possibility:2.1629576824341772E-116
+
+Running time: 1518798 ms
+[``, It, 's, very, real, ,, otherwise, we, would, n't, be, doing, it, ,, '', this, official, said, .]
+(ROOT (S (PUNC``  `` )(S-TPC (NP (PRP  It ))(VP (VP (VBZ  's )(ADJP-PRD (RB  very )(JJ  real ))) , (ADVP (RB  otherwise )(NP (PRP  we )))(VP (MD  would )(RB  n't )(VP (VB  be )(VP (VBG  doing )(NP (PRP  it ))))))) , (PUNC''  '' )(NP (DT  this )(NN  official ))(VP (VBD  said ))(PUNC.  . )))
+
+weight:144.1326859306041
+best possibility:4.090140053621487E-44
+
+Running time: 84492 ms
+
+
+(ROOT (S (NP (DT a)
+             (JJ senior)
+             (NN intelligence)
+             (NN official))
+         (VP (VBD said)
+             (SBAR (S (NP (DT the)
+                          (NN administration))
+                      (VP (VBN considered)
+                          (S (SBAR-TMP (WHADVP (WRB how)
+                                               (RB strongly))
+                                       (S (NP (PRP it))
+                                          (VP (VBD was)
+                                              (VP (VBN criticized)
+                                                  (PP (IN for)
+                                                      (S-NOM (VP (VBG issuing)
+                                                                 (NP (DT a)
+                                                                     (JJ similar)
+                                                                     (ADJP (ADVP (RBR less)
+                                                                                 (IN than))
+                                                                           (JJ specific))
+                                                                     (NN warning))
+                                                                 (PP (IN on)
+                                                                     (NP (NPR (NNP Oct.))
+                                                                         (QP (CD 11)))))))))))
+                             ,
+                             (NP (ADJP (RB then)
+                                       (VBN decided))
+                                 (DT the)
+                                 (NN information))
+                             (VP (VBD was)
+                                 (RB too)
+                                 (ADJP-PRD (JJ serious)
+                                           (S (VP (TO to)
+                                                  (VP (VB keep)
+                                                      (PP (IN under)
+                                                          (S-NOM (VP (VB cover)))))))))
+                             (PUNC. .))))))))
+
