@@ -3,9 +3,9 @@ import java.util.*;
 /**
  * Created by Jason on 3/23/16.
  */
-public class Earley5 {
+public class Earley6 {
 
-    private Set<Integer> check;  //for checking duplicated rule in one column
+    private Set<String> check;  //for checking duplicated rule in one column
     private Map<String, List<Rule>> rules;
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
@@ -15,8 +15,8 @@ public class Earley5 {
     private StringBuilder sb;
     private Map<String, DottedRule> attachMap;
 
-    public Earley5() {
-        this.check = new HashSet<Integer>();
+    public Earley6() {
+        this.check = new HashSet<String>();
         this.chartHead = new ArrayList<DottedRule>();
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
@@ -84,7 +84,7 @@ public class Earley5 {
             DottedRule head = chartHead.get(i);
             attachMap.clear();
             dottedRulePos.clear();
-            check.clear();
+//            System.out.print(i);
             while (head != null) {
                 if (isComplete(head)) {
                     attach(head, i);
@@ -154,7 +154,7 @@ public class Earley5 {
         String predictKey = genPredictKey(dottedRule);
 
         // unique key for each entry in the Early chart
-        int checkKey = genCheckKey(colNum, predictKey);
+        String checkKey = genCheckKey(colNum, predictKey);
 
 
         // Check if the predicted rule is already in the column
@@ -220,13 +220,14 @@ public class Earley5 {
                 // Track the previous column
                 newDottedRule.previousColumn = head;
                 newDottedRule.previous = dottedRule;
-                attachMap.put(genPreColKey(colNum, dottedRule, newDottedRule), head);
+                String preColKey = genPreColKey(colNum, dottedRule, newDottedRule);
+                attachMap.put(preColKey, head);
                 if (!check.contains(attachCheckKey)) {
                     addToChart(newDottedRule, colNum);
-                    check.add(attachCheckKey.hashCode());
+                    check.add(attachCheckKey);
                     dottedRule.childCnt++;
-                    String key = dottedRule.toString() + "_c" + String.valueOf(dottedRule.childCnt);
-                    dottedRulePos.put(key, newDottedRule);
+//                    dottedRulePos.put(String.valueOf(colNum) + "_" + dottedRule.toString() + "_child_" + String.valueOf(dottedRule.childCnt), newDottedRule);
+                    dottedRulePos.put(genChildKey(colNum, dottedRule, dottedRule.childCnt), newDottedRule);
                 } else {
                     //replace if the weight is better
                     replaceDottedRule(dottedRule, newDottedRule, colNum);
@@ -247,9 +248,8 @@ public class Earley5 {
             DottedRule curr = dottedRulePos.get(key);
 
             org.childCnt++;
-            String key2 = org.toString() + "_c" + String.valueOf(org.childCnt);
-            dottedRulePos.put(key2, curr);
-
+//            dottedRulePos.put(String.valueOf(colNum) + "_" + org.toString() + "_child_" + String.valueOf(org.childCnt), curr);
+            dottedRulePos.put(genChildKey(colNum, org, org.childCnt), curr);
             if (dottedRule.getWeight() < curr.getWeight()) {
                 curr.setWeight(dottedRule.getWeight());
                 updateChildWeight(colNum, curr);
@@ -267,17 +267,11 @@ public class Earley5 {
     private boolean updateChildWeight(int colNum, DottedRule previous) {
 //        boolean update = true;
         for (int i = 1; i <= previous.childCnt; i++) {
-            String childKey = previous.toString() + "_c" + String.valueOf(i);
+//            String childKey = String.valueOf(colNum) + "_" + previous.toString() + "_child_" + String.valueOf(i);
+            String childKey = genChildKey(colNum, previous, i);
             DottedRule child = dottedRulePos.get(childKey);
-            String kkk = genPreColKey(colNum, previous, child);
-            DottedRule preCol = attachMap.get(kkk);
-            if (child == null) {
-                System.out.println("child is null");
-            } else if (preCol == null) {
-                System.out.println("precol is null");
-                System.out.println(previous.toString());
-                System.out.println(child.toString());
-            }
+            String preColKey = genPreColKey(colNum, previous, child);
+            DottedRule preCol = attachMap.get(preColKey);
 
             double newWeight = preCol.getWeight() + previous.getWeight();
             if (newWeight < child.getWeight()) {
@@ -373,9 +367,8 @@ public class Earley5 {
         return dottedRule.getRule().getRhs()[dottedRule.getDotPosition()];
     }
 
-    private int genCheckKey(int colNum, String predictKey) {
-        String key = String.valueOf(colNum) + "_" + predictKey;
-        return key.hashCode();
+    private String genCheckKey(int colNum, String predictKey) {
+        return String.valueOf(colNum) + "_" + predictKey;
     }
 
     private String genAttachCheckKey(int colNum, DottedRule dottedRule) {
@@ -384,12 +377,14 @@ public class Earley5 {
 //                Integer.toString(dottedRule.getDotPosition()) + "_" +
 //                dottedRule.getRule().getLhs() + "_" +
 //                Arrays.toString(dottedRule.getRule().getRhs());
-        String key = String.valueOf(colNum) + "_" + dottedRule.toString();
-        return key;
+        return String.valueOf(colNum) + "_" + dottedRule.toString();
     }
 
     private String genPreColKey(int colNum, DottedRule dottedRule, DottedRule newDottedRule) {
-        String key = String.valueOf(colNum) + "_" + dottedRule.toString() + "_" + newDottedRule.toString();
-        return key;
+        return String.valueOf(colNum) + "_" + dottedRule.toString() + "_" + newDottedRule.toString();
+    }
+
+    private String genChildKey(int colNum, DottedRule previous, int childNum) {
+        return String.valueOf(colNum) + "_" + previous.toString() + "_c" + String.valueOf(childNum);
     }
 }

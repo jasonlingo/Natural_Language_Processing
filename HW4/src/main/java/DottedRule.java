@@ -7,10 +7,6 @@ public class DottedRule {
 
 
     public String toString() {
-        return this.key;
-    }
-
-    private void genKey() {
         StringBuilder sb = new StringBuilder();
         sb.append(String.valueOf(getStartPosition()));
         sb.append(" ");
@@ -19,26 +15,38 @@ public class DottedRule {
         sb.append(getRule().getLhs());
         sb.append(" ");
         sb.append(Arrays.toString(rule.getRhs()));
-
-//        int dotPos = getDotPosition();
-//        String[] rhs = rule.getRhs();
-//        for (int i = 0; i < rhs.length; i++) {
-//            if (i == dotPos) {
-//                sb.append(".");
-//            }
-//
-//            sb.append(rhs[i]);
-//        }
-//        if (dotPos >= rhs.length) {
-//            sb.append(".");
-//        }
-//        sb.insert(0, " ");
-//        sb.insert(0, getRule().getLhs());
-//        sb.insert(0, " ");
-//        sb.insert(0, String.valueOf(getStartPosition()));
-        this.key = sb.toString();
-
+        return sb.toString();
     }
+
+//    private void genKey() {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(String.valueOf(getStartPosition()));
+//        sb.append(" ");
+//        sb.append(String.valueOf(getDotPosition()));
+//        sb.append(" ");
+//        sb.append(getRule().getLhs());
+//        sb.append(" ");
+//        sb.append(Arrays.toString(rule.getRhs()));
+//
+////        int dotPos = getDotPosition();
+////        String[] rhs = rule.getRhs();
+////        for (int i = 0; i < rhs.length; i++) {
+////            if (i == dotPos) {
+////                sb.append(".");
+////            }
+////
+////            sb.append(rhs[i]);
+////        }
+////        if (dotPos >= rhs.length) {
+////            sb.append(".");
+////        }
+////        sb.insert(0, " ");
+////        sb.insert(0, getRule().getLhs());
+////        sb.insert(0, " ");
+////        sb.insert(0, String.valueOf(getStartPosition()));
+//        this.key = sb.toString();
+//
+//    }
 
     public double getWeight() {
         return weight;
@@ -94,7 +102,7 @@ public class DottedRule {
     private int dotPosition;
     private Rule rule;
     private double weight;
-    private String key;
+//    private String key;
 
 
     public DottedRule(int startPosition, int dotPosition, Rule rule, double weight) {
@@ -103,8 +111,8 @@ public class DottedRule {
         this.rule = rule;
         this.weight = weight;
         this.childCnt = 0;
-        if (this.rule != null) {
-            genKey();
-        }
+//        if (this.rule != null) {
+//            genKey();
+//        }
     }
 }
