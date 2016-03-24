@@ -10,7 +10,6 @@ public class Earley {
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
-//    private List<Boolean> processed;
 
     public Earley() {
         this.check = new HashMap<String, List<DottedRule>>();
@@ -18,7 +17,6 @@ public class Earley {
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
         this.dottedRulePos = new HashMap<String, DottedRule>();
-//        this.processed = new ArrayList<Boolean>();
 
     }
 
@@ -33,7 +31,11 @@ public class Earley {
 
         for (String orgSen : sentences) {
             String[] sen = orgSen.split(" ");
+            long startTime = System.nanoTime();
             System.out.println(decode(sen));
+            long endTime = System.nanoTime();
+            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
+
         }
     }
 
@@ -44,7 +46,6 @@ public class Earley {
         chartTail.clear();
         check.clear();
         dottedRulePos.clear();
-//        processed.clear();
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -87,8 +88,7 @@ public class Earley {
         DottedRule bestParse = null;
         double bestScore = Double.MAX_VALUE;
         while (curr != null) {
-//            if (curr.getStartPosition() == 0 && curr.getRule().getLhs().equals("ROOT")) {
-            if (curr.getRule().getLhs().equals("ROOT")) {
+            if (curr.getStartPosition() == 0 && curr.getRule().getLhs().equals("ROOT")) {
                 if (curr.getWeight() < bestScore) {
                     bestParse = curr;
                     bestScore = curr.getWeight();
@@ -96,15 +96,11 @@ public class Earley {
             }
             curr = curr.next;
         }
-//
-//        for (int i = chartHead.size() - 1; i >= 0; i--) {
-//            printChart(i);
-//        }
 
         if (bestParse == null) {
             return "None";
         } else {
-            printEntry (bestParse, true);
+            printEntry(bestParse, true);
 
             System.out.println();
             System.out.println("best weight:" + Double.toString(bestScore));
@@ -141,17 +137,18 @@ public class Earley {
         // unique key for each entry in the Early chart
         String checkKey = genCheckKey(colNum, dottedRule, predictKey);
 
-        List<Rule> predictResult = rules.get(predictKey);
-        List<DottedRule> dottedPredictResult = new ArrayList<DottedRule>();
 
         // Check if the predicted rule is already in the column
         if (!check.containsKey(checkKey)) {
+
+            List<Rule> predictResult = rules.get(predictKey);
+            List<DottedRule> dottedPredictResult = new ArrayList<DottedRule>();
             for (Rule rule : predictResult) {
                 // the initial dotted rule predicted should be 0
                 // once the dot moves to the right, add the weight of rules
                 // on the left
                 DottedRule next = new DottedRule(colNum, 0, rule, rule.getWeight());
-//                next.previous = dottedRule;
+                next.previous = dottedRule;
                 addToChart(next, colNum);
                 dottedPredictResult.add(next);
             }
@@ -186,7 +183,6 @@ public class Earley {
     private void attach(DottedRule dottedRule, int colNum) {
         String match = dottedRule.getRule().getLhs();
         DottedRule head = chartHead.get(dottedRule.getStartPosition());
-
         /*
          From the startPos column, find the DottedRules that have the same grammar at the right of the dot.
          Attached the found DottedRule in the current column.
@@ -205,16 +201,19 @@ public class Earley {
                 newDottedRule.previousColumn = head;
                 newDottedRule.previous = dottedRule;
                 if (!check.containsKey(attachCheckKey)) {
+
                     addToChart(newDottedRule, colNum);
                     check.put(attachCheckKey, null);
                 } else {
                     //replace if the weight is better
                     replaceDottedRule(newDottedRule, colNum);
                 }
+
             }
             head = head.next;
         }
     }
+
 
     /*
      Check the given DottedRule is better than the same rule in the specified column.
@@ -249,65 +248,10 @@ public class Earley {
             chartTail.set(colNum, tail.next);
             dottedRulePos.put(String.valueOf(colNum) + "_" + dottedRule.toString(), dottedRule);
         }
+//        if (colNum == 3)
+//            printChart(colNum);
     }
 
-//    private void printEntry(DottedRule bestParse) {
-//        int numOfBracket = 0;
-//        while (bestParse != null) {
-//
-//            if (bestParse.getDotPosition() > 1) {
-//
-//                // Test if the rule before dot is terminal
-//                StringBuilder sb = new StringBuilder();
-//                for (int i = bestParse.getDotPosition() - 1; i >=0; i--) {
-////                    String ruleBeforeDot = bestParse.getRule().getRhs()[bestParse.getDotPosition() - 1];
-//                    String ruleBeforeDot = bestParse.getRule().getRhs()[i];
-//                    if (!rules.containsKey(ruleBeforeDot)) {
-//                        sb.insert(0, ruleBeforeDot);
-//                    } else {
-//                        break;
-//                    }
-//                }
-//
-//                // TODO:
-////                if (!rules.containsKey(ruleBeforeDot)) {
-//                if (sb.length() > 0) {
-//                    if (bestParse.previousColumn.previous == null) {
-//                        printEntry(bestParse.previousColumn);
-//                    }
-//                    else {
-//                        printEntry(bestParse.previousColumn.previous);
-//                    }
-//
-////                    System.out.print(" " + ruleBeforeDot + " ");
-//                    System.out.print(" " + sb.toString() + " ");
-//                }
-//                else {
-//
-//                    System.out.print("(" + bestParse.getRule().getLhs() + " ");
-//                    numOfBracket++;
-//                    printEntry(bestParse.previousColumn);
-////                    System.out.print(" " + sb.toString() + " ");
-//
-//                }
-//
-//            }
-//            else {
-//                System.out.print("(" + bestParse.getRule().getLhs() + " ");
-//
-//                //TODO: could it be more than 1 terminals correspond to one particular rule?
-//                if (!rules.containsKey(bestParse.getRule().getRhs()[0])) {
-//                    System.out.print(bestParse.getRule().getRhs()[0]);
-//                }
-//                numOfBracket++;
-//            }
-//            bestParse = bestParse.previous;
-//        }
-//
-//        for (int i = 0; i < numOfBracket; i++) {
-//            System.out.print(")");
-//        }
-//    }
 
     private void printEntry(DottedRule bestParse, boolean start) {
         if (bestParse.previousColumn == null) {
@@ -329,20 +273,31 @@ public class Earley {
         }
     }
 
+    private void printEntry2(DottedRule bestParse) {
+        if (bestParse == null){
+            return;
+        }
+
+        if (bestParse.previousColumn != null) {
+            printEntry2(bestParse.previousColumn);
+        }
+
+    }
+
     private void printChart(int colNum) {
         for (int i = colNum; i < chartHead.size(); i++) {
             System.out.println("-----" + Integer.toString(i) + "th column -----");
             DottedRule h = chartHead.get(i);
             while (h != null) {
                 System.out.println(h.toString());
-//                if (h.previousColumn != null) {
+                if (h.previousColumn != null) {
 //                    System.out.print("  previous column is " + h.previousColumn.toString());
-//                    if (h.previous != null) {
+                    if (h.previous != null) {
 //                        System.out.println();
 //                        System.out.print("  previous is " + h.previous.toString());
-//                    }
-//                    System.out.println();
-//                }
+                    }
+                    System.out.println();
+                }
                 h = h.next;
             }
         }
