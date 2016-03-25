@@ -7,7 +7,6 @@ import java.util.List;
 
 public class Parse {
     HashMap<String, List<Rule>> grammars = new HashMap<String, List<Rule>> ();
-//    HashMap<String, List<DottedRule>> entries = new HashMap<String, List<DottedRule>>();
     List<String> sentences = new ArrayList<String>();
 
 

@@ -10,6 +10,7 @@ public class Earley {
     private List<DottedRule> chartHead;           // keep the first DottedRule of each column
     private List<DottedRule> chartTail;
     private Map<String, DottedRule> dottedRulePos;// record the position of DottedRules
+    private StringBuilder sb;
 
     public Earley() {
         this.check = new HashMap<String, List<DottedRule>>();
@@ -17,6 +18,7 @@ public class Earley {
         this.chartTail = new ArrayList<DottedRule>();
         this.rules = null;
         this.dottedRulePos = new HashMap<String, DottedRule>();
+        this.sb = new StringBuilder();
 
     }
 
@@ -31,21 +33,22 @@ public class Earley {
 
         for (String orgSen : sentences) {
             String[] sen = orgSen.split(" ");
-            long startTime = System.nanoTime();
+//            long startTime = System.nanoTime();
             System.out.println(decode(sen));
-            long endTime = System.nanoTime();
-            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
+//            long endTime = System.nanoTime();
+//            System.out.println("Running time: " + (endTime - startTime)/1000000 + " ms");
 
         }
     }
 
     private String decode(String[] sen) {
-        System.out.println(Arrays.toString(sen));
+//        System.out.println(Arrays.toString(sen));
 
         chartHead.clear();
         chartTail.clear();
         check.clear();
         dottedRulePos.clear();
+        sb.setLength(0);
 
         // initialize root dottedRule
         List<Rule> root = this.rules.get("ROOT");
@@ -101,9 +104,11 @@ public class Earley {
             return "None";
         } else {
             printEntry(bestParse, true);
+            System.out.println(sb.toString().trim());
 
-            System.out.println();
-            System.out.println("best weight:" + Double.toString(bestScore));
+//            System.out.println();
+//            System.out.println("best weight:" + Double.toString(bestScore));
+            System.out.println(Double.toString(bestScore));
             return "";
         }
 
@@ -255,53 +260,45 @@ public class Earley {
 
     private void printEntry(DottedRule bestParse, boolean start) {
         if (bestParse.previousColumn == null) {
-            System.out.print("(" + bestParse.getRule().getLhs() + " ");
+            sb.append(" (");
+            sb.append(bestParse.getRule().getLhs());
         } else {
             printEntry(bestParse.previousColumn, false);
             if (bestParse.previous == null) {
                 int i = bestParse.getDotPosition() - 1;
                 if (i >= 0) {
-                    System.out.print(" " + bestParse.getRule().getRhs()[i] + " ");
+                    sb.append(" ");
+                    sb.append(bestParse.getRule().getRhs()[i]);
                 }
             } else {
                 printEntry(bestParse.previous, false);
-                System.out.print(")");
+                sb.append(")");
             }
         }
         if (start) {
-            System.out.println(")");
+            sb.append(")");
         }
     }
 
-    private void printEntry2(DottedRule bestParse) {
-        if (bestParse == null){
-            return;
-        }
 
-        if (bestParse.previousColumn != null) {
-            printEntry2(bestParse.previousColumn);
-        }
-
-    }
-
-    private void printChart(int colNum) {
-        for (int i = colNum; i < chartHead.size(); i++) {
-            System.out.println("-----" + Integer.toString(i) + "th column -----");
-            DottedRule h = chartHead.get(i);
-            while (h != null) {
-                System.out.println(h.toString());
-                if (h.previousColumn != null) {
-//                    System.out.print("  previous column is " + h.previousColumn.toString());
-                    if (h.previous != null) {
-//                        System.out.println();
-//                        System.out.print("  previous is " + h.previous.toString());
-                    }
-                    System.out.println();
-                }
-                h = h.next;
-            }
-        }
-    }
+//    private void printChart(int colNum) {
+//        for (int i = colNum; i < chartHead.size(); i++) {
+//            System.out.println("-----" + Integer.toString(i) + "th column -----");
+//            DottedRule h = chartHead.get(i);
+//            while (h != null) {
+//                System.out.println(h.toString());
+//                if (h.previousColumn != null) {
+////                    System.out.print("  previous column is " + h.previousColumn.toString());
+//                    if (h.previous != null) {
+////                        System.out.println();
+////                        System.out.print("  previous is " + h.previous.toString());
+//                    }
+//                    System.out.println();
+//                }
+//                h = h.next;
+//            }
+//        }
+//    }
 
     private String genPredictKey(DottedRule dottedRule) {
         return dottedRule.getRule().getRhs()[dottedRule.getDotPosition()];
