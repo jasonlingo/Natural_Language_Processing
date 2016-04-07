@@ -59,11 +59,11 @@ public class Parse3 {
     }
 
     public static  void main(String[] args) throws IOException {
-        Parse3 p = new Parse3(args[0], args[1]);
-        Earley3 e = new Earley3();
-        e.setRules(p.grammars);
-        e.parse(p.sentences);
-
+//        Parse3 p = new Parse3(args[0], args[1]);
+//        Earley3 e = new Earley3();
+//        e.setRules(p.grammars);
+//        e.parse(p.sentences);
+        System.out.println(2 >> 1);
 
         
     }
