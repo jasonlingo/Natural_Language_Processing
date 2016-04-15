@@ -1,0 +1,140 @@
+600.465 -- Natural Language Processing
+Assignment 5: Semantics
+Li-Yi Lin / llin34
+
+Problem 3:
+(a)
+i.  f = %x loves(Mary, x)
+ii. loves(Mary)
+
+(b)
+The VP in the sentence will be a "unary predicate", namely loves(Mary).
+
+(c)
+i.  f = %y (A%x woman(x) => loves(x, y)) 
+ii. f: y loves all women.
+    f(John): John loves all women.
+
+(d)
+f = %v %x obviously(v(x))
+
+we can use
+f(%x loves(Mary, x))(sue) 
+= (%x obviously((loves(Mary, x)))(sue)
+= obviously(loves(Mary, sue))
+
+(e)
+f = %x %y %e act(e, loving) ^ lovee(e, x) ^ lover(e, y)
+
+(f)
+f(Mary) = %y %e act(e, loving) ^ lovee(e, Mary) ^ lover(e, y)
+So we pop out and then push %y and %e.
+g = %v %y %e v(y, e) ^ manner(e, passionate)
+
+(g)
+i.  f = %v A%y woman(y) => v(y)
+ii. f(%x loves(Mary, x)): all women love Mary.
+    (%x loves(Mary, x)): x loves Mary.
+    f: all women will satisfy v function
+
+(h)
+i.  g = %u %v %y A%y u(y) => v(y)
+ii. imply
+
+(i)
+i.  f = %v v(Papa)
+ii. The semantics mean that no matter what x is, Papa loves Mary. Whereas in 3(g), it only means that all women love Mary. However the two semantics do not contradict with each other because even Papa is not a woman, Papa can still love Mary.
+
+
+Problem 4:
+ROOT: him love -s she . 
+Attributes: sem=Assert(Speaker, Pres(love(her,him))) head=love
+=> This is an ungrammatical sentence because it uses "him" instead of "he" to be the subject of the sentence. The parse should print "No consistent way to assign attributes!"
+
+
+ROOT: Papa eat -ed every bonbon with a spoon . 
+Attributes: sem=Assert(Speaker, Past(eat(all(%x bonbon(x) ^ with(some(spoon),x)),Papa))) head=eat
+=> The attributes for this sentence is inappropriate because it means that every bonbon has a spoon, not Papa eats every bonbon using a spoon, which is more reasonable.
+
+
+ROOT: Papa is chief of staff . 
+Attributes: sem=Assert(Speaker, Pres(chief_of_staff(Papa))) head=be
+=> There is no determiner for the "chief of staff", which is a singluar noun. Thus, the parser should output "No consistent way to assign attributes!"
+
+
+ROOT: the fine and blue woman and every man must have eat -ed two sandwich -s and sleep -ed on the floor . 
+No consistent way to assign attributes!  (Maybe another parse?)
+=> This should be a grammatical sentence but the parser didn't give semantic attributes for this sentence.
+
+
+Problem 5:
+For supporting "mass" attribute, I added following rules into the "english.gra":
+1 S[=2 sem=Past(2(1))]  NP[num=mass] VP[num=sing tense=pres]
+1 S[=2 sem=Past(2(1))]  NP[num=mass] VP[num=sing tense=past]
+1 S[=2 sem=2(1)]    NP[num=mass] VP[num=sing tense=modal] 
+1 Det[=1 num=mass sem=the_mass]       the  
+1 Det[=1 num=mass sem=all_mass]         all 
+1 Det[=1 num=mass sem=some_mass]       some  # same as "a"
+1 Det[=1 num=mass sem="%n thea_mass(%x n(x)^possess(x,him))"]  his 
+1 Det[=1 num=mass sem="%n the_mass(%x n(x)^possess(x,her))"]  her
+1 Det[=1 num=mass sem="%n the_mass(%x n(x)^possess(x,it))"]   its
+1 Det[=1 num=mass sem="%n the_mass(%x n(x)^possess(x,them))"] their 
+
+Added the mass noun "caviar" as well.
+1 N[=1 num=mass] caviar
+
+By adding those rules, the mass noun can share the same rules that related to singular nouns and singular verbs.
+
+The new "english.gra" is tested by the following sentence:
+(1) 
+ROOT: George love -s the caviar . 
+Attributes: sem=Assert(Speaker, Pres(love(the_mass(caviar),George))) head=love
+=> It correctly parsed the "caviar" with a mass determiner.
+
+(2) 
+ROOT: Papa eat -ed a caviar with a spoon . 
+No consistent way to assign attributes!  (Maybe another parse?)
+=> Because singular determiner cannot be used on mass noun (it is ungrammatical), it couldn't find a consistent parse.
+
+(3)
+ROOT: Papa eat -ed his caviar with a spoon . 
+Attributes: sem=Assert(Speaker, Past(with(some(spoon),eat(the_mass(%x caviar(x)^possess(x,him)),Papa)))) head=eat
+=> It correctly parsed the "caviar" with a mass determiner.
+
+(4)
+ROOT: all caviar was go -ing to have been delicious . 
+Attributes: head=be sem=Assert(Speaker, Past(Prog(Will(Perf(delicious(all_mass(caviar)))))))
+=> It correctly use plural determiner and singular verb for the "caviar".
+
+(5) 
+ROOT: all caviar is delicious . 
+Attributes: head=be sem=Assert(Speaker, Past(delicious(all_mass(caviar))))
+=> It correctly use plural determiner and singular verb for the "caviar".
+
+(6)
+ROOT: Papa would have eat -ed his sandwich -s and the caviar . 
+Attributes: sem=Assert(Speaker, would(Perf(eat(and(the_plural(%x sandwich(x)^possess(x,him)),the_mass(caviar)),Papa)))) head=eat
+=> It correctly parsed the caviar with a mass determiner.
+
+
+In the beginning, I tried to make all the plural nouns use the determiners for mass nouns and add some extra determiners that can only for plural nouns, "two" for example. However, this method will have some strange outputs as following example:
+ROOT: all caviar is delicious . 
+Attributes: sem=Assert(Speaker, Past(delicious(all_mass(caviar)))) head=be
+Or:       sem=Assert(Speaker, Past(delicious(all_mass(caviar)))) head=be
+=> It outputed the same parse twice.
+
+
+Problem 6.
+(a)
+For "two", it uses "%dom %pred E%first E%second [first!=second ^ dom(first)^dom(second)] ^ pred(first) ^ pred(second)" as its semantic lambda-term. It means that there exist "first" and "second" such that they are different (not equivalent to each other) and they belong to the same domain (dom) and satisfy the "pred" (predicate). In short, it is used to identify two subject belongs to the same "dom".
+
+For the singular "the", it uses "%dom %pred E%t [dom(t) ^ !E%u u!=t ^ dom(u)] ^ pred(t)" as its semantic lambda-term. It means that there exists a "t" such that it belongs to "dom" and there is no other "u" that is different from "t" and also belongs to dom. In addition, "t" also satisfy the "pred". In other words, "the" is used to identify a specific "t".
+
+For the plural "the", it uses "%dom %pred E%T [exhaustive(T,dom)] ^ pred(T)" as its semantic lambda-term. It means that there is a "T" that includes all the subject in the "dom" and it satisfies the "pred". In other words, "T" represents all the subjects that belong to the same "dom" and satisfy the "pred".
+
+(b) ??? can be replaced by "2(1,3)"
+
+
+
+
+
