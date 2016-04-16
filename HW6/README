@@ -17,12 +17,25 @@
 	p(H) on day 1 changed from 1.0 to 0. p(H) on day 2 changed from 0.995 to 0.557.
 
 	(b)
-	i. p(H) immediately falls to 0 when 1 ice cream is eaten during the day.
+	i. p(H) immediately falls to 0 when only 1 ice cream is eaten during the day.
 
 	ii. The graph looks exactly the same as the one before reestimation.
 
 	iii. p(1 | H) = 0.
-	Since we changed p(1 | H) from 0.1 to 0, 
+	The probability p(1 | H) after 10 iterations is defined by sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ).
+	
+	Each p_d(H, 1) is equal to p_d(H) if only 1 ice cream is consumed at that day and equal to 0 otherwise.
+	
+	p_d(H) = (alpha_d(H) * beta_d(H) / ( alpha_d(H) * beta_d(H) + alpha_d(C) * beta_d(C) )
+	
+	alpha_d(H) = ( alpha_{d-1}(C) * p(H | C) + alpha_{d-1}(H) * p(H | H) ) * p(1 | H) if 1 ice cream is cunsumed at day d.
+	
+	p(1 | H) at 10th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 9th iteration, 
+	and p(1 | H) at 9th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 8th iteration, and so on.
+
+	Since we changed p(1 | H) from 0.1 to 0 at the beginning, all alpha_d(H) that relates to eating 1 ice cream at day d in each iteration will be 0. Therefore, p_d(H, 1) will also be 0.
+	
+	Thus, p(1 | H) = sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) = 0 after 10 iterations.
 
 
 
