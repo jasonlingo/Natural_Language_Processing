@@ -1,0 +1,29 @@
+1.
+	(a)
+	i. The new probability of day 1 is hot is 0.491 (the old probability is 0.871).
+
+		p(133 | HHH) = p(1 | H) * p(3 | H) * p(3 | H) = 0.1 * 0.7 * 0.7 = 0.049
+
+		p(133 | CHH) = p(1 | C) * p(3 | H) * p(3 | H) = 0.7 * 0.7 * 0.7 = 0.343
+
+	The probability CHH as explanations of the first three days of data is higher, that's why the probability of first day being hot goes down.
+
+
+	ii.	The probability that day 2 is hot changes from 0.977 to 0.918.
+		Cell K28.
+
+	iii. The graph of p(H) and p(H -> H) on day 1 fell greatly (from approximately 0.9 to 0), while the plot of p(H -> C) and p(C -> C) on day 1 raised slightly. Other part of the graph almost remains unchanged.
+
+	p(H) on day 1 changed from 1.0 to 0. p(H) on day 2 changed from 0.995 to 0.557.
+
+	(b)
+	i. p(H) immediately falls to 0 when 1 ice cream is eaten during the day.
+
+	ii. The graph looks exactly the same as the one before reestimation.
+
+	iii. p(1 | H) = 0.
+	Since we changed p(1 | H) from 0.1 to 0, 
+
+
+
+
