@@ -37,6 +37,9 @@
 	
 	Thus, p(1 | H) = sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) = 0 after 10 iterations.
 
+	(c)
+	1. 
+
 
 
 
