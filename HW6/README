@@ -22,7 +22,11 @@
 	ii. The graph looks exactly the same as the one before reestimation.
 
 	iii. p(1 | H) = 0.
-	Since we changed p(1 | H) from 0.1 to 0, 
+	Since we changed p(1 | H) from 0.1 to 0, the values of entire column of p(->H, 1) turn to 0, making the new value of p(1 | H) in the next iteration 0 and so on. 
+
+	(c) The first word's beta probability.
+	
+
 
 
 
