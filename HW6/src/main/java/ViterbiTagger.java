@@ -4,5 +4,17 @@
 public class ViterbiTagger {
 
 
-    
+    public ViterbiTagger() {
+
+    }
+
+
+
+
+    public static void main(String[] args) {
+
+
+
+    }
+
 }
