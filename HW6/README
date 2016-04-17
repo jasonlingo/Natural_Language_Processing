@@ -1,50 +1,77 @@
 1.
-	(a)
-	i. The new probability of day 1 is hot is 0.491 (the old probability is 0.871).
+    (a)
+    i. The new probability of day 1 is hot is 0.491 (the old probability is 0.871).
+    
+       Because we want to know the probability of p(H) for the first day given the 133 data for the first 3 days, we need to calculate the probability of P(HHH | 133) and P(CHH | 133). By Bayesian theorem, we can calculate them by following equations:
+      
+      
+        ##### need to check again #####
+        p(HHH | 133) = p(133 | HHH) * p(HHH) / p(133)
+                     = P(1 | H) * P(3 | H) * p(3 | H) / p(133)
+                     = 0.049 / p(133)
+      
+        p(CHH | 133) = p(133 | CHH) * p(CHH) / p(133)
+                     = p(1 | C) * p(3 | H) * p(3 | H) 
+                     = 0.343 / p(133)
+        ###############################
+        p(133 | HHH) = p(1 | H) * p(3 | H) * p(3 | H) = 0.049
+        p(133 | CHH) = p(1 | C) * p(3 | H) * p(3 | H) = 0.343
 
-		p(133 | HHH) = p(1 | H) * p(3 | H) * p(3 | H) = 0.1 * 0.7 * 0.7 = 0.049
-
-		p(133 | CHH) = p(1 | C) * p(3 | H) * p(3 | H) = 0.7 * 0.7 * 0.7 = 0.343
-
-	The probability CHH as explanations of the first three days of data is higher, that's why the probability of first day being hot goes down.
-
-
-	ii.	The probability that day 2 is hot changes from 0.977 to 0.918.
-		Cell K28.
-
-	iii. The graph of p(H) and p(H -> H) on day 1 fell greatly (from approximately 0.9 to 0), while the plot of p(H -> C) and p(C -> C) on day 1 raised slightly. Other part of the graph almost remains unchanged.
-
-	p(H) on day 1 changed from 1.0 to 0. p(H) on day 2 changed from 0.995 to 0.557.
-
-	(b)
-	i. p(H) immediately falls to 0 when only 1 ice cream is eaten during the day.
-
-	ii. The graph looks exactly the same as the one before reestimation.
-
-	iii. p(1 | H) = 0.
-
-	The probability p(1 | H) after 10 iterations is defined by sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ).
-	
-	Each p_d(H, 1) is equal to p_d(H) if only 1 ice cream is consumed at that day and equal to 0 otherwise.
-	
-	p_d(H) = (alpha_d(H) * beta_d(H) / ( alpha_d(H) * beta_d(H) + alpha_d(C) * beta_d(C) )
-	
-	alpha_d(H) = ( alpha_{d-1}(C) * p(H | C) + alpha_{d-1}(H) * p(H | H) ) * p(1 | H) if 1 ice cream is consumed at day d.
-	
-	p(1 | H) at 10th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 9th iteration, 
-	and p(1 | H) at 9th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 8th iteration, and so on.
-
-	Since we changed p(1 | H) from 0.1 to 0 at the beginning, all alpha_d(H) that relates to eating 1 ice cream at day d in each iteration will be 0. Therefore, p_d(H, 1) will also be 0.
-	
-	Thus, p(1 | H) = sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) = 0 after 10 iterations.
-
-	(c)
-	1. 
+    The probability CHH as explanations of the first three days of data is higher, that's why the probability of first day being hot goes down.
 
 
-	(c)
-		i. The first word's beta probability.
-		ii. 
+    ii.    The probability that day 2 is hot changes from 0.977 to 0.918.
+        Cell K28.
+
+    iii. The graph of p(H) and p(H -> H) on day 1 fell greatly (from approximately 0.9 to 0), while the plot of p(H -> C) and p(C -> C) on day 1 raised slightly. Other part of the graph almost remains unchanged.
+
+    p(H) on day 1 changed from 1.0 to 0. p(H) on day 2 changed from 0.995 to 0.557.
+
+    (b)
+    i. p(H) immediately falls to 0 when only 1 ice cream is eaten during the day.
+
+    ii. The graph looks exactly the same as the one before reestimation.
+
+    iii. p(1 | H) = 0.
+
+    The probability p(1 | H) after 10 iterations is defined by sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ).
+    
+    Each p_d(H, 1) is equal to p_d(H) if only 1 ice cream is consumed at that day and equal to 0 otherwise.
+    
+    p_d(H) = (alpha_d(H) * beta_d(H) / ( alpha_d(H) * beta_d(H) + alpha_d(C) * beta_d(C) )
+    
+    alpha_d(H) = ( alpha_{d-1}(C) * p(H | C) + alpha_{d-1}(H) * p(H | H) ) * p(1 | H) if 1 ice cream is consumed at day d.
+    
+    p(1 | H) at 10th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 9th iteration, 
+    and p(1 | H) at 9th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 8th iteration, and so on.
+
+    Since we changed p(1 | H) from 0.1 to 0 at the beginning, all alpha_d(H) that relates to eating 1 ice cream at day d in each iteration will be 0. Therefore, p_d(H, 1) will also be 0.
+    
+    Thus, p(1 | H) = sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) = 0 after 10 iterations.
+
+
+    (c)
+        i. The sum of all first word's beta probabilities.
+        ii. An H constituent means that particular day with known ice cream consumption ends with a "Hot" tag.
+        All the rule we have is 
+        START -> 2 C
+        C     -> 3 H
+        H     -> 1 C
+        H     -> epsilon
+        
+        So, 
+        p(H -> 1 C) = 0.5
+        p(H -> epsilon) = 0.5
+        
+        By using the approach on the right hand side, the rules can be more flexible and the total number of rules can possibly reduced. For example, we can write following rules:
+        START -> EC C
+        EC    -> 1
+        EC    -> 2
+        EC    -> 3
+        ...
+        
+        
+        
 
 
 

@@ -89,7 +89,7 @@ public class ViterbiTagger {
 
         // Reduce the count of "###" by 1 (the last one) and half the count
         // Looks pretty much like hard code here
-        countItems.replace("###", (countItems.get("###") - 1 )/ 2);
+        countItems.replace("###", countItems.get("###")/ 2 - 1);
     }
 
 

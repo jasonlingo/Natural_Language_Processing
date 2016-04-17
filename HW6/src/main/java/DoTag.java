@@ -54,13 +54,25 @@ public class DoTag {
         correct -= 2;
         System.out.println((double)(correct) / (result.size() - 2));
         double perplexity = 0;
-        double prob = 0.0;
-        for (int i = 0; i < result .size(); i++) {
+        double prob = 1.0;
+        for (int i = 0; i < result.size(); i++) {
             System.out.println(result.get(i) + "/" + i + "\t\t" + tagger.mus.get(result.get(i) + "/" + i));
-            prob = Math.max(prob, tagger.mus.get(result.get(i) + "/" + i));
         }
 
-        perplexity = Math.pow(2.0, -Math.log(prob) / (Math.log(2) * 34));
+        double countFirstBigram = tagger.countItems.get(dt.words.get(0)) + tagger.countItems.get(result.get(0));
+        System.out.println("c(w0t0) " + countFirstBigram);
+        for (int i = 1; i < result.size(); i++) {
+            double curBigramCount = tagger.countItems.get(dt.words.get(i) + "/" + result.get(i));
+//            double curCount =
+
+//            System.out.println("c(witi) " +  curBigramCount);
+//            prob *= curCount / countFirstBigram;
+
+//            curCount = tagger.countItems.get(result.get(i));
+            prob *= ( tagger.mus.get(result.get(i) + "/" + i) / tagger.mus.get(result.get(0) + "/" + 0));
+        }
+
+        perplexity = Math.exp(- Math.log( prob ) / 34);
         System.out.println(perplexity);
     }
 }
