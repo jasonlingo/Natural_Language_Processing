@@ -15,7 +15,6 @@ public class ViterbiTagger {
     HashMap<String, String> backPointers;
     HashSet<String> allTags;
 
-
     public ViterbiTagger() {
         this.tagDict = new HashMap<String, HashSet<String>>();
         this.countItems = new HashMap<String, Double>();
@@ -210,11 +209,18 @@ public class ViterbiTagger {
         double totAccu = (double)totCorrect / (double)totCnt * 100;
         double knownAccu = 0.0;
         double novelAccu = 0.0;
-        double perp = 0.0;
+        double perplexity = 0.0;
+
+        // calculate perplexity
+        double prob = 0.0;
+        for (int i = 0; i < result .size(); i++) {
+//            System.out.println(result.get(i) + "/" + i + "\t\t" + mus.get(result.get(i) + "/" + i));
+            prob += Math.max(prob, mus.get(result.get(i) + "/" + i));
+        }
 
         //output format
         System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
-        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f", perp);
+        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
 
     }
 
