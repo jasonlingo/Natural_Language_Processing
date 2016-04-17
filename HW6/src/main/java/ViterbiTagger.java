@@ -96,13 +96,14 @@ public class ViterbiTagger {
 
         for (int i = 1; i < words.size(); i++) {
             List<String> candidateTag = tagDict.get(words.get(i));
+            List<String> prevCandidateTag = tagDict.get(words.get(i - 1));
 
             for (String tag : candidateTag) {
-                List<String> prevCandidateTag = tagDict.get(words.get(i - 1));
                 for (String prevTag : prevCandidateTag) {
-                    double p_tt = (countItems.get(tag + "_" + prevTag)) / countItems.get(prevTag);
-                    double p_tw = (countItems.get(words.get(i) + "_" + tag)) / countItems.get(tag);
+                    double p_tt = ((double)countItems.get(prevTag + "_" + tag)) / (double) countItems.get(prevTag);
+                    double p_tw = ((double)countItems.get(words.get(i) + "_" + tag)) / (double) countItems.get(tag);
                     double currentMu = mus.get(prevTag + "_" + (i - 1)) * p_tt * p_tw;
+
                     if (!mus.containsKey(tag + "_" + i) || mus.get(tag + "_" + i) < currentMu) {
                         mus.put(tag + "_" + i, currentMu);
                         backPointers.put(tag + "_" + i, prevTag);
