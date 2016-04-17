@@ -88,6 +88,9 @@ public class ViterbiTagger {
             // divide the count of ### by 2 and minus the last one
             double bndTagCnt = countItems.get("###");
             countItems.replace("###", bndTagCnt / 2 - 1);
+
+            // reduce the number of ###/### by 1 because we need to ignore the first or last ###/### in unigram counting
+            // but need them in bigram counting.
             countItems.replace("###/###", countItems.get("###/###") - 1);
 
             // we don't try ### for novel words
@@ -142,7 +145,6 @@ public class ViterbiTagger {
                     if (novelWord) {
                         p_tw = 1.0;
                     } else {
-                        String key = words.get(i) + "/" + tag;
                         p_tw = (countItems.get(words.get(i) + "/" + tag)) / countItems.get(tag);
                     }
 
@@ -198,7 +200,7 @@ public class ViterbiTagger {
         perplexity = exp( - (log p(w1, t1, ..., wn, tn | w0, t0)) / n )
 
      */
-    public void computeAccuracy(List<String> result, List<String> ans) {
+    public void computeAccuracy(List<String> words, List<String> result, List<String> ans) {
         int totCnt          = 0;
         int totCorrect      = 0;
         int totKnownCnt     = 0;
@@ -207,43 +209,54 @@ public class ViterbiTagger {
         int totNovelCorrect = 0;
 
         for(int i = 0; i < result.size(); i++) {
+            String word   = words.get(i);
             String resTag = result.get(i);
             String ansTag = ans.get(i);
+
             if (resTag.equals("###")) {
                 // we don't count ###
                 continue;
             }
 
+            boolean correct = false;
+            // count overall correct data
             totCnt++;
             if (resTag.equals(ansTag)) {
                 totCorrect++;
+                correct = true;
+            }
+
+            if (tagDict.containsKey(word)) {
+                // count known word correct data
+                totKnownCnt++;
+                if (correct) {
+                    totKnowCorrect++;
+                }
+            } else {
+                // count novel word correct data
+                totNovelCnt++;
+                if (correct) {
+                    totNovelCorrect++;
+                }
+
             }
         }
 
-        double totAccu = (double)totCorrect / (double)totCnt * 100;
-        double knownAccu = 0.0;
-        double novelAccu = 0.0;
+        // calcuate accuracy
+        double totAccu   = (double)totCorrect / (double)totCnt * 100;
+        double knownAccu = (double)totKnowCorrect / (double)totKnownCnt * 100;
+        double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
+
+        // Calculate perplexity
         String key = result.get(result.size() - 1) + "/" + String.valueOf(result.size() - 1);
         double prob = mus.get(key) / Math.log(2);
-
         double perplexity = Math.pow(2, -prob/34.0);
 
 
         //output format
-        System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
+        System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%)\n", totAccu, knownAccu, novelAccu);
         System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
 
     }
 
-    // Main method for testing IO
-//    public static void main(String[] args) throws IOException {
-//        ViterbiTagger3 vt = new ViterbiTagger3();
-//        vt.readFile("data/ictrain");
-//        for (Map.Entry<String, Double> entry : vt.countItems.entrySet()) {
-//            System.out.println(entry.getKey() + "/" + entry.getValue());
-//        }
-//
-//
-//
-//    }
 }

@@ -45,7 +45,7 @@ public class DoTag {
 
         List<String> result = tagger.tag(dt.words);
 
-        tagger.computeAccuracy(result, dt.tags);
+        tagger.computeAccuracy(dt.words, result, dt.tags);
 
 //        int correct = 0;
 //        for (int i = 0; i < result.size(); i++) {
