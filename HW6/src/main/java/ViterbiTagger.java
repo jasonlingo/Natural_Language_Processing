@@ -7,10 +7,9 @@ import java.io.*;
 public class ViterbiTagger {
     HashMap<String, List<String>> tagDict;
     HashMap<String, Integer> countItems;
-    HashMap<String, Double> arcProbs;
+    HashMap<String, Double> arcProbs; // Unused yet
     HashMap<String, Double> mus;
-    HashMap<String, String> backPointers; // ??
-
+    HashMap<String, String> backPointers;
 
 
     public ViterbiTagger() {
@@ -34,10 +33,13 @@ public class ViterbiTagger {
                     String word = elements[0];
                     String tag  = elements[1];
 
+                    // Initialize tagDict
                     if (tagDict.containsKey(word)) {
                         List<String> temp = tagDict.get(word);
-                        temp.add(tag);
-                        tagDict.replace(word, temp);
+                        if (!temp.contains(tag)) { // could be time-consuming here
+                            temp.add(tag);
+                            tagDict.replace(word, temp);
+                        }
                     }
                     else {
                         List<String> temp = new ArrayList<String>();
@@ -48,7 +50,7 @@ public class ViterbiTagger {
 
                     // Initialize Bigrams: tag to tag
                     if (prevElements != null) {
-                        String tagTag = prevElements[1] + "_" + elements[1];
+                        String tagTag = prevElements[1] + "/" + tag;
                         if (countItems.containsKey(tagTag)) {
                             countItems.replace(tagTag, countItems.get(tagTag) + 1);
                         }
@@ -59,7 +61,7 @@ public class ViterbiTagger {
                     prevElements = elements;
 
                     // Initialize Bigrams: tag to word
-                    String wordTag = elements[0] + "_" + elements[1];
+                    String wordTag = elements[0] + "/" + elements[1];
                     if (countItems.containsKey(wordTag)) {
                         countItems.replace(wordTag, countItems.get(wordTag) + 1);
                     }
@@ -69,6 +71,9 @@ public class ViterbiTagger {
 
                     // Initialize Unigrams
                     for (String e : elements) {
+                        if (e.equals("###")) {
+                            countItems.put(e, 1);
+                        }
                         if (countItems.containsKey(e)) {
                             countItems.replace(e, countItems.get(e) + 1);
                         }
@@ -92,7 +97,7 @@ public class ViterbiTagger {
 //        List<String> test = readTestFile("data/ictest");
         List<String> tags = new ArrayList<String>();
         tags.add("###");
-        mus.put("###_0", 1.0);
+        mus.put("###/0", 1.0);
 
         for (int i = 1; i < words.size(); i++) {
             List<String> candidateTag = tagDict.get(words.get(i));
@@ -100,13 +105,13 @@ public class ViterbiTagger {
 
             for (String tag : candidateTag) {
                 for (String prevTag : prevCandidateTag) {
-                    double p_tt = ((double)countItems.get(prevTag + "_" + tag)) / (double) countItems.get(prevTag);
-                    double p_tw = ((double)countItems.get(words.get(i) + "_" + tag)) / (double) countItems.get(tag);
-                    double currentMu = mus.get(prevTag + "_" + (i - 1)) * p_tt * p_tw;
+                    double p_tt = ((double)countItems.get(prevTag + "/" + tag)) / (double) countItems.get(prevTag);
+                    double p_tw = ((double)countItems.get(words.get(i) + "/" + tag)) / (double) countItems.get(tag);
+                    double currentMu = mus.get(prevTag + "/" + (i - 1)) * p_tt * p_tw;
 
-                    if (!mus.containsKey(tag + "_" + i) || mus.get(tag + "_" + i) < currentMu) {
-                        mus.put(tag + "_" + i, currentMu);
-                        backPointers.put(tag + "_" + i, prevTag);
+                    if (!mus.containsKey(tag + "/" + i) || mus.get(tag + "/" + i) < currentMu) {
+                        mus.put(tag + "/" + i, currentMu);
+                        backPointers.put(tag + "/" + i, prevTag);
                     }
 
                 }
@@ -114,7 +119,7 @@ public class ViterbiTagger {
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
-            tags.add(0, backPointers.get(tags.get(0) + "_" + i));
+            tags.add(0, backPointers.get(tags.get(0) + "/" + i));
         }
         return tags;
 

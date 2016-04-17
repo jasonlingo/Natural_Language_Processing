@@ -53,5 +53,14 @@ public class DoTag {
 
         correct -= 2;
         System.out.println((double)(correct) / (result.size() - 2));
+        double perplexity = 0;
+        double prob = 0.0;
+        for (int i = 0; i < result .size(); i++) {
+            System.out.println(result.get(i) + "/" + i + "\t\t" + tagger.mus.get(result.get(i) + "/" + i));
+            prob = Math.max(prob, tagger.mus.get(result.get(i) + "/" + i));
+        }
+
+        perplexity = Math.pow(2.0, -Math.log(prob) / (Math.log(2) * 34));
+        System.out.println(perplexity);
     }
 }
