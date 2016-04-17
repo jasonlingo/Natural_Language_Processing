@@ -6,7 +6,8 @@ import java.util.*;
 /**
  * Created by Jason on 4/16/16.
  */
-public class ViterbiTagger2 {
+public class ViterbiTagger3 {
+    private static final boolean DEBUG = false;
     HashMap<String, HashSet<String>> tagDict;
     HashMap<String, Double> countItems;
     HashMap<String, Double> arcProbs;
@@ -15,7 +16,7 @@ public class ViterbiTagger2 {
     int wordIdx;
 
 
-    public ViterbiTagger2() {
+    public ViterbiTagger3() {
         this.tagDict = new HashMap<String, HashSet<String>>();
         this.countItems = new HashMap<String, Double>();
         this.arcProbs = new HashMap<String, Double>();
@@ -84,6 +85,7 @@ public class ViterbiTagger2 {
             // divide the count of ### by 2 and minus the last one
             double startTag = countItems.get("###");
             countItems.replace("###", startTag / 2 - 1);
+
         }catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -107,27 +109,24 @@ public class ViterbiTagger2 {
             for (String tag : candidateTag) {
                 for (String prevTag : prevCandidateTag) {
                     // tag to tag bigram probability
-                    double n1 = countItems.get(prevTag + "/" + tag);
-                    double d1 = countItems.get(prevTag);
                     double p_tt = (countItems.get(prevTag + "/" + tag)) / countItems.get(prevTag);
                     // tag to word probability
-                    double n2 = countItems.get(words.get(i) + "/" + tag);
-                    double d2 = countItems.get(tag);
                     double p_tw = (countItems.get(words.get(i) + "/" + tag)) / countItems.get(tag);
 
-                    double prem = mus.get(prevTag + "/" + preI);
                     double currentMu = mus.get(prevTag + "/" + preI) * p_tt * p_tw;
 
                     if (!mus.containsKey(tag + "/" + currI) || mus.get(tag + "/" + currI) < currentMu) {
-//                        double cuM = mus.get(tag + "_" + currI);
                         mus.put(tag + "/" + currI, currentMu);
                         backPointers.put(tag + "/" + currI, prevTag);
                     }
                 }
             }
-            System.out.printf("T = %d-----\n", i);
-            System.out.printf("%s -> %.13e\n", "C", mus.get("C" + "/" + currI));
-            System.out.printf("%s -> %.13e\n", "H", mus.get("H" + "/" + currI));
+
+            if (DEBUG) {
+                System.out.printf("T = %d-----\n", i);
+                System.out.printf("%s -> %.13e\n", "C", mus.get("C" + "/" + currI));
+                System.out.printf("%s -> %.13e\n", "H", mus.get("H" + "/" + currI));
+            }
 
         }
 
@@ -138,15 +137,58 @@ public class ViterbiTagger2 {
 
     }
 
-    // Main method for testing IO
-    public static void main(String[] args) throws IOException {
-        ViterbiTagger2 vt = new ViterbiTagger2();
-        vt.readFile("data/ictrain");
-        for (Map.Entry<String, Double> entry : vt.countItems.entrySet()) {
-            System.out.println(entry.getKey() + "/" + entry.getValue());
+    /*
+     Compute the tagging accuracy:
+        1. overall accuracy: considers all word tokens, other than the sentence boundary markers ###
+        2. known-word accuracy: considers only tokens of words (other than ###) that also appeared in training data
+        3. novel-word accuracy: consider only tokens of words that did not also appear in training data.
+
+     Compute perplexity:
+        perplexity = exp( - (log p(w1, t1, ..., wn, tn | w0, t0)) / n )
+
+     */
+    public void computeAccuracy(List<String> result, List<String> ans) {
+        int totCnt          = 0;
+        int totCorrect      = 0;
+        int totKnownCnt     = 0;
+        int totKnowCorrect  = 0;
+        int totNovelCnt     = 0;
+        int totNovelCorrect = 0;
+
+        for(int i = 0; i < result.size(); i++) {
+            String resTag = result.get(i);
+            String ansTag = ans.get(i);
+            if (resTag.equals("###")) {
+                // we don't count ###
+                continue;
+            }
+
+            totCnt++;
+            if (resTag.equals(ansTag)) {
+                totCorrect++;
+            }
         }
 
+        double totAccu = (double)totCorrect / (double)totCnt * 100;
+        double knownAccu = 0.0;
+        double novelAccu = 0.0;
+        double perp = 0.0;
 
+        //output format
+        System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
+        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f", perp);
 
     }
+
+    // Main method for testing IO
+//    public static void main(String[] args) throws IOException {
+//        ViterbiTagger3 vt = new ViterbiTagger3();
+//        vt.readFile("data/ictrain");
+//        for (Map.Entry<String, Double> entry : vt.countItems.entrySet()) {
+//            System.out.println(entry.getKey() + "/" + entry.getValue());
+//        }
+//
+//
+//
+//    }
 }
