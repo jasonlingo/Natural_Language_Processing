@@ -15,7 +15,6 @@ public class ViterbiTagger {
     HashMap<String, String> backPointers;
     HashSet<String> allTags;
 
-
     public ViterbiTagger() {
         this.tagDict = new HashMap<String, HashSet<String>>();
         this.countItems = new HashMap<String, Double>();
@@ -89,9 +88,11 @@ public class ViterbiTagger {
             // divide the count of ### by 2 and minus the last one
             double bndTagCnt = countItems.get("###");
             countItems.replace("###", bndTagCnt / 2 - 1);
+            countItems.replace("###/###", countItems.get("###/###") - 1);
 
             // we don't try ### for novel words
             allTags.remove("###");
+
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -141,12 +142,16 @@ public class ViterbiTagger {
                     if (novelWord) {
                         p_tw = 1.0;
                     } else {
+                        String key = words.get(i) + "/" + tag;
                         p_tw = (countItems.get(words.get(i) + "/" + tag)) / countItems.get(tag);
                     }
 
                     double currentMu = mus.get(prevTag + "/" + preI) + Math.log(p_tt) + Math.log(p_tw);
 
                     if (!mus.containsKey(tag + "/" + currI) || mus.get(tag + "/" + currI) < currentMu) {
+                        if(DEBUG) {
+                            System.out.printf("update %s = %f\n", tag + "/" + currI, currentMu);
+                        }
                         mus.put(tag + "/" + currI, currentMu);
                         backPointers.put(tag + "/" + currI, prevTag);
                     }
@@ -157,6 +162,10 @@ public class ViterbiTagger {
 
             if (DEBUG) {
                 System.out.printf("T = %d-----\n", i);
+                if (mus.containsKey("C" + "/" + currI)) {
+                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
+                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
+                }
                 if (mus.containsKey("C" + "/" + currI))
                     System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
                 if (mus.containsKey(("H" + "/" + currI)))
@@ -214,13 +223,15 @@ public class ViterbiTagger {
         double totAccu = (double)totCorrect / (double)totCnt * 100;
         double knownAccu = 0.0;
         double novelAccu = 0.0;
-        double logprob =  this.mus.get(result.get(result.size() - 2) + "/" + (result.size() - 2)) +
-                this.mus.get(result.get(1) + "/" + 1);
-        double perp = Math.exp( - logprob / ( result.size() - 1) );
+        String key = result.get(result.size() - 1) + "/" + String.valueOf(result.size() - 1);
+        double prob = mus.get(key) / Math.log(2);
+
+        double perplexity = Math.pow(2, -prob/34.0);
+
 
         //output format
         System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
-        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f", perp);
+        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
 
     }
 
