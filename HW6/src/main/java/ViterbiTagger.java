@@ -157,8 +157,12 @@ public class ViterbiTagger {
 
             if (DEBUG) {
                 System.out.printf("T = %d-----\n", i);
-                System.out.printf("%s -> %.13e\n", "C", mus.get("C" + "/" + currI));
-                System.out.printf("%s -> %.13e\n", "H", mus.get("H" + "/" + currI));
+                if (mus.containsKey("C" + "/" + currI))
+                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
+                if (mus.containsKey(("H" + "/" + currI)))
+                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
+                if (mus.containsKey(("###" + "/" + currI)))
+                    System.out.printf("%s -> %.13e\n", "###", Math.exp(mus.get("###" + "/" + currI)));
             }
 
         }
@@ -210,7 +214,9 @@ public class ViterbiTagger {
         double totAccu = (double)totCorrect / (double)totCnt * 100;
         double knownAccu = 0.0;
         double novelAccu = 0.0;
-        double perp = Math.exp( - this.mus.get(result.get(result.size() - 1) + "/" + (result.size() - 1)) / 34);
+        double logprob =  this.mus.get(result.get(result.size() - 2) + "/" + (result.size() - 2)) +
+                this.mus.get(result.get(1) + "/" + 1);
+        double perp = Math.exp( - logprob / ( result.size() - 1) );
 
         //output format
         System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
