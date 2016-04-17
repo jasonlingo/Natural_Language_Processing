@@ -252,7 +252,6 @@ public class ViterbiTagger {
         double prob = mus.get(key) / Math.log(2);
         double perplexity = Math.pow(2, -prob / (words.size() - 1) );
 
-
         //output format
         System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%)\n", totAccu, knownAccu, novelAccu);
         System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
