@@ -71,9 +71,6 @@ public class ViterbiTagger {
 
                     // Initialize Unigrams
                     for (String e : elements) {
-                        if (e.equals("###")) {
-                            countItems.put(e, 1);
-                        }
                         if (countItems.containsKey(e)) {
                             countItems.replace(e, countItems.get(e) + 1);
                         }
@@ -89,6 +86,10 @@ public class ViterbiTagger {
         }finally {
             br.close();
         }
+
+        // Reduce the count of "###" by 1 (the last one) and half the count
+        // Looks pretty much like hard code here
+        countItems.replace("###", (countItems.get("###") - 1 )/ 2);
     }
 
 
