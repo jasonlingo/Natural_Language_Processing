@@ -96,6 +96,8 @@ public class ViterbiTagger {
             // we don't try ### for novel words
             allTags.remove("###");
 
+            // for "add one smoothing", add an OOV
+            tagDict.put("OOV", allTags);
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -109,47 +111,60 @@ public class ViterbiTagger {
         tags.add("###");
         mus.put("###/0", Math.log(1.0));
 
+        // count for add one for word-tag pair
+        int totWordTagCnt = 0;
+        for(String w : tagDict.keySet()) {
+            for(String t : allTags) {
+                String key = w + "/" + t;
+                if(countItems.containsKey(key)) {
+                    totWordTagCnt++;
+                }
+            }
+        }
+        totWordTagCnt += allTags.size();
+
         HashSet<String> candidateTag;
         HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
 
         for (int i = 1; i < words.size(); i++) {
-            candidateTag = tagDict.get(words.get(i));
+            String word = words.get(i);
+            // check novel word
+            boolean novelWord = false;
+            if (!tagDict.containsKey(word)) {
+                word = "OOV";
+                novelWord = true;
+            }
+
+            candidateTag = tagDict.get(word);
 
             String currI = String.valueOf(i);
             String preI  = String.valueOf(i - 1);
 
-            // deal with novel word, try all tags
-            boolean novelWord = false;
-            if (candidateTag == null) {
-                candidateTag = allTags;
-                novelWord = true;
-            }
-
             // find the tag with max probability
             for (String tag : candidateTag) {
                 for (String prevTag : prevCandidateTag) {
-                    // tag to tag bigram probability
 
                     // tag to tag probability
-                    double tagtag;
+                    double p_tt;
                     if(countItems.containsKey(prevTag + "/" + tag)){
-                        tagtag = countItems.get(prevTag + "/" + tag);
+                        p_tt = (countItems.get(prevTag + "/" + tag) + 1.0) / (countItems.get(prevTag) + allTags.size() + 1.0);
                     } else {
-                        tagtag = 0.0;
+                        p_tt = 1.0 / (countItems.get(prevTag) + allTags.size());
                     }
-
-                    double p_tt = tagtag / countItems.get(prevTag);
 
                     // tag to word probability
                     double p_tw;
                     if (novelWord) {
+                        p_tw = 1.0 / (countItems.get(tag) + tagDict.size());
+                    } else if (word.equals("###") && tag.equals("###")) {
                         p_tw = 1.0;
                     } else {
-                        p_tw = (countItems.get(words.get(i) + "/" + tag)) / countItems.get(tag);
+                        p_tw = (countItems.get(word + "/" + tag) + 1.0) / (countItems.get(tag) + tagDict.size());
                     }
 
                     double currentMu = mus.get(prevTag + "/" + preI) + Math.log(p_tt) + Math.log(p_tw);
 
+                    // update max probability and back pointers
                     if (!mus.containsKey(tag + "/" + currI) || mus.get(tag + "/" + currI) < currentMu) {
                         if(DEBUG) {
                             System.out.printf("update %s = %f\n", tag + "/" + currI, currentMu);
@@ -166,6 +181,8 @@ public class ViterbiTagger {
                 System.out.printf("T = %d-----\n", i);
                 if (mus.containsKey("C" + "/" + currI)) {
                     System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
+                }
+                if (mus.containsKey("H" + "/" + currI)) {
                     System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
                 }
                 if (mus.containsKey("C" + "/" + currI))
