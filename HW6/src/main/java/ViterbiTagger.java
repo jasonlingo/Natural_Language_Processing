@@ -250,7 +250,7 @@ public class ViterbiTagger {
         // Calculate perplexity
         String key = result.get(result.size() - 1) + "/" + String.valueOf(result.size() - 1);
         double prob = mus.get(key) / Math.log(2);
-        double perplexity = Math.pow(2, -prob/34.0);
+        double perplexity = Math.pow(2, -prob / (words.size() - 1) );
 
 
         //output format
