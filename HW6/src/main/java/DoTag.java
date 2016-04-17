@@ -50,5 +50,6 @@ public class DoTag {
                 correct++;
             }
         }
+        System.out.println((double)(correct) / result.size());
     }
 }

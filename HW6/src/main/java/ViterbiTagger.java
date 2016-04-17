@@ -123,9 +123,9 @@ public class ViterbiTagger {
     public static void main(String[] args) throws IOException {
         ViterbiTagger vt = new ViterbiTagger();
         vt.readFile("data/ictrain");
-//        for (Map.Entry<String, Integer> entry : vt.countItems.entrySet()) {
-//            System.out.println(entry.getKey() + "/" + entry.getValue());
-//        }
+        for (Map.Entry<String, Integer> entry : vt.countItems.entrySet()) {
+            System.out.println(entry.getKey() + "/" + entry.getValue());
+        }
 
 
     }
