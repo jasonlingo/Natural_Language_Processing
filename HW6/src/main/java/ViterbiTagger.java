@@ -5,7 +5,7 @@ import java.io.*;
  * Created by Jason on 4/16/16.
  */
 public class ViterbiTagger {
-    HashMap<String, List<String>> tagDict;
+    HashMap<String, HashSet<String>> tagDict;
     HashMap<String, Integer> countItems;
     HashMap<String, Double> arcProbs; // Unused yet
     HashMap<String, Double> mus;
@@ -13,7 +13,7 @@ public class ViterbiTagger {
 
 
     public ViterbiTagger() {
-        this.tagDict = new HashMap<String, List<String>>();
+        this.tagDict = new HashMap<String, HashSet<String>>();
         this.countItems = new HashMap<String, Integer>();
         this.arcProbs = new HashMap<String, Double>();
         this.mus = new HashMap<String, Double>();
@@ -35,14 +35,14 @@ public class ViterbiTagger {
 
                     // Initialize tagDict
                     if (tagDict.containsKey(word)) {
-                        List<String> temp = tagDict.get(word);
+                        HashSet<String> temp = tagDict.get(word);
                         if (!temp.contains(tag)) { // could be time-consuming here
                             temp.add(tag);
                             tagDict.replace(word, temp);
                         }
                     }
                     else {
-                        List<String> temp = new ArrayList<String>();
+                        HashSet<String> temp = new HashSet<String>();
                         temp.add(tag);
                         tagDict.put(word, temp);
                     }
@@ -101,8 +101,8 @@ public class ViterbiTagger {
         mus.put("###/0", 1.0);
 
         for (int i = 1; i < words.size(); i++) {
-            List<String> candidateTag = tagDict.get(words.get(i));
-            List<String> prevCandidateTag = tagDict.get(words.get(i - 1));
+            Set<String> candidateTag = tagDict.get(words.get(i));
+            Set<String> prevCandidateTag = tagDict.get(words.get(i - 1));
 
             for (String tag : candidateTag) {
                 for (String prevTag : prevCandidateTag) {

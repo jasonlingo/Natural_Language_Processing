@@ -37,7 +37,7 @@ public class DoTag {
     }
 
     public static void main(String[] args) throws IOException {
-        ViterbiTagger2 tagger = new ViterbiTagger2();
+        ViterbiTagger tagger = new ViterbiTagger();
         tagger.readFile("data/ictrain");
 
         DoTag dt = new DoTag();

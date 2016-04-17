@@ -49,7 +49,7 @@ public class ViterbiTagger2 {
 
                     // Initialize Bigrams: tag to tag
                     if (prevElements != null) {
-                        String tagTag = prevElements[1] + "_" + elements[1];
+                        String tagTag = prevElements[1] + "/" + elements[1];
                         if (countItems.containsKey(tagTag)) {
                             countItems.replace(tagTag, countItems.get(tagTag) + 1);
                         }
@@ -60,7 +60,7 @@ public class ViterbiTagger2 {
                     prevElements = elements;
 
                     // Initialize Bigrams: tag to word
-                    String wordTag = elements[0] + "_" + elements[1];
+                    String wordTag = elements[0] + "/" + elements[1];
                     if (countItems.containsKey(wordTag)) {
                         countItems.replace(wordTag, countItems.get(wordTag) + 1);
                     }
@@ -96,7 +96,7 @@ public class ViterbiTagger2 {
     public List<String> tag(List<String> words) {
         List<String> tags = new ArrayList<String>();
         tags.add("###");
-        mus.put("###_0", 1.0);
+        mus.put("###/0", 1.0);
 
         for (int i = 1; i < words.size(); i++) {
             HashSet<String> candidateTag = tagDict.get(words.get(i));
@@ -107,32 +107,32 @@ public class ViterbiTagger2 {
             for (String tag : candidateTag) {
                 for (String prevTag : prevCandidateTag) {
                     // tag to tag bigram probability
-                    double n1 = countItems.get(prevTag + "_" + tag);
+                    double n1 = countItems.get(prevTag + "/" + tag);
                     double d1 = countItems.get(prevTag);
-                    double p_tt = (countItems.get(prevTag + "_" + tag)) / countItems.get(prevTag);
+                    double p_tt = (countItems.get(prevTag + "/" + tag)) / countItems.get(prevTag);
                     // tag to word probability
-                    double n2 = countItems.get(words.get(i) + "_" + tag);
+                    double n2 = countItems.get(words.get(i) + "/" + tag);
                     double d2 = countItems.get(tag);
-                    double p_tw = (countItems.get(words.get(i) + "_" + tag)) / countItems.get(tag);
+                    double p_tw = (countItems.get(words.get(i) + "/" + tag)) / countItems.get(tag);
 
-                    double prem = mus.get(prevTag + "_" + preI);
-                    double currentMu = mus.get(prevTag + "_" + preI) * p_tt * p_tw;
+                    double prem = mus.get(prevTag + "/" + preI);
+                    double currentMu = mus.get(prevTag + "/" + preI) * p_tt * p_tw;
 
-                    if (!mus.containsKey(tag + "_" + currI) || mus.get(tag + "_" + currI) < currentMu) {
+                    if (!mus.containsKey(tag + "/" + currI) || mus.get(tag + "/" + currI) < currentMu) {
 //                        double cuM = mus.get(tag + "_" + currI);
-                        mus.put(tag + "_" + currI, currentMu);
-                        backPointers.put(tag + "_" + currI, prevTag);
+                        mus.put(tag + "/" + currI, currentMu);
+                        backPointers.put(tag + "/" + currI, prevTag);
                     }
                 }
             }
             System.out.printf("T = %d-----\n", i);
-            System.out.printf("%s -> %.13e\n", "C", mus.get("C" + "_" + currI));
-            System.out.printf("%s -> %.13e\n", "H", mus.get("H" + "_" + currI));
+            System.out.printf("%s -> %.13e\n", "C", mus.get("C" + "/" + currI));
+            System.out.printf("%s -> %.13e\n", "H", mus.get("H" + "/" + currI));
 
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
-            tags.add(0, backPointers.get(tags.get(0) + "_" + i));
+            tags.add(0, backPointers.get(tags.get(0) + "/" + i));
         }
         return tags;
 
