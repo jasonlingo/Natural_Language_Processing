@@ -166,6 +166,12 @@ public class ViterbiTagger {
                     System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
                     System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
                 }
+                if (mus.containsKey("C" + "/" + currI))
+                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
+                if (mus.containsKey(("H" + "/" + currI)))
+                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
+                if (mus.containsKey(("###" + "/" + currI)))
+                    System.out.printf("%s -> %.13e\n", "###", Math.exp(mus.get("###" + "/" + currI)));
             }
 
         }
@@ -221,6 +227,7 @@ public class ViterbiTagger {
         double prob = mus.get(key) / Math.log(2);
 
         double perplexity = Math.pow(2, -prob/34.0);
+
 
         //output format
         System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%\n", totAccu, knownAccu, novelAccu);
