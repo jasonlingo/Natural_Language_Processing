@@ -38,10 +38,10 @@ public class DoTag {
 
     public static void main(String[] args) throws IOException {
         ViterbiTagger tagger = new ViterbiTagger();
-        tagger.readFile("data/entrain");
+        tagger.readFile("data/ictrain");
 
         DoTag dt = new DoTag();
-        dt.readTestFile("data/entest");
+        dt.readTestFile("data/ictest");
 
         List<String> result = tagger.tag(dt.words);
 
