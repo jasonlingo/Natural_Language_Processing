@@ -113,9 +113,7 @@ public class ViterbiTagger {
 
             // for "add one smoothing", add an OOV
             tagDict.put("OOV", allTags);
-
-            System.out.println(countItems.toString());
-
+            
         }catch (IOException e) {
             e.printStackTrace();
         }finally {
@@ -124,25 +122,12 @@ public class ViterbiTagger {
     }
 
     public List<String> tag(List<String> words) {
-        Set<String> probs = new HashSet<String>();
-        String line = "%s prob: %s | %f"; //mode, key, prob
-        //trans prob: ###/J | 0.0426889
+//        Set<String> probs = new HashSet<String>();
+//        String line = "%s prob: %s | %f"; //mode, key, prob
 
         List<String> tags = new ArrayList<String>();
         tags.add("###");
         mus.put("###" + timeSep + "0", Math.log(1.0));
-
-        // count for add one for word-tag pair
-//        int totWordTagCnt = 0;
-//        for(String w : tagDict.keySet()) {
-//            for(String t : allTags) {
-//                String key = w + "/" + t;
-//                if(countItems.containsKey(key)) {
-//                    totWordTagCnt++;
-//                }
-//            }
-//        }
-//        totWordTagCnt += allTags.size();
 
         HashSet<String> candidateTag;
         HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
@@ -173,9 +158,6 @@ public class ViterbiTagger {
                         p_tt = 1.0 / (countItems.get(prevTag + tagSep) + allTags.size() + 1.0);
                     }
 
-//                    System.out.printf("@@ trans: %s | %f\n", prevTag + "/" + tag, p_tt);
-                    probs.add(String.format(line, "trans", prevTag + "/" + tag, p_tt));
-
                     // tag to word probability
                     double p_tw;
                     if (novelWord) {
@@ -185,9 +167,6 @@ public class ViterbiTagger {
                     } else {
                         p_tw = (countItems.get(word + tagWordSep + tag) + 1.0) / (countItems.get(tag + tagSep) + tagDict.size());
                     }
-
-//                    System.out.printf("@@ emit: %s | %f\n", word + "/" + tag, p_tw);
-                    probs.add(String.format(line, "emit", word + "/" + tag, p_tw));
 
                     double currentMu = mus.get(prevTag + timeSep + preI) + Math.log(p_tt) + Math.log(p_tw);
 
@@ -229,9 +208,6 @@ public class ViterbiTagger {
         if(DEBUG) {
             System.out.println(tags.toString());
         }
-
-
-//        System.out.println(probs.toString());
 
         return tags;
 
