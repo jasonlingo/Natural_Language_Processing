@@ -126,8 +126,93 @@ public class ViterbiTagger {
         }
     }
 
-    public List<String> tag(List<String> words) {
+
+    public void tag(List<String> words) {
+        Map<String, Double> alpha = forward(words);
+        backward(words, alpha);
+    }
+
+    private Map<String, Double> forward(List<String> words) {
+        Map<String, Double> alpha = new HashMap<String, Double>();
+        List<String> tags = new ArrayList<String>();
+
+        tags.add(BND);
+        alpha.put(BND + TIME_SEP + "0", Math.log(1.0));
+
+        HashSet<String> candidateTag;
+        HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
+        String curTime;
+        String preTime = String.valueOf(0);
+        double p_tt;
+        double p_tw;
+        double preAlpha;
+        double alpha_ti;
+
+        for (int i = 1; i < words.size(); i++) {
+            String word = words.get(i);
+            curTime = String.valueOf(i);
+
+            // check novel word
+            boolean novelWord = false;
+            if (!tagDict.containsKey(word)) {
+                word = OOV;
+                novelWord = true;
+            }
+
+            candidateTag = tagDict.get(word);
+
+            // find the tag with max probability
+            for (String tag : candidateTag) {
+                alpha_ti = 0.0;
+
+                for (String prevTag : prevCandidateTag) {
+                    // tag to tag probability
+                    String p_tt_key = prevTag + TAGTAG_SEP + tag;
+                    if (probDP.containsKey(p_tt_key)) {
+                        p_tt = probDP.get(p_tt_key);
+                    } else {
+                        if (countItems.containsKey(p_tt_key)) {
+                            p_tt = (countItems.get(p_tt_key) + LAMBDA) / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                        } else {
+                            p_tt = LAMBDA / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                        }
+                        probDP.put(p_tt_key, p_tt);
+                    }
+
+                    // tag to word probability
+                    String p_tw_key = word + TAG_WORD_SEP + tag;
+                    if (probDP.containsKey(p_tw_key)) {
+                        p_tw = probDP.get(p_tw_key);
+                    } else {
+                        if (novelWord) {
+                            p_tw = LAMBDA / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
+                        } else if (word.equals(BND) && tag.equals(BND)) {
+                            p_tw = 1.0;
+                        } else {
+                            p_tw = (countItems.get(p_tw_key) + LAMBDA) / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
+                        }
+                        probDP.put(p_tw_key, p_tw);
+                    }
+
+                    preAlpha = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
+                    alpha_ti = logadd(alpha_ti, preAlpha);
+                }
+                alpha.put(tag + TIME_SEP + curTime, alpha_ti);
+            }
+
+            preTime = curTime;
+            prevCandidateTag = candidateTag;
+
+        }
+
+        return alpha;
+
+    }
+
+    private List<String> backward(List<String> words, Map<String, Double> alpha) {
         long start = System.nanoTime();
+
+        double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
 
         List<String> tags = new ArrayList<String>();
         tags.add(BND);
