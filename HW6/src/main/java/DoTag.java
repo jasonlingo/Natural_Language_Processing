@@ -43,9 +43,11 @@ public class DoTag {
         DoTag dt = new DoTag();
         dt.readTestFile("data/ictest");
 
-        List<String> result = tagger.tag(dt.words);
+        List<String> vTags = tagger.viterbiTag(dt.words);
+        tagger.computeAccuracy(dt.words, vTags, dt.tags, true);
 
-        tagger.computeAccuracy(dt.words, result, dt.tags);
+        List<String> posTags = tagger.posTag(dt.words);
+        tagger.computeAccuracy(dt.words, posTags, dt.tags, false);
 
 //        int correct = 0;
 //        for (int i = 0; i < result.size(); i++) {

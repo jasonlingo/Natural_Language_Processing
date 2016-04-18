@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -8,21 +9,26 @@ import java.util.*;
  */
 public class ViterbiTagger {
     private static final boolean DEBUG = false;
-    Map<String, HashSet<String>> tagDict;
-    Map<String, Double> countItems;
-    Map<String, Double> arcProbs;
-    Map<String, Double> mus;
-    Map<String, Double> probDP;
-    Map<String, String> backPointers;
-    HashSet<String> allTags;
-    final String TAGTAG_SEP   = "[TT]";
-    final String TAG_WORD_SEP = "/";
-    final String TIME_SEP     = "__";
-    final String WORD_SEP     = "[w]";
-    final String TAG_SEP      = "[T]";
-    final String OOV          = "OOV";
-    final String BND          = "###"; //boundary marker
-    final double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected Map<String, HashSet<String>> tagDict;
+    protected Map<String, Double> countItems;
+    protected Map<String, Double> arcProbs;
+    protected Map<String, Double> mus;
+    protected Map<String, Double> probDP;
+    protected Map<String, String> backPointers;
+    protected HashSet<String> allTags;
+    protected Map<String, Double> alpha;
+    protected Map<String, Double> beta;
+    protected boolean forwardTag;
+    protected final String TAGTAG_SEP   = "[TT]";
+    protected final String TAG_WORD_SEP = "/";
+    protected final String TIME_SEP     = "__";
+    protected final String WORD_SEP     = "[w]";
+    protected final String TAG_SEP      = "[T]";
+    protected final String OOV          = "OOV";
+    protected final String BND          = "###"; //boundary marker
+    protected final String VITERBI      = "Viterbi";
+    protected final String POSTERIOR    = "posterior";
+    protected final double LAMBDA       = 0.0;   // setting LAMBDA = 0 means no add one smoothing
 
 
     public ViterbiTagger() {
@@ -33,12 +39,27 @@ public class ViterbiTagger {
         this.probDP       = new HashMap<String, Double>();
         this.backPointers = new HashMap<String, String>();
         this.allTags      = new HashSet<String>();
+        this.alpha        = new HashMap<String, Double>();
+        this.beta         = new HashMap<String, Double>();
+        this.forwardTag   = false;
+    }
+
+
+    /*
+     When starting a new training, clean relevant instance variables.
+     */
+    protected void init() {  // TODO
+        countItems.clear();
+        allTags.clear();
+        forwardTag = false;
     }
 
     /*
      Read file and parse word/tag pairs and store needed data.
      */
     public void readFile(String fileName) throws IOException {
+        init();
+
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         try {
             String line = br.readLine();
@@ -111,7 +132,8 @@ public class ViterbiTagger {
 
             // reduce the number of ###/### by 1 because we need to ignore the first or last ###/### in unigram counting
             // but need them in bigram counting.
-            countItems.replace(BND + TAG_WORD_SEP + BND, countItems.get(BND + TAG_WORD_SEP + BND) - 1);
+            countItems.replace(BND + TAG_WORD_SEP + BND,
+                               countItems.get(BND + TAG_WORD_SEP + BND) - 1);
 
             // we don't try ### for novel words
             allTags.remove(BND);
@@ -127,126 +149,73 @@ public class ViterbiTagger {
     }
 
 
-    public void tag(List<String> words) {
-        Map<String, Double> alpha = forward(words);
-        backward(words, alpha);
+    /*
+     This will tag funciton will first perform Viterbi decoding, and then perform
+     forward-backward decoding.
+     */
+    public List<String> viterbiTag(List<String> words) {
+        alpha.clear();
+        beta.clear();
+        mus.clear();
+
+        List<String> tags = forward(words);
+        return tags;
     }
 
-    private Map<String, Double> forward(List<String> words) {
-        Map<String, Double> alpha = new HashMap<String, Double>();
+    public List<String> posTag(List<String> words) {
+        if (!forwardTag) {
+            forward(words);
+        }
+        Map<String, Double> probTW = backward(words);
+        List<String> tags = posteriorTag(words, probTW);
+        return tags;
+    }
+
+    protected List<String> forward(List<String> words) {
+        forwardTag = true;
+
         List<String> tags = new ArrayList<String>();
 
         tags.add(BND);
         alpha.put(BND + TIME_SEP + "0", Math.log(1.0));
-
-        HashSet<String> candidateTag;
-        HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
-        String curTime;
-        String preTime = String.valueOf(0);
-        double p_tt;
-        double p_tw;
-        double preAlpha;
-        double alpha_ti;
-
-        for (int i = 1; i < words.size(); i++) {
-            String word = words.get(i);
-            curTime = String.valueOf(i);
-
-            // check novel word
-            boolean novelWord = false;
-            if (!tagDict.containsKey(word)) {
-                word = OOV;
-                novelWord = true;
-            }
-
-            candidateTag = tagDict.get(word);
-
-            // find the tag with max probability
-            for (String tag : candidateTag) {
-                alpha_ti = 0.0;
-
-                for (String prevTag : prevCandidateTag) {
-                    // tag to tag probability
-                    String p_tt_key = prevTag + TAGTAG_SEP + tag;
-                    if (probDP.containsKey(p_tt_key)) {
-                        p_tt = probDP.get(p_tt_key);
-                    } else {
-                        if (countItems.containsKey(p_tt_key)) {
-                            p_tt = (countItems.get(p_tt_key) + LAMBDA) / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
-                        } else {
-                            p_tt = LAMBDA / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
-                        }
-                        probDP.put(p_tt_key, p_tt);
-                    }
-
-                    // tag to word probability
-                    String p_tw_key = word + TAG_WORD_SEP + tag;
-                    if (probDP.containsKey(p_tw_key)) {
-                        p_tw = probDP.get(p_tw_key);
-                    } else {
-                        if (novelWord) {
-                            p_tw = LAMBDA / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
-                        } else if (word.equals(BND) && tag.equals(BND)) {
-                            p_tw = 1.0;
-                        } else {
-                            p_tw = (countItems.get(p_tw_key) + LAMBDA) / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
-                        }
-                        probDP.put(p_tw_key, p_tw);
-                    }
-
-                    preAlpha = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
-                    alpha_ti = logadd(alpha_ti, preAlpha);
-                }
-                alpha.put(tag + TIME_SEP + curTime, alpha_ti);
-            }
-
-            preTime = curTime;
-            prevCandidateTag = candidateTag;
-
-        }
-
-        return alpha;
-
-    }
-
-    private List<String> backward(List<String> words, Map<String, Double> alpha) {
-        long start = System.nanoTime();
-
-        double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
-
-        List<String> tags = new ArrayList<String>();
-        tags.add(BND);
         mus.put(BND + TIME_SEP + "0", Math.log(1.0));
 
         HashSet<String> candidateTag;
         HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
 
         for (int i = 1; i < words.size(); i++) {
-            String word = words.get(i);
+            String curWord = words.get(i);
+            String preWord = words.get(i - 1);
+            String curTime = String.valueOf(i);
+            String preTime = String.valueOf(i - 1);
+
             // check novel word
             boolean novelWord = false;
-            if (!tagDict.containsKey(word)) {
-                word = OOV;
+            if (!tagDict.containsKey(curWord)) {
+                curWord = OOV;
                 novelWord = true;
             }
 
-            candidateTag = tagDict.get(word);
+            if (!tagDict.containsKey(words.get(i - 1))){
+                preWord = OOV;
+            }
 
-            String currI = String.valueOf(i);
-            String preI  = String.valueOf(i - 1);
+            candidateTag     = tagDict.get(curWord);
+            prevCandidateTag = tagDict.get(preWord);
 
-            // find the tag with max probability
             for (String tag : candidateTag) {
-                for (String prevTag : prevCandidateTag) {
+                double alpha_ti = 0.0;
 
+                for (String prevTag : prevCandidateTag) {
                     // tag to tag probability
-                    double p_tt;
                     String p_tt_key = prevTag + TAGTAG_SEP + tag;
+                    double p_tt;
                     if (probDP.containsKey(p_tt_key)) {
                         p_tt = probDP.get(p_tt_key);
                     } else {
                         if (countItems.containsKey(p_tt_key)) {
-                            p_tt = (countItems.get(p_tt_key) + LAMBDA) / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                            p_tt = (countItems.get(p_tt_key) + LAMBDA) /
+                                    (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
                         } else {
                             p_tt = LAMBDA / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
                         }
@@ -254,66 +223,183 @@ public class ViterbiTagger {
                     }
 
                     // tag to word probability
+                    String p_tw_key = curWord + TAG_WORD_SEP + tag;
                     double p_tw;
-                    String p_tw_key = word + TAG_WORD_SEP + tag;
                     if (probDP.containsKey(p_tw_key)) {
                         p_tw = probDP.get(p_tw_key);
                     } else {
                         if (novelWord) {
                             p_tw = LAMBDA / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
-                        } else if (word.equals(BND) && tag.equals(BND)) {
+                        } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            p_tw = (countItems.get(p_tw_key) + LAMBDA) / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
+                            p_tw = (countItems.get(p_tw_key) + LAMBDA) /
+                                    (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
 
-                    double currentMu = mus.get(prevTag + TIME_SEP + preI) + Math.log(p_tt) + Math.log(p_tw);
+                    // for forward-backward
+                    double preAlpha_p = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
+                    if(alpha_ti == 0) {
+                        alpha_ti = preAlpha_p;
+                    } else {
+                        alpha_ti = logadd(alpha_ti, preAlpha_p);
+                    }
+
+                    // for Viterbi decoding
+                    double currentMu = mus.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
 
                     // update max probability and back pointers
-                    if (!mus.containsKey(tag + TIME_SEP + currI) || mus.get(tag + TIME_SEP + currI) < currentMu) {
-                        if(DEBUG) {
-                            System.out.printf("update %s = %f\n", tag + TIME_SEP + currI, currentMu);
-                        }
-                        mus.put(tag + TIME_SEP + currI, currentMu);
-                        backPointers.put(tag + TIME_SEP + currI, prevTag);
+                    if (!mus.containsKey(tag + TIME_SEP + curTime) || mus.get(tag + TIME_SEP + curTime) < currentMu) {
+                        mus.put(tag + TIME_SEP + curTime, currentMu);
+                        backPointers.put(tag + TIME_SEP + curTime, prevTag);
                     }
+
                 }
+                alpha.put(tag + TIME_SEP + curTime, alpha_ti);
             }
-
-            prevCandidateTag = candidateTag;
-
-            if (DEBUG) {
-                System.out.printf("T = %d-----\n", i);
-                if (mus.containsKey("C" + TIME_SEP + currI)) {
-                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + TIME_SEP + currI)));
-                }
-                if (mus.containsKey("H" + TIME_SEP + currI)) {
-                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + TIME_SEP + currI)));
-                }
-                if (mus.containsKey("C" + TIME_SEP + currI))
-                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + TIME_SEP + currI)));
-                if (mus.containsKey(("H" + TIME_SEP + currI)))
-                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + TIME_SEP + currI)));
-                if (mus.containsKey((BND + TIME_SEP + currI)))
-                    System.out.printf("%s -> %.13e\n", BND, Math.exp(mus.get(BND + TIME_SEP + currI)));
-            }
-
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
             tags.add(0, backPointers.get(tags.get(0) + TIME_SEP + i));
         }
 
-        if(DEBUG) {
-            System.out.println(tags.toString());
-        }
-
-        System.out.println((System.nanoTime() - start) / 1000);
         return tags;
 
     }
+
+    protected Map<String, Double> backward(List<String> words) {
+        Map<String, Double> probTW = new HashMap<String, Double>();
+
+        double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
+
+        List<String> tags = new ArrayList<String>();
+        tags.add(BND);
+        beta.put(BND + TIME_SEP + String.valueOf(words.size() - 1), Math.log(1.0));
+
+        HashSet<String> candidateTag, prevCandidateTag;
+
+        for (int i = words.size() - 1; i > 0; i--) {
+            String curWord = words.get(i);
+            String preWord = words.get(i - 1);
+            String curTime = String.valueOf(i);
+            String preTime = String.valueOf(i - 1);
+
+            // find tags for current word and previous word
+            if (!tagDict.containsKey(preWord)) {
+                preWord = OOV;
+            }
+
+            boolean curWordNovel = false;
+            if (!tagDict.containsKey(curWord)) {
+                curWord = OOV;
+                curWordNovel = true;
+            }
+
+            prevCandidateTag = tagDict.get(preWord);
+            candidateTag     = tagDict.get(curWord);
+
+            // perform backward algorithm
+            for (String tag : candidateTag) {
+                // compute p(T_i = t_i | \vec{w}) = alpha_ti(i) * beta_{t_i}(i) / s
+                // all are log probabilities
+                double prob_ti = alpha.get(tag + TIME_SEP + curTime) + beta.get(tag + TIME_SEP + curTime) - s;
+                probTW.put(tag + TIME_SEP + curTime, prob_ti);
+
+                for (String prevTag : prevCandidateTag) {
+
+                    // tag to tag probability
+                    String p_tt_key = prevTag + TAGTAG_SEP + tag;
+                    double p_tt;
+                    if (probDP.containsKey(p_tt_key)) {
+                        p_tt = probDP.get(p_tt_key);
+                    } else {
+                        if (countItems.containsKey(p_tt_key)) {
+                            p_tt = (countItems.get(p_tt_key) + LAMBDA) /
+                                    (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                        } else {
+                            p_tt = LAMBDA / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                        }
+                        probDP.put(p_tt_key, p_tt);
+                    }
+
+                    // tag to word probability
+                    String p_tw_key = curWord + TAG_WORD_SEP + tag;
+                    double p_tw;
+                    if (probDP.containsKey(p_tw_key)) {
+                        p_tw = probDP.get(p_tw_key);
+                    } else {
+                        if (curWordNovel) {
+                            p_tw = LAMBDA / (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
+                        } else if (curWord.equals(BND) && tag.equals(BND)) {
+                            p_tw = 1.0;
+                        } else {
+                            p_tw = (countItems.get(p_tw_key) + LAMBDA) /
+                                    (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
+                        }
+                        probDP.put(p_tw_key, p_tw);
+                    }
+                    double p = Math.log(p_tt) + Math.log(p_tw);
+                    double p_Beta_ti = beta.get(tag + TIME_SEP + curTime) + p;
+
+                    String betaKey = prevTag + TIME_SEP + preTime;
+                    if(!beta.containsKey(betaKey)){
+                        beta.put(betaKey, p_Beta_ti);
+                    } else {
+                        beta.put(betaKey,
+                                logadd(beta.get(betaKey), p_Beta_ti));
+                    }
+
+                    // compute p(T_{i_1} = prevTag, T_i = tag | \vec{w}) = alpha_{t_{i-1}}(i - 1) * p * beta_{t_i}(i) / s
+                    double prob_ti_1 = alpha.get(prevTag + TIME_SEP + preTime) + p + beta.get(tag + TIME_SEP + curTime) - s;
+                    probTW.put(prevTag + TAGTAG_SEP + tag, prob_ti_1);
+                }
+            }
+        }
+
+        return probTW;
+    }
+
+
+    /*
+     Find the best tag for each word according to the forward-backward probability.
+     */
+    protected List<String> posteriorTag(List<String> words, Map<String, Double> probTW) {
+        List<String> tags = new ArrayList<String>();
+        tags.add(BND);
+
+        for (int i = 1; i < words.size(); i++) {
+            String word = words.get(i);
+            String curTime = String.valueOf(i);
+
+            if (!tagDict.containsKey(word)) {
+                word = OOV;
+            }
+
+            HashSet<String> candidateTags = tagDict.get(word);
+            tags.add(findBestTag(candidateTags, probTW, curTime));
+        }
+
+        return tags;
+    }
+
+
+    protected String findBestTag(Set<String> candidateTags, Map<String, Double> probTW, String curTime) {
+        double bestProb = -Double.MAX_VALUE;
+        String bestTag  = "";
+
+        for(String tag : candidateTags) {
+            double prob = probTW.get(tag + TIME_SEP + curTime);
+            if (bestProb <= prob) {
+                bestProb = prob;
+                bestTag = tag;
+            }
+        }
+        return bestTag;
+    }
+
+
 
     /*
      Compute the tagging accuracy:
@@ -325,7 +411,7 @@ public class ViterbiTagger {
         perplexity = exp( - (log p(w1, t1, ..., wn, tn | w0, t0)) / n )
 
      */
-    public void computeAccuracy(List<String> words, List<String> result, List<String> ans) {
+    public void computeAccuracy(List<String> words, List<String> tags, List<String> ans, boolean isVtag) {
         int totCnt          = 0;
         int totCorrect      = 0;
         int totKnownCnt     = 0;
@@ -333,9 +419,9 @@ public class ViterbiTagger {
         int totNovelCnt     = 0;
         int totNovelCorrect = 0;
 
-        for(int i = 0; i < result.size(); i++) {
+        for(int i = 0; i < words.size(); i++) {
             String word   = words.get(i);
-            String resTag = result.get(i);
+            String resTag = tags.get(i);
             String ansTag = ans.get(i);
 
             if (resTag.equals(BND)) {
@@ -369,17 +455,17 @@ public class ViterbiTagger {
 
         // calcuate accuracy
         double totAccu   = (double)totCorrect / (double)totCnt * 100;
-        double knownAccu = (double)totKnowCorrect / (double)totKnownCnt * 100;
+        double knownAccu = totKnownCnt > 0? (double)totKnowCorrect / (double)totKnownCnt * 100 : 0;
         double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
+        System.out.printf("Tagging accuracy (%s decoding): %.2f%% (known: %.2f%% novel: %.2f%%)\n", isVtag? VITERBI:POSTERIOR, totAccu, knownAccu, novelAccu);
 
         // Calculate perplexity
-        String key = result.get(result.size() - 1) + TIME_SEP + String.valueOf(result.size() - 1);
-        double prob = mus.get(key) / Math.log(2);
-        double perplexity = Math.pow(2, -prob / (words.size() - 1) );
-
-        //output format
-        System.out.printf("Tagging accuracy (Vierbi decoding): %.2f%% (known: %.2f%% novel: %.2f%%)\n", totAccu, knownAccu, novelAccu);
-        System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
+        if(isVtag) {
+            String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
+            double prob = mus.get(key) / Math.log(2);
+            double perplexity = Math.pow(2, -prob / (words.size() - 1));
+            System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
+        }
 
     }
 
@@ -390,8 +476,15 @@ public class ViterbiTagger {
      */
     private static double logadd(double x, double y) { //TODO: handle the case x=0 or y=0
         if(y <= x) {
+            if (1 + Math.exp(y - x) == 0) {
+                return x + (-Double.MAX_VALUE);
+            }
             return x + Math.log(1 + Math.exp(y - x));
+
         } else {
+            if (1 + Math.exp(x - y) == 0) {
+                return y + (-Double.MAX_VALUE);
+            }
             return y + Math.log(1 + Math.exp(x - y));
         }
     }
