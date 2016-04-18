@@ -7,13 +7,19 @@ import java.util.*;
  * Created by Jason on 4/16/16.
  */
 public class ViterbiTagger {
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     HashMap<String, HashSet<String>> tagDict;
     HashMap<String, Double> countItems;
     HashMap<String, Double> arcProbs;
     HashMap<String, Double> mus;
     HashMap<String, String> backPointers;
     HashSet<String> allTags;
+    String tagtagSep  = "[TT]";
+    String tagWordSep = "/";
+    String timeSep    = "__";
+    String wordSep    = "[w]";
+    String tagSep     = "[T]";
+
 
     public ViterbiTagger() {
         this.tagDict = new HashMap<String, HashSet<String>>();
@@ -53,7 +59,7 @@ public class ViterbiTagger {
 
                     // Initialize Bigrams: tag to tag
                     if (prevElements != null) {
-                        String tagTag = prevElements[1] + "/" + elements[1];
+                        String tagTag = prevElements[1] + tagtagSep + elements[1];
                         if (countItems.containsKey(tagTag)) {
                             countItems.replace(tagTag, countItems.get(tagTag) + 1.0);
                         }
@@ -64,7 +70,7 @@ public class ViterbiTagger {
                     prevElements = elements;
 
                     // Initialize tag to word
-                    String wordTag = elements[0] + "/" + elements[1];
+                    String wordTag = elements[0] + tagWordSep + elements[1];
                     if (countItems.containsKey(wordTag)) {
                         countItems.replace(wordTag, countItems.get(wordTag) + 1.0);
                     }
@@ -74,30 +80,41 @@ public class ViterbiTagger {
 
                     // Initialize Unigram
                     // Here we will count ### twice for each ###/###, need to correct count later
-                    for (String e : elements) {
-                        if (countItems.containsKey(e)) {
-                            countItems.replace(e, countItems.get(e) + 1.0);
-                        }
-                        else {
-                            countItems.put(e, 1.0);
-                        }
+                    String wordkey = word + wordSep;
+                    if (countItems.containsKey(wordkey)) {
+                        countItems.replace(wordkey, countItems.get(wordkey) + 1.0);
+                    } else {
+                        countItems.put(wordkey, 1.0);
                     }
+
+                    String tagkey = tag + tagSep;
+                    if (countItems.containsKey(tagkey)) {
+                        countItems.replace(tagkey, countItems.get(tagkey) + 1.0);
+                    } else {
+                        countItems.put(tagkey, 1.0);
+                    }
+
                 }
                 line = br.readLine();
             }
-            // divide the count of ### by 2 and minus the last one
-            double bndTagCnt = countItems.get("###");
-            countItems.replace("###", bndTagCnt / 2 - 1);
+
+            // minus one for last ###/###
+            double bndWordCnt = countItems.get("###" + wordSep) - 1;
+            countItems.replace("###" + wordSep, bndWordCnt);
+            double bndTagCnt = countItems.get("###" + tagSep) - 1;
+            countItems.replace("###" + tagSep, bndTagCnt);
 
             // reduce the number of ###/### by 1 because we need to ignore the first or last ###/### in unigram counting
             // but need them in bigram counting.
-            countItems.replace("###/###", countItems.get("###/###") - 1);
+            countItems.replace("###" + tagWordSep + "###", countItems.get("###" + tagWordSep + "###") - 1);
 
             // we don't try ### for novel words
             allTags.remove("###");
 
             // for "add one smoothing", add an OOV
             tagDict.put("OOV", allTags);
+
+            System.out.println(countItems.toString());
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -107,21 +124,25 @@ public class ViterbiTagger {
     }
 
     public List<String> tag(List<String> words) {
+        Set<String> probs = new HashSet<String>();
+        String line = "%s prob: %s | %f"; //mode, key, prob
+        //trans prob: ###/J | 0.0426889
+
         List<String> tags = new ArrayList<String>();
         tags.add("###");
-        mus.put("###/0", Math.log(1.0));
+        mus.put("###" + timeSep + "0", Math.log(1.0));
 
         // count for add one for word-tag pair
-        int totWordTagCnt = 0;
-        for(String w : tagDict.keySet()) {
-            for(String t : allTags) {
-                String key = w + "/" + t;
-                if(countItems.containsKey(key)) {
-                    totWordTagCnt++;
-                }
-            }
-        }
-        totWordTagCnt += allTags.size();
+//        int totWordTagCnt = 0;
+//        for(String w : tagDict.keySet()) {
+//            for(String t : allTags) {
+//                String key = w + "/" + t;
+//                if(countItems.containsKey(key)) {
+//                    totWordTagCnt++;
+//                }
+//            }
+//        }
+//        totWordTagCnt += allTags.size();
 
         HashSet<String> candidateTag;
         HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
@@ -146,31 +167,37 @@ public class ViterbiTagger {
 
                     // tag to tag probability
                     double p_tt;
-                    if(countItems.containsKey(prevTag + "/" + tag)){
-                        p_tt = (countItems.get(prevTag + "/" + tag) + 1.0) / (countItems.get(prevTag) + allTags.size() + 1.0);
+                    if(countItems.containsKey(prevTag + tagtagSep + tag)){
+                        p_tt = (countItems.get(prevTag + tagtagSep + tag) + 1.0) / (countItems.get(prevTag + tagSep) + allTags.size() + 1.0);
                     } else {
-                        p_tt = 1.0 / (countItems.get(prevTag) + allTags.size());
+                        p_tt = 1.0 / (countItems.get(prevTag + tagSep) + allTags.size() + 1.0);
                     }
+
+//                    System.out.printf("@@ trans: %s | %f\n", prevTag + "/" + tag, p_tt);
+                    probs.add(String.format(line, "trans", prevTag + "/" + tag, p_tt));
 
                     // tag to word probability
                     double p_tw;
                     if (novelWord) {
-                        p_tw = 1.0 / (countItems.get(tag) + tagDict.size());
+                        p_tw = 1.0 / (countItems.get(tag + tagSep) + tagDict.size());
                     } else if (word.equals("###") && tag.equals("###")) {
                         p_tw = 1.0;
                     } else {
-                        p_tw = (countItems.get(word + "/" + tag) + 1.0) / (countItems.get(tag) + tagDict.size());
+                        p_tw = (countItems.get(word + tagWordSep + tag) + 1.0) / (countItems.get(tag + tagSep) + tagDict.size());
                     }
 
-                    double currentMu = mus.get(prevTag + "/" + preI) + Math.log(p_tt) + Math.log(p_tw);
+//                    System.out.printf("@@ emit: %s | %f\n", word + "/" + tag, p_tw);
+                    probs.add(String.format(line, "emit", word + "/" + tag, p_tw));
+
+                    double currentMu = mus.get(prevTag + timeSep + preI) + Math.log(p_tt) + Math.log(p_tw);
 
                     // update max probability and back pointers
-                    if (!mus.containsKey(tag + "/" + currI) || mus.get(tag + "/" + currI) < currentMu) {
+                    if (!mus.containsKey(tag + timeSep + currI) || mus.get(tag + timeSep + currI) < currentMu) {
                         if(DEBUG) {
-                            System.out.printf("update %s = %f\n", tag + "/" + currI, currentMu);
+                            System.out.printf("update %s = %f\n", tag + timeSep + currI, currentMu);
                         }
-                        mus.put(tag + "/" + currI, currentMu);
-                        backPointers.put(tag + "/" + currI, prevTag);
+                        mus.put(tag + timeSep + currI, currentMu);
+                        backPointers.put(tag + timeSep + currI, prevTag);
                     }
                 }
             }
@@ -179,29 +206,32 @@ public class ViterbiTagger {
 
             if (DEBUG) {
                 System.out.printf("T = %d-----\n", i);
-                if (mus.containsKey("C" + "/" + currI)) {
-                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
+                if (mus.containsKey("C" + timeSep + currI)) {
+                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + timeSep + currI)));
                 }
-                if (mus.containsKey("H" + "/" + currI)) {
-                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
+                if (mus.containsKey("H" + timeSep + currI)) {
+                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + timeSep + currI)));
                 }
-                if (mus.containsKey("C" + "/" + currI))
-                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + "/" + currI)));
-                if (mus.containsKey(("H" + "/" + currI)))
-                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + "/" + currI)));
-                if (mus.containsKey(("###" + "/" + currI)))
-                    System.out.printf("%s -> %.13e\n", "###", Math.exp(mus.get("###" + "/" + currI)));
+                if (mus.containsKey("C" + timeSep + currI))
+                    System.out.printf("%s -> %.13e\n", "C", Math.exp(mus.get("C" + timeSep + currI)));
+                if (mus.containsKey(("H" + timeSep + currI)))
+                    System.out.printf("%s -> %.13e\n", "H", Math.exp(mus.get("H" + timeSep + currI)));
+                if (mus.containsKey(("###" + timeSep + currI)))
+                    System.out.printf("%s -> %.13e\n", "###", Math.exp(mus.get("###" + timeSep + currI)));
             }
 
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
-            tags.add(0, backPointers.get(tags.get(0) + "/" + i));
+            tags.add(0, backPointers.get(tags.get(0) + timeSep + i));
         }
 
         if(DEBUG) {
             System.out.println(tags.toString());
         }
+
+
+//        System.out.println(probs.toString());
 
         return tags;
 
@@ -265,7 +295,7 @@ public class ViterbiTagger {
         double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
 
         // Calculate perplexity
-        String key = result.get(result.size() - 1) + "/" + String.valueOf(result.size() - 1);
+        String key = result.get(result.size() - 1) + timeSep + String.valueOf(result.size() - 1);
         double prob = mus.get(key) / Math.log(2);
         double perplexity = Math.pow(2, -prob / (words.size() - 1) );
 
