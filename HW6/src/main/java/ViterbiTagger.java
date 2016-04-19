@@ -266,7 +266,6 @@ public class ViterbiTagger {
                         p_tt = probDP.get(p_tt_key);
                     } else {
                         // tag-tag backoff probability
-                        String tagTagKey = prevTag + TAGTAG_SEP + tag;
                         double p_tt_backoff = countItems.get(tag + TAG_SEP) / (tokenCount - 1.0);
 
                         // Update the lambda value

@@ -335,7 +335,6 @@ public class ViterbiTaggerEM {
                         p_tt = probDP.get(p_tt_key);
                     } else {
                         // tag-tag backoff probability
-                        String tagTagKey = prevTag + TAGTAG_SEP + tag;
                         double p_tt_backoff = currCount.get(tag + TAG_SEP) / (tokenCount - 1.0);
 
                         // Update the lambda value
@@ -497,7 +496,6 @@ public class ViterbiTaggerEM {
                         } else {
 //                            p_tt = LAMBDA / (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
                             p_tt = LAMBDA * p_tt_backoff / ( currCount.get(prevTag + TAG_SEP) + LAMBDA);
-
                         }
 
                         probDP.put(p_tt_key, p_tt);
@@ -544,7 +542,6 @@ public class ViterbiTaggerEM {
                                 logadd(beta.get(betaKey), p_Beta_ti));
                     }
 
-//                    System.out.printf("beta_{%d}: %f\n", i, Math.exp(p_Beta_ti));
                     // compute p(T_{i_1} = prevTag, T_i = tag | \vec{w}) = alpha_{t_{i-1}}(i - 1) * p * beta_{t_i}(i) / s
                     double prob_ti_1 = alpha.get(prevTag + TIME_SEP + preTime) + p + beta.get(tag + TIME_SEP + curTime) - s;
 
@@ -556,6 +553,13 @@ public class ViterbiTaggerEM {
 
                 }
             }
+        }
+
+//        for (Map.Entry<String, Double> entry : probTW.entrySet()) {
+//            System.out.println(entry.getKey() + "   " + entry.getValue());
+//        }
+        for (Map.Entry<String, Double> entry : probDP.entrySet()) {
+            System.out.println(entry.getKey() + "   " + entry.getValue());
         }
         return probTW;
     }

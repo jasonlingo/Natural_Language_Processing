@@ -38,10 +38,10 @@ public class VTagEM {
 
     public static void main(String[] args) throws IOException {
         ViterbiTaggerEM tagger = new ViterbiTaggerEM();
-        tagger.readFile("data/entrain25k", "data/enraw");
+        tagger.readFile("data/ictrain", "data/icraw");
 
         VTagEM dt = new VTagEM();
-        dt.readTestFile("data/entest");
+        dt.readTestFile("data/ictest");
 
         tagger.emTag(dt.words, dt.tags, 11);
 
