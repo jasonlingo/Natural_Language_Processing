@@ -48,8 +48,11 @@ public class ViterbiTagger {
     /*
      When starting a new training, clean relevant instance variables.
      */
-    protected void init() {  // TODO
+    protected void init() {
         countItems.clear();
+        tagDict.clear();
+        arcProbs.clear();
+        mus.clear();
         allTags.clear();
         forwardTag = false;
     }
@@ -464,7 +467,7 @@ public class ViterbiTagger {
             String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
             double prob = mus.get(key) / Math.log(2);
             double perplexity = Math.pow(2, -prob / (words.size() - 1));
-            System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
+            System.out.printf("Perplexity per Viterbi-tagged test word: %f\n", perplexity);
         }
 
     }
