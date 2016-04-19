@@ -8,7 +8,6 @@ import java.util.*;
  * Created by Jason on 4/16/16.
  */
 public class ViterbiTaggerEM {
-    private static final boolean DEBUG = false;
     protected Map<String, HashSet<String>> tagDict;
     protected Map<String, Double> currCount;
     protected Map<String, Double> orgCount;
@@ -63,7 +62,7 @@ public class ViterbiTaggerEM {
     /*
      When starting a new training, clean relevant instance variables.
      */
-    protected void init() {  // TODO
+    protected void init() {
         this.tagDict.clear();
         this.currCount.clear();
         this.orgCount.clear();
@@ -237,6 +236,7 @@ public class ViterbiTaggerEM {
             tagDict.put(OOV, allTags);
 
             orgCount = new HashMap<String, Double>(currCount);
+//            orgCount = new HashMap<String, Double>();
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -676,13 +676,19 @@ public class ViterbiTaggerEM {
             }
         }
 
-        // calcuate accuracy
+        // calculate accuracy
         double totAccu   = (double)totCorrect / (double)totCnt * 100;
         double knownAccu = totKnownCnt > 0? (double)totKnowCorrect / (double)totKnownCnt * 100 : 0;
         double seenAccu  = totSeenCnt  > 0? (double)totSeenCorrect / (double)totSeenCnt * 100 : 0;
         double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
         System.out.printf("Tagging accuracy (Viterbi decoding): %.2f%% (known: %.2f%% seen: %.2f%% novel: %.2f%%)\n",
                            totAccu, knownAccu, seenAccu, novelAccu);
+
+        // calculate perplexity
+        String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
+        double prob = mus.get(key) / Math.log(2);
+        double perplexity = Math.pow(2, -prob / (words.size() - 1));
+        System.out.printf("Perplexity per Viterbi-tagged test word: %f\n", perplexity);
     }
 
     /*
@@ -715,7 +721,7 @@ public class ViterbiTaggerEM {
         prob = prob / Math.log(2);
         double perpl = Math.pow(2, -prob / (rawWords.size() - 1));
 
-        System.out.printf("Iteration %d: Perplexity per untagged raw word: %f\n", epoc, perpl);
+        System.out.printf("Iteration %d: Perplexity per untagged raw word: %f\n\n", epoc, perpl);
     }
 
     /*

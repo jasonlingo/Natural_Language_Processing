@@ -37,13 +37,17 @@ public class VTagEM {
     }
 
     public static void main(String[] args) throws IOException {
+        String train = args[0];
+        String test  = args[1];
+        String raw   = args[2];
+
         ViterbiTaggerEM tagger = new ViterbiTaggerEM();
-        tagger.readFile("data/ictrain", "data/icraw");
+        tagger.readFile(train, raw);
 
         VTagEM dt = new VTagEM();
-        dt.readTestFile("data/ictest");
+        dt.readTestFile(test);
 
-        tagger.emTag(dt.words, dt.tags, 11);
+        tagger.emTag(dt.words, dt.tags, 100);
 
     }
 }
