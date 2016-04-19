@@ -23,6 +23,7 @@ public class ViterbiTaggerEM {
     protected HashSet<String> trainTypes;
     protected HashSet<String> rawTypes;
     protected HashSet<String> allTypes;
+    protected HashSet<String> tagsPlusBND;
     protected List<String> rawWords;
     protected boolean forwardTag;
     protected final String TAGTAG_SEP   = "[TT]";
@@ -52,6 +53,7 @@ public class ViterbiTaggerEM {
         this.trainTypes   = new HashSet<String>();
         this.rawTypes     = new HashSet<String>();
         this.allTypes     = new HashSet<String>();
+        this.tagsPlusBND  = new HashSet<String>();
         this.rawWords     = new ArrayList<String>();
         this.forwardTag   = false;
     }
@@ -76,6 +78,7 @@ public class ViterbiTaggerEM {
         this.rawTypes.clear();
         this.allTypes.clear();
         this.rawWords.clear();
+        this.tagsPlusBND.clear();
         this.forwardTag = false;
     }
 
@@ -175,6 +178,7 @@ public class ViterbiTaggerEM {
                     currCount.get(BND + WORD_TAG_SEP + BND) - 1);
 
             // we don't try ### for novel words
+            tagsPlusBND = new HashSet<String>(allTags);
             allTags.remove(BND);
 
             // for "add one smoothing", add an OOV
@@ -187,6 +191,7 @@ public class ViterbiTaggerEM {
         }catch (IOException e) {
             e.printStackTrace();
         }finally {
+            rawBr.close();
             br.close();
         }
 
@@ -210,15 +215,11 @@ public class ViterbiTaggerEM {
             newCount = new HashMap<String, Double>(orgCount);
 
             tags = forward(words);
-//            computeAccuracy(words, tags, testTags, true);
+            computeAccuracy(words, tags, testTags, true);
 
 
             tags = forward(words);
             Map<String, Double> probTW = backward(rawWords);
-//            System.out.println(tags.toString());
-
-//            updateNewCount(probTW);
-
             System.out.printf("Iteration %d: Perplexity per untagged raw word: %.2f%%\n", epoc, 0.0);
 
             currCount = new HashMap<String, Double>(newCount);
@@ -226,38 +227,6 @@ public class ViterbiTaggerEM {
 
 
         return tags;
-    }
-
-    protected void updateNewCount(Map<String, Double> probTW) {
-        for (String k : probTW.keySet()) {
-            System.out.printf("%s = %f\n", k, Math.exp(probTW.get(k)));
-        }
-//        for(int i = 1; i < words.size(); i++) {
-//            String word    = words.get(i);
-//            String tag     = tags.get(i);
-//            String preWord = words.get(i - 1);
-//            String preTag  = tags.get(i - 1);
-//
-//            // update (preTag, tag) count
-//            String ttKey = preTag + TAGTAG_SEP + tag;
-//
-//
-//            // update (word, tag) count
-//            String wtKey = word + WORD_TAG_SEP + tag;
-//
-//
-//            // update unigram count
-//            String wKey = word + WORD_SEP;
-//
-//
-//            String tKey = tag + TAG_SEP;
-//
-//        }
-        // minus one for last ###/###
-//        double bndWordCnt = newCount.get(BND + WORD_SEP) - 1;
-//        newCount.replace(BND + WORD_SEP, bndWordCnt);
-//        double bndTagCnt = newCount.get(BND + TAG_SEP) - 1;
-//        newCount.replace(BND + TAG_SEP, bndTagCnt);
     }
 
 
@@ -300,8 +269,8 @@ public class ViterbiTaggerEM {
                     // tag to tag probability
                     String p_tt_key = prevTag + TAGTAG_SEP + tag;
                     double p_tt;
-                    if (currCount.containsKey(p_tt_key)) {
-                        p_tt = currCount.get(p_tt_key);
+                    if (probDP.containsKey(p_tt_key)) {
+                        p_tt = probDP.get(p_tt_key);
                     } else {
                         if (currCount.containsKey(p_tt_key)) {
                             p_tt = (currCount.get(p_tt_key) + LAMBDA) /
@@ -309,14 +278,14 @@ public class ViterbiTaggerEM {
                         } else {
                             p_tt = LAMBDA / (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
                         }
-                        currCount.put(p_tt_key, p_tt);
+                        probDP.put(p_tt_key, p_tt);
                     }
 
                     // tag to word probability
                     String p_tw_key = curWord + WORD_TAG_SEP + tag;
                     double p_tw;
-                    if (currCount.containsKey(p_tw_key)) {
-                        p_tw = currCount.get(p_tw_key);
+                    if (probDP.containsKey(p_tw_key)) {
+                        p_tw = probDP.get(p_tw_key);
                     } else {
                         if (novelWord) {
                             p_tw = LAMBDA / (currCount.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
@@ -326,7 +295,7 @@ public class ViterbiTaggerEM {
                             p_tw = (currCount.get(p_tw_key) + LAMBDA) /
                                     (currCount.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
                         }
-                        currCount.put(p_tw_key, p_tw);
+                        probDP.put(p_tw_key, p_tw);
                     }
 
                     // for forward-backward
@@ -349,11 +318,11 @@ public class ViterbiTaggerEM {
                 }
                 alpha.put(tag + TIME_SEP + curTime, alpha_ti);
 
-//                System.out.printf("Day %d alpha_{%s}: %f\n", i, tag, Math.exp(-alpha_ti));
+//                System.out.printf("Day %d alpha_{%s}: %f\n", i, tag, Math.exp(alpha_ti));
             }
         }
         for (Map.Entry<String, Double> entry : alpha.entrySet()) {
-            System.out.println(entry.getKey() + "  " +  Math.exp(-entry.getValue()));
+            System.out.println(entry.getKey() + "  " +  Math.exp(entry.getValue()));
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
@@ -404,6 +373,13 @@ public class ViterbiTaggerEM {
                 double prob_ti = alpha.get(tag + TIME_SEP + curTime) + beta.get(tag + TIME_SEP + curTime) - s;
                 probTW.put(tag + TIME_SEP + curTime, prob_ti);
 
+                // update c(tag)
+                newCount.put(tag + TAG_SEP, newCount.getOrDefault(tag + TAG_SEP, 0.0) + Math.exp(prob_ti));
+
+                // update c(word/tag)
+                newCount.put(curWord + WORD_TAG_SEP + tag,
+                             newCount.getOrDefault(curWord + WORD_TAG_SEP + tag, 0.0) + Math.exp(prob_ti));
+
                 for (String prevTag : prevCandidateTag) {
 
                     // tag to tag probability
@@ -451,7 +427,14 @@ public class ViterbiTaggerEM {
 //                    System.out.printf("beta_{%d}: %f\n", i, Math.exp(p_Beta_ti));
                     // compute p(T_{i_1} = prevTag, T_i = tag | \vec{w}) = alpha_{t_{i-1}}(i - 1) * p * beta_{t_i}(i) / s
                     double prob_ti_1 = alpha.get(prevTag + TIME_SEP + preTime) + p + beta.get(tag + TIME_SEP + curTime) - s;
-                    probTW.put(prevTag + TAGTAG_SEP + tag, prob_ti_1);
+                    double tmp2 = Math.exp(prob_ti_1);
+
+                    // update c(tag to tag)
+                    String key = prevTag + TAGTAG_SEP + tag;
+                    newCount.put(key,
+                                 newCount.getOrDefault(key, 0.0) + Math.exp(prob_ti_1));
+                    probTW.put(prevTag + TAGTAG_SEP + tag + TIME_SEP + curTime, prob_ti_1);
+
                 }
             }
         }

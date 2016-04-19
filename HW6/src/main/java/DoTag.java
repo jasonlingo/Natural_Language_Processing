@@ -37,17 +37,17 @@ public class DoTag {
     }
 
     public static void main(String[] args) throws IOException {
-        ViterbiTaggerEM tagger = new ViterbiTaggerEM();
-        tagger.readFile("data/ictrain", "data/icraw");
+        ViterbiTagger tagger = new ViterbiTagger();
+        tagger.readFile("data/ictrain");
 
         DoTag dt = new DoTag();
         dt.readTestFile("data/ictest");
-//
-        List<String> vTags = tagger.emTag(dt.words, dt.tags, 2);
+
+        List<String> vTags = tagger.viterbiTag(dt.words);
         tagger.computeAccuracy(dt.words, vTags, dt.tags, true);
 
-//        List<String> posTags = tagger.posTag(dt.words);
-//        tagger.computeAccuracy(dt.words, posTags, dt.tags, false);
+        List<String> posTags = tagger.posTag(dt.words);
+        tagger.computeAccuracy(dt.words, posTags, dt.tags, false);
 
     }
 }
