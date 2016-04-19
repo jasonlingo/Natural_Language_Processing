@@ -33,7 +33,7 @@ public class ViterbiTaggerEM {
     protected final String TAG_SEP      = "[T]";
     protected final String OOV          = "OOV";
     protected final String BND          = "###"; //boundary marker
-    protected double LAMBDA       = 0.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
     protected double tokenCount     = 0.0;  // Token count (number of training entries
 
 
