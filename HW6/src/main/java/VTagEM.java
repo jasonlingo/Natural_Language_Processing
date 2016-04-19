@@ -43,7 +43,7 @@ public class VTagEM {
         VTagEM dt = new VTagEM();
         dt.readTestFile("data/entest");
 
-        List<String> vTags = tagger.emTag(dt.words, dt.tags, 11);
+        tagger.emTag(dt.words, dt.tags, 11);
 
     }
 }
