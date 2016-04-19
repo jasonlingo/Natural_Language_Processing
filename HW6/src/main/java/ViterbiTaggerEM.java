@@ -104,6 +104,7 @@ public class ViterbiTaggerEM {
                     String[] elements = line.split("/");
                     String word = elements[0];
                     String tag  = elements[1];
+                    tokenCount += 1.0;
 
                     allTags.add(tag);
                     trainTypes.add(word);
@@ -555,12 +556,6 @@ public class ViterbiTaggerEM {
             }
         }
 
-//        for (Map.Entry<String, Double> entry : probTW.entrySet()) {
-//            System.out.println(entry.getKey() + "   " + entry.getValue());
-//        }
-        for (Map.Entry<String, Double> entry : probDP.entrySet()) {
-            System.out.println(entry.getKey() + "   " + entry.getValue());
-        }
         return probTW;
     }
 
