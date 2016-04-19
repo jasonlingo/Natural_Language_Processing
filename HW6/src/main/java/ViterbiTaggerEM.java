@@ -35,6 +35,7 @@ public class ViterbiTaggerEM {
     protected final String BND          = "###"; //boundary marker
     protected double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
     protected double tokenCount     = 0.0;  // Token count (number of training entries
+    protected double vocabulary     = 0.0;
 
 
     public ViterbiTaggerEM() {
@@ -207,12 +208,18 @@ public class ViterbiTaggerEM {
                 line = br.readLine();
             }
 
+            vocabulary += (double) tagDict.size();
+
             // process raw data
             line = rawBr.readLine();
             while(line != null) {
                 String word = line.trim(); // remove trailing space if it exists
+                if (!tagDict.containsKey(word) && !rawWords.contains(word)) {
+                    vocabulary += 1.0;
+                }
                 rawTypes.add(word);
                 rawWords.add(word);
+
                 line = rawBr.readLine();
             }
 
@@ -374,12 +381,12 @@ public class ViterbiTaggerEM {
                         }
 
                         if (novelWord) {
-                            double p_tw_backoff = 1.0 / (tokenCount + tagDict.size() - 1.0);
+                            double p_tw_backoff = 1.0 / (tokenCount + vocabulary - 1.0);
                             p_tw = LAMBDA * p_tw_backoff / (currCount.get(tag + TAG_SEP) + LAMBDA);
                         } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / (tokenCount + tagDict.size() - 1.0);
+                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / (tokenCount + vocabulary - 1.0);
                             p_tw = (currCount.get(p_tw_key) + LAMBDA * p_tw_backoff) / ( currCount.get(tag + TAG_SEP) + LAMBDA);
 
                         }
@@ -516,17 +523,13 @@ public class ViterbiTaggerEM {
                         }
 
                         if (curWordNovel) {
-                            double p_tw_backoff = 1.0 / (tokenCount + tagDict.size() - 1.0);
+                            double p_tw_backoff = 1.0 / (tokenCount + vocabulary - 1.0);
                             p_tw = LAMBDA * p_tw_backoff / ( currCount.get(tag + TAG_SEP) + LAMBDA);
-//                            p_tw = LAMBDA / (currCount.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
                         } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / ( tokenCount + tagDict.size() - 1.0 );
+                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / ( tokenCount + vocabulary - 1.0 );
                             p_tw = (currCount.get(p_tw_key) + LAMBDA * p_tw_backoff ) / (currCount.get(tag + TAG_SEP) + LAMBDA);
-//
-//                            p_tw = (currCount.get(p_tw_key) + LAMBDA) /
-//                                    (currCount.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
