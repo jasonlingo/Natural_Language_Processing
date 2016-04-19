@@ -260,7 +260,6 @@ public class ViterbiTagger {
                 alpha.put(tag + TIME_SEP + curTime, alpha_ti);
             }
         }
-
         for (int i = words.size() - 1; i > 0; i--) {
             tags.add(0, backPointers.get(tags.get(0) + TIME_SEP + i));
         }

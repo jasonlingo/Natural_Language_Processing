@@ -213,11 +213,11 @@ public class ViterbiTaggerEM {
 //            computeAccuracy(words, tags, testTags, true);
 
 
-            tags = forward(rawWords);
+            tags = forward(words);
             Map<String, Double> probTW = backward(rawWords);
-            System.out.println(tags.toString());
+//            System.out.println(tags.toString());
 
-            updateNewCount(probTW);
+//            updateNewCount(probTW);
 
             System.out.printf("Iteration %d: Perplexity per untagged raw word: %.2f%%\n", epoc, 0.0);
 
@@ -348,7 +348,12 @@ public class ViterbiTaggerEM {
 
                 }
                 alpha.put(tag + TIME_SEP + curTime, alpha_ti);
+
+//                System.out.printf("Day %d alpha_{%s}: %f\n", i, tag, Math.exp(-alpha_ti));
             }
+        }
+        for (Map.Entry<String, Double> entry : alpha.entrySet()) {
+            System.out.println(entry.getKey() + "  " +  Math.exp(-entry.getValue()));
         }
 
         for (int i = words.size() - 1; i > 0; i--) {
@@ -443,6 +448,7 @@ public class ViterbiTaggerEM {
                                 logadd(beta.get(betaKey), p_Beta_ti));
                     }
 
+//                    System.out.printf("beta_{%d}: %f\n", i, Math.exp(p_Beta_ti));
                     // compute p(T_{i_1} = prevTag, T_i = tag | \vec{w}) = alpha_{t_{i-1}}(i - 1) * p * beta_{t_i}(i) / s
                     double prob_ti_1 = alpha.get(prevTag + TIME_SEP + preTime) + p + beta.get(tag + TIME_SEP + curTime) - s;
                     probTW.put(prevTag + TAGTAG_SEP + tag, prob_ti_1);
