@@ -33,7 +33,7 @@ public class ViterbiTaggerEM {
     protected final String TAG_SEP      = "[T]";
     protected final String OOV          = "OOV";
     protected final String BND          = "###"; //boundary marker
-    protected double LAMBDA       = 0.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
     protected double tokenCount     = 0.0;  // Token count (number of training entries
 
 
@@ -104,6 +104,7 @@ public class ViterbiTaggerEM {
                     String[] elements = line.split("/");
                     String word = elements[0];
                     String tag  = elements[1];
+                    tokenCount += 1.0;
 
                     allTags.add(tag);
                     trainTypes.add(word);
@@ -555,12 +556,6 @@ public class ViterbiTaggerEM {
             }
         }
 
-//        for (Map.Entry<String, Double> entry : probTW.entrySet()) {
-//            System.out.println(entry.getKey() + "   " + entry.getValue());
-//        }
-        for (Map.Entry<String, Double> entry : probDP.entrySet()) {
-            System.out.println(entry.getKey() + "   " + entry.getValue());
-        }
         return probTW;
     }
 
