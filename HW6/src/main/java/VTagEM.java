@@ -11,8 +11,6 @@ public class VTagEM {
     List<String> words  = new ArrayList<String>();
     List<String> tags   = new ArrayList<String>();
 
-
-
     public void readTestFile(String fileName) throws  IOException {
         words.clear();
         tags.clear();
@@ -40,12 +38,12 @@ public class VTagEM {
 
     public static void main(String[] args) throws IOException {
         ViterbiTaggerEM tagger = new ViterbiTaggerEM();
-        tagger.readFile("data/ictrain", "data/icraw");
+        tagger.readFile("data/entrain", "data/enraw");
 
         VTagEM dt = new VTagEM();
-        dt.readTestFile("data/ictest");
+        dt.readTestFile("data/entest");
 
-        List<String> vTags = tagger.emTag(dt.words, dt.tags, 10);
+        List<String> vTags = tagger.emTag(dt.words, dt.tags, 11);
 
     }
 }

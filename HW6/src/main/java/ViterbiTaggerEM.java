@@ -35,7 +35,7 @@ public class ViterbiTaggerEM {
     protected final String BND          = "###"; //boundary marker
     protected final String VITERBI      = "Viterbi";
     protected final String POSTERIOR    = "posterior";
-    protected final double LAMBDA       = 0.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected final double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
 
 
     public ViterbiTaggerEM() {
@@ -184,8 +184,8 @@ public class ViterbiTaggerEM {
             // for "add one smoothing", add an OOV
             tagDict.put(OOV, allTags);
 
-//            orgCount = new HashMap<String, Double>(currCount);  //FIXME
-            orgCount = new HashMap<String, Double>();
+            orgCount = new HashMap<String, Double>(currCount);  //FIXME
+//            orgCount = new HashMap<String, Double>();
 
 
         }catch (IOException e) {
@@ -210,27 +210,28 @@ public class ViterbiTaggerEM {
         List<String> tags = new ArrayList<String>();
 
         for(int epoc = 0; epoc < iters; epoc++) {
-            // Viterbi decoding
             newCount = new HashMap<String, Double>(orgCount);
 
-            tags = forward(words);
-            computeAccuracy(words, tags, testTags, true);
+            // perform Viterbi decoding on test data
+            tags = forward(words, false);
+            calAccuracy(words, tags, testTags);
 
-
-            tags = forward(rawWords);
+            // perform forward-backward on raw data
+            tags = forward(rawWords, true);
             Map<String, Double> probTW = backward(rawWords);
-            
-            System.out.printf("Iteration %d: Perplexity per untagged raw word: %.2f%%\n", epoc, 0.0);
+            calPerplexity(epoc);
 
             currCount = new HashMap<String, Double>(newCount);
         }
-
 
         return tags;
     }
 
 
-    protected List<String> forward(List<String> words) {
+    /*
+     Viterbi decoding and forward process.
+     */
+    protected List<String> forward(List<String> words, boolean isFB) {
         probDP.clear();
         alpha.clear();
         mus.clear();
@@ -238,9 +239,12 @@ public class ViterbiTaggerEM {
 
         List<String> tags = new ArrayList<String>();
 
-        tags.add(BND);
-        alpha.put(BND + TIME_SEP + "0", Math.log(1.0));
-        mus.put(BND + TIME_SEP + "0", Math.log(1.0));
+        if(isFB) {
+            alpha.put(BND + TIME_SEP + "0", Math.log(1.0));
+        } else {
+            mus.put(BND + TIME_SEP + "0", Math.log(1.0));
+            tags.add(BND);
+        }
 
         for (int i = 1; i < words.size(); i++) {
             String curWord = words.get(i);
@@ -298,48 +302,52 @@ public class ViterbiTaggerEM {
                         probDP.put(p_tw_key, p_tw);
                     }
 
-                    // for forward-backward
-                    double preAlpha_p = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
-                    if(alpha_ti == 0) {
-                        alpha_ti = preAlpha_p;
+
+                    if(isFB) {
+                        // for forward-backward
+                        double preAlpha_p = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
+                        if (alpha_ti == 0) {
+                            alpha_ti = preAlpha_p;
+                        } else {
+                            alpha_ti = logadd(alpha_ti, preAlpha_p);
+                        }
                     } else {
-                        alpha_ti = logadd(alpha_ti, preAlpha_p);
-                    }
+                        // for Viterbi decoding
+                        double currentMu = mus.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
 
-                    // for Viterbi decoding
-                    double currentMu = mus.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
-
-                    // update max probability and back pointers
-                    if (!mus.containsKey(tag + TIME_SEP + curTime) || mus.get(tag + TIME_SEP + curTime) < currentMu) {
-                        mus.put(tag + TIME_SEP + curTime, currentMu);
-                        backPointers.put(tag + TIME_SEP + curTime, prevTag);
+                        // update max probability and back pointers
+                        if (!mus.containsKey(tag + TIME_SEP + curTime) || mus.get(tag + TIME_SEP + curTime) < currentMu) {
+                            mus.put(tag + TIME_SEP + curTime, currentMu);
+                            backPointers.put(tag + TIME_SEP + curTime, prevTag);
+                        }
                     }
 
                 }
-                alpha.put(tag + TIME_SEP + curTime, alpha_ti);
+                if(isFB) {
+                    alpha.put(tag + TIME_SEP + curTime, alpha_ti);
+                }
             }
         }
 
-        for (int i = words.size() - 1; i > 0; i--) {
-            tags.add(0, backPointers.get(tags.get(0) + TIME_SEP + i));
+        if(!isFB) {
+            for (int i = words.size() - 1; i > 0; i--) {
+                tags.add(0, backPointers.get(tags.get(0) + TIME_SEP + i));
+            }
         }
 
         return tags;
 
     }
 
+
     protected Map<String, Double> backward(List<String> words) {
         beta.clear();
 
         Map<String, Double> probTW = new HashMap<String, Double>();
+        HashSet<String> candidateTag, prevCandidateTag;
 
         double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
-
-        List<String> tags = new ArrayList<String>();
-        tags.add(BND);
         beta.put(BND + TIME_SEP + String.valueOf(words.size() - 1), Math.log(1.0));
-
-        HashSet<String> candidateTag, prevCandidateTag;
 
         for (int i = words.size() - 1; i > 0; i--) {
             String curWord = words.get(i);
@@ -408,6 +416,8 @@ public class ViterbiTaggerEM {
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
+
+
                     double p = Math.log(p_tt) + Math.log(p_tw);
                     double p_Beta_ti = beta.get(tag + TIME_SEP + curTime) + p;
 
@@ -421,7 +431,6 @@ public class ViterbiTaggerEM {
 
                     // compute p(T_{i_1} = prevTag, T_i = tag | \vec{w}) = alpha_{t_{i-1}}(i - 1) * p * beta_{t_i}(i) / s
                     double prob_ti_1 = alpha.get(prevTag + TIME_SEP + preTime) + p + beta.get(tag + TIME_SEP + curTime) - s;
-                    double tmp2 = Math.exp(prob_ti_1);
 
                     // update c(tag to tag)
                     String key = prevTag + TAGTAG_SEP + tag;
@@ -432,7 +441,6 @@ public class ViterbiTaggerEM {
                 }
             }
         }
-
         return probTW;
     }
 
@@ -451,11 +459,9 @@ public class ViterbiTaggerEM {
             if (!tagDict.containsKey(word)) {
                 word = OOV;
             }
-
             HashSet<String> candidateTags = tagDict.get(word);
             tags.add(findBestTag(candidateTags, probTW, curTime));
         }
-
         return tags;
     }
 
@@ -486,16 +492,18 @@ public class ViterbiTaggerEM {
         perplexity = exp( - (log p(w1, t1, ..., wn, tn | w0, t0)) / n )
 
      */
-    public void computeAccuracy(List<String> words, List<String> tags, List<String> ans, boolean isVtag) {
+    public void calAccuracy(List<String> words, List<String> tags, List<String> ans) {
         int totCnt          = 0;
         int totCorrect      = 0;
         int totKnownCnt     = 0;
         int totKnowCorrect  = 0;
+        int totSeenCnt      = 0;
+        int totSeenCorrect  = 0;
         int totNovelCnt     = 0;
         int totNovelCorrect = 0;
 
         for(int i = 0; i < words.size(); i++) {
-            String word   = words.get(i);
+            String word = words.get(i);
             String resTag = tags.get(i);
             String ansTag = ans.get(i);
 
@@ -513,13 +521,19 @@ public class ViterbiTaggerEM {
             }
 
             if (tagDict.containsKey(word)) {
-                // count known word correct data
+                // count known word that appeared in train data
                 totKnownCnt++;
                 if (correct) {
                     totKnowCorrect++;
                 }
+            } else if (rawTypes.contains(word)) {
+                // count seen word that did not appear in train data but did appear in raw data
+                totSeenCnt++;
+                if (correct) {
+                    totSeenCorrect++;
+                }
             } else {
-                // count novel word correct data
+                // count novel word correct data (in neither train data nor raw data)
                 totNovelCnt++;
                 if (correct) {
                     totNovelCorrect++;
@@ -531,17 +545,47 @@ public class ViterbiTaggerEM {
         // calcuate accuracy
         double totAccu   = (double)totCorrect / (double)totCnt * 100;
         double knownAccu = totKnownCnt > 0? (double)totKnowCorrect / (double)totKnownCnt * 100 : 0;
+        double seenAccu  = totSeenCnt  > 0? (double)totSeenCorrect / (double)totSeenCnt * 100 : 0;
         double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
-        System.out.printf("Tagging accuracy (%s decoding): %.2f%% (known: %.2f%% novel: %.2f%%)\n", isVtag? VITERBI:POSTERIOR, totAccu, knownAccu, novelAccu);
+        System.out.printf("Tagging accuracy (Viterbi decoding): %.2f%% (known: %.2f%% seen: %.2f%% novel: %.2f%%)\n",
+                           totAccu, knownAccu, seenAccu, novelAccu);
+    }
 
-        // Calculate perplexity
-        if(isVtag) {
-            String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
-            double prob = mus.get(key) / Math.log(2);
-            double perplexity = Math.pow(2, -prob / (words.size() - 1));
-            System.out.printf("Perplexity per Viterbi-tagged test word: %.3f\n", perplexity);
+    /*
+     Calculate perplexity of forward-backward decoding.
+     */
+    protected void calPerplexity(int epoc) {
+//        String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
+//        double prob = mus.get(key) / Math.log(2);
+//        double perplexity = Math.pow(2, -prob / (words.size() - 1));
+        double prob = 0.0;
+
+        if (rawWords.size() > 1) {
+            String word = rawWords.get(1);
+            if (!tagDict.containsKey(word)) {
+                word = OOV;
+            }
+
+            HashSet<String> tags = tagDict.get(word);
+
+            for (String tag : tags) {
+                String key = tag + TIME_SEP + "1";
+                double abProb = alpha.getOrDefault(key, 0.0) + beta.getOrDefault(key, 0.0);
+                if (prob == 0) {
+                    prob = abProb;
+                } else {
+                    prob = logadd(prob, abProb);
+                }
+            }
         }
 
+
+
+
+        prob = prob / Math.log(2);
+        double perpl = Math.pow(2, -prob / (rawWords.size() - 1));
+
+        System.out.printf("Iteration %d: Perplexity per untagged raw word: %f\n", epoc, perpl);
     }
 
     /*
@@ -549,7 +593,7 @@ public class ViterbiTaggerEM {
      logadd(x, y) = x + log(1 + exp(y - x))  if y <= x;
                   = y + log(1 + exp(x - y))  otherwise
      */
-    private static double logadd(double x, double y) { //TODO: handle the case x=0 or y=0
+     protected static double logadd(double x, double y) { //TODO: handle the case x=0 or y=0
         if(y <= x) {
             if (1 + Math.exp(y - x) == 0) {
                 return x + (-Double.MAX_VALUE);
