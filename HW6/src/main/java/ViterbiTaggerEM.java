@@ -219,9 +219,7 @@ public class ViterbiTaggerEM {
 
             tags = forward(rawWords);
             Map<String, Double> probTW = backward(rawWords);
-
-//            updateNewCount(probTW, rawWords);
-
+            
             System.out.printf("Iteration %d: Perplexity per untagged raw word: %.2f%%\n", epoc, 0.0);
 
             currCount = new HashMap<String, Double>(newCount);
@@ -229,65 +227,6 @@ public class ViterbiTaggerEM {
 
 
         return tags;
-    }
-
-    protected void updateNewCount(Map<String, Double> probTW, List<String> words) {
-        // update p(tag | BND), the start probability of each tag
-//        for(String tag : allTags) {
-//            String key = BND + TAGTAG_SEP + tag;
-//            new
-//        }
-
-
-
-        // update tag count
-//        for(String tag : tagsPlusBND) {
-//            double cnt = 0.0;
-//            for(int i = 0; i < words.size() - 1; i++) {
-//                String key = tag + TIME_SEP + String.valueOf(i);
-//                if(probTW.containsKey(key)) {
-//                    cnt += Math.exp(probTW.get(key));
-//                }
-//            }
-//            newCount.put(tag + TAG_SEP,
-//                         newCount.getOrDefault(tag + TAG_SEP, 0.0) + cnt);
-//        }
-
-        // update tag-tag count
-//        for(String tag1 : tagsPlusBND) {
-//            for(String tag2 : tagsPlusBND) {
-//                double cnt = 0.0;
-//                for(int i = 0; i < words.size() - 1; i++) {
-//                    String key = tag1 + TAGTAG_SEP + tag2 + TIME_SEP + String.valueOf(i);
-//                    if(probTW.containsKey(key)) {
-//                        cnt += Math.exp(probTW.get(key));
-//                    }
-//                }
-//                newCount.put(tag1 + TAGTAG_SEP + tag2,
-//                             newCount.getOrDefault(tag1 + TAGTAG_SEP + tag2, 0.0) + cnt);
-//            }
-//        }
-
-        // update word-tag count
-        for(int i = 0; i < words.size() - 1; i++) {
-            String word = words.get(i);
-            String curTime = String.valueOf(i);
-
-            if(!tagDict.containsKey(word)) {
-                word = OOV;
-            }
-
-            HashSet<String> tags = tagDict.get(word);
-            for(String tag : tags) {
-                String key = tag + TIME_SEP + curTime;
-                if(probTW.containsKey(key)) {
-                    double cnt = Math.exp(probTW.get(key));
-                    String wtKey = word + WORD_TAG_SEP + tag;
-                    newCount.put(wtKey,
-                                 newCount.getOrDefault(wtKey, 0.0) + cnt);
-                }
-            }
-        }
     }
 
 
