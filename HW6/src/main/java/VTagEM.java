@@ -5,15 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Jinyi on 4/16/16.
+ * Created by Jason on 4/19/16.
  */
-public class DoTag {
+public class VTagEM {
     List<String> words  = new ArrayList<String>();
     List<String> tags   = new ArrayList<String>();
 
 
 
     public void readTestFile(String fileName) throws  IOException {
+        words.clear();
+        tags.clear();
 
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         try {
@@ -37,17 +39,13 @@ public class DoTag {
     }
 
     public static void main(String[] args) throws IOException {
-        ViterbiTagger tagger = new ViterbiTagger();
-        tagger.readFile("data/ictrain");
+        ViterbiTaggerEM tagger = new ViterbiTaggerEM();
+        tagger.readFile("data/ictrain", "data/icraw");
 
-        DoTag dt = new DoTag();
+        VTagEM dt = new VTagEM();
         dt.readTestFile("data/ictest");
 
-        List<String> vTags = tagger.viterbiTag(dt.words);
-        tagger.computeAccuracy(dt.words, vTags, dt.tags, true);
-
-        List<String> posTags = tagger.posTag(dt.words);
-        tagger.computeAccuracy(dt.words, posTags, dt.tags, false);
+        List<String> vTags = tagger.emTag(dt.words, dt.tags, 10);
 
     }
 }
