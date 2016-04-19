@@ -33,8 +33,6 @@ public class ViterbiTaggerEM {
     protected final String TAG_SEP      = "[T]";
     protected final String OOV          = "OOV";
     protected final String BND          = "###"; //boundary marker
-    protected final String VITERBI      = "Viterbi";
-    protected final String POSTERIOR    = "posterior";
     protected final double LAMBDA       = 1.0;   // setting LAMBDA = 0 means no add one smoothing
 
 
@@ -84,6 +82,9 @@ public class ViterbiTaggerEM {
 
     /*
      Read file and parse word/tag pairs and store needed data.
+
+     @param train: training data that has words and tags.
+     @param raw: raw data that only has words.
      */
     public void readFile(String train, String raw) throws IOException {
         init();
@@ -184,9 +185,7 @@ public class ViterbiTaggerEM {
             // for "add one smoothing", add an OOV
             tagDict.put(OOV, allTags);
 
-            orgCount = new HashMap<String, Double>(currCount);  //FIXME
-//            orgCount = new HashMap<String, Double>();
-
+            orgCount = new HashMap<String, Double>(currCount);
 
         }catch (IOException e) {
             e.printStackTrace();
@@ -201,8 +200,12 @@ public class ViterbiTaggerEM {
     /*
      This will tag funciton will first perform Viterbi decoding, and then perform
      forward-backward decoding.
+
+     @param words: a list of test words to be decoded.
+     @param testTags: the true tags for the input words.
+     @param iters: the total number of iteration for running the EM algorithm.
      */
-    public List<String> emTag(List<String> words, List<String> testTags, int iters) {
+    public void emTag(List<String> words, List<String> testTags, int iters) {
         alpha.clear();
         beta.clear();
         mus.clear();
@@ -224,12 +227,16 @@ public class ViterbiTaggerEM {
             currCount = new HashMap<String, Double>(newCount);
         }
 
-        return tags;
     }
 
 
     /*
-     Viterbi decoding and forward process.
+     Viterbi decoding (calculate mu probability) and forward process (calculate alpha probability).
+
+     @param: words: the words list to be decoded
+     @param: isFB: indicate forward(true) or Viterbi(false) mode
+     @return: (Viterbi mode) a list of tags for input words;
+              (FB mode) no use
      */
     protected List<String> forward(List<String> words, boolean isFB) {
         probDP.clear();
@@ -263,6 +270,7 @@ public class ViterbiTaggerEM {
                 preWord = OOV;
             }
 
+            // get the candidate tags for current and previous words.
             HashSet<String> candidateTag     = tagDict.get(curWord);
             HashSet<String> prevCandidateTag = tagDict.get(preWord);
 
@@ -340,6 +348,12 @@ public class ViterbiTaggerEM {
     }
 
 
+    /*
+     Backward process, calculate beta probability.
+
+     @param words: list of words (from raw data) to be decoded.
+     @return: a HashMap containing the p_tw and p_tt probabilities.
+     */
     protected Map<String, Double> backward(List<String> words) {
         beta.clear();
 
@@ -447,6 +461,10 @@ public class ViterbiTaggerEM {
 
     /*
      Find the best tag for each word according to the forward-backward probability.
+
+     @param words: a list of words to be tagged.
+     @param probTW: the probability for each possible tag for each word in the input words list.
+     @return: a list of tags.
      */
     protected List<String> posteriorTag(List<String> words, Map<String, Double> probTW) {
         List<String> tags = new ArrayList<String>();
@@ -466,6 +484,14 @@ public class ViterbiTaggerEM {
     }
 
 
+    /*
+     Find the best tag with the highest probability for a word.
+
+     @param candidateTags: a list of candidate tags for a word.
+     @param probTW: the probability for each possible tag for each word.
+     @param curTime: indicate the word position.
+     @return: the best tag.
+     */
     protected String findBestTag(Set<String> candidateTags, Map<String, Double> probTW, String curTime) {
         double bestProb = -Double.MAX_VALUE;
         String bestTag  = "";
@@ -481,16 +507,18 @@ public class ViterbiTaggerEM {
     }
 
 
-
     /*
      Compute the tagging accuracy:
-        1. overall accuracy: considers all word tokens, other than the sentence boundary markers ###
-        2. known-word accuracy: considers only tokens of words (other than ###) that also appeared in training data
+        1. overall accuracy: considers all word tokens, other than the sentence boundary markers ###.
+        2. known-word accuracy: considers only tokens of words (other than ###) that also appeared in training data.
         3. novel-word accuracy: consider only tokens of words that did not also appear in training data.
 
      Compute perplexity:
         perplexity = exp( - (log p(w1, t1, ..., wn, tn | w0, t0)) / n )
 
+     @param words: a list of words from test data.
+     @param tags: predicted tags for the input words.
+     @param ans: correct tags for the input words.
      */
     public void calAccuracy(List<String> words, List<String> tags, List<String> ans) {
         int totCnt          = 0;
@@ -552,12 +580,11 @@ public class ViterbiTaggerEM {
     }
 
     /*
-     Calculate perplexity of forward-backward decoding.
+     Calculate perplexity of forward-backward decoding and print it.
+
+     @param epoc: iteration number.
      */
     protected void calPerplexity(int epoc) {
-//        String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
-//        double prob = mus.get(key) / Math.log(2);
-//        double perplexity = Math.pow(2, -prob / (words.size() - 1));
         double prob = 0.0;
 
         if (rawWords.size() > 1) {
@@ -579,9 +606,6 @@ public class ViterbiTaggerEM {
             }
         }
 
-
-
-
         prob = prob / Math.log(2);
         double perpl = Math.pow(2, -prob / (rawWords.size() - 1));
 
@@ -592,16 +616,17 @@ public class ViterbiTaggerEM {
      perform log addition:
      logadd(x, y) = x + log(1 + exp(y - x))  if y <= x;
                   = y + log(1 + exp(x - y))  otherwise
+     @param x, y: log probabilities.
      */
-     protected static double logadd(double x, double y) { //TODO: handle the case x=0 or y=0
+     protected static double logadd(double x, double y) {
         if(y <= x) {
-            if (1 + Math.exp(y - x) == 0) {
+            if (1 + Math.exp(y - x) == 0) { //handle the case log(0)
                 return x + (-Double.MAX_VALUE);
             }
             return x + Math.log(1 + Math.exp(y - x));
 
         } else {
-            if (1 + Math.exp(x - y) == 0) {
+            if (1 + Math.exp(x - y) == 0) { //handle the case log(0)
                 return y + (-Double.MAX_VALUE);
             }
             return y + Math.log(1 + Math.exp(x - y));
