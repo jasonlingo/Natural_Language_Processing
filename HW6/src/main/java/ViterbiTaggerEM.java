@@ -372,7 +372,7 @@ public class ViterbiTaggerEM {
                             LAMBDA += countSingletons.get(singletonTKKey);
                         }
 
-                        if (novelWord) {
+                        if (novelWord) { // TODO
                             double p_tw_backoff = 1.0 / (tokenCount + tagDict.size() - 1.0);
                             p_tw = LAMBDA * p_tw_backoff / (currCount.get(tag + TAG_SEP) + LAMBDA);
                         } else if (curWord.equals(BND) && tag.equals(BND)) {
