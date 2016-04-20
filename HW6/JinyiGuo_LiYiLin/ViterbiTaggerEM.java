@@ -8,35 +8,25 @@ import java.util.*;
  * Created by Jason on 4/16/16.
  */
 public class ViterbiTaggerEM {
-    // tags tables
     protected Map<String, HashSet<String>> tagDict;
-    protected HashSet<String> tagsPlusBND;
-    protected HashSet<String> allTags;
-
-    // counters.
     protected Map<String, Double> currCount;
     protected Map<String, Double> orgCount;
     protected Map<String, Double> newCount;
-
-    // probability tables.
+    protected Map<String, Double> arcProbs;
     protected Map<String, Double> mus;
+    protected Map<String, Double> probDP;
+    protected Map<String, String> backPointers;
+    protected HashSet<String> allTags;
     protected Map<String, Double> alpha;
     protected Map<String, Double> beta;
-
-    // singleton table.
     protected Map<String, Double> countSingletons;
-
-    // word type tables, allType is the union of train and raw dataset.
     protected HashSet<String> trainTypes;
     protected HashSet<String> rawTypes;
     protected HashSet<String> allTypes;
-
-    // word token counters and raw word list.
+    protected HashSet<String> tagsPlusBND;
     protected List<String> rawWords;
-    protected int trainToken;
-    protected int rawToken;
+    protected boolean forwardTag;
 
-    // separators for differentiating different keys for counters.
     protected final String TAGTAG_SEP   = "[TT]";
     protected final String WORD_TAG_SEP = "/";
     protected final String TIME_SEP     = "__";
@@ -44,36 +34,59 @@ public class ViterbiTaggerEM {
     protected final String TAG_SEP      = "[T]";
     protected final String OOV          = "OOV";
     protected final String BND          = "###"; //boundary marker
-    protected final String SING         = ".|";
 
-    // smoothing parameter.
-    protected double LAMBDA             = 1.0;
+    protected double LAMBDA             = 1.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected double tokenCount         = 0.0;   // Token count (number of training entries
+    protected double vocabulary         = 0.0;
+    protected double token              = 0.0;
+    protected double v                  = 0.0;
 
 
     public ViterbiTaggerEM() {
         this.tagDict      = new HashMap<String, HashSet<String>>();
-        this.tagsPlusBND  = new HashSet<String>();
-        this.allTags      = new HashSet<String>();
-
         this.currCount    = new HashMap<String, Double>();
         this.orgCount     = new HashMap<String, Double>();
         this.newCount     = new HashMap<String, Double>();
-
+        this.arcProbs     = new HashMap<String, Double>();
         this.mus          = new HashMap<String, Double>();
+        this.probDP       = new HashMap<String, Double>();
+        this.backPointers = new HashMap<String, String>();
+        this.allTags      = new HashSet<String>();
         this.alpha        = new HashMap<String, Double>();
         this.beta         = new HashMap<String, Double>();
-
-        this.countSingletons = new HashMap<String, Double>();
-
         this.trainTypes   = new HashSet<String>();
         this.rawTypes     = new HashSet<String>();
         this.allTypes     = new HashSet<String>();
-
+        this.tagsPlusBND  = new HashSet<String>();
         this.rawWords     = new ArrayList<String>();
-        this.trainToken   = 0;
-        this.rawToken     = 0;
+        this.countSingletons = new HashMap<String, Double>();
+        this.forwardTag   = false;
     }
 
+
+    /*
+     When starting a new training, clean relevant instance variables.
+     */
+    protected void init() {
+        this.tagDict.clear();
+        this.currCount.clear();
+        this.orgCount.clear();
+        this.newCount.clear();
+        this.arcProbs.clear();
+        this.mus.clear();
+        this.probDP.clear();
+        this.backPointers.clear();
+        this.allTags.clear();
+        this.alpha.clear();
+        this.beta.clear();
+        this.trainTypes.clear();
+        this.rawTypes.clear();
+        this.allTypes.clear();
+        this.rawWords.clear();
+        this.tagsPlusBND.clear();
+        this.countSingletons.clear();
+        this.forwardTag = false;
+    }
 
     /*
      Read file and parse word/tag pairs and store needed data.
@@ -82,33 +95,10 @@ public class ViterbiTaggerEM {
      @param raw: raw data that only has words.
      */
     public void readFile(String train, String raw) throws IOException {
-        processTrainData(train);
-        processRawData(raw);
+        init();
 
-        allTypes.add(OOV);
-
-        // minus one for last ###/###
-        double bndWordCnt = currCount.get(BND + WORD_SEP) - 1;
-        currCount.replace(BND + WORD_SEP, bndWordCnt);
-        double bndTagCnt = currCount.get(BND + TAG_SEP) - 1;
-        currCount.replace(BND + TAG_SEP, bndTagCnt);
-
-        // reduce the number of ###/### by 1 because we need to ignore the first or last ###/### in unigram counting
-        // but need them in bigram counting.
-        currCount.replace(BND + WORD_TAG_SEP + BND,
-                currCount.get(BND + WORD_TAG_SEP + BND) - 1);
-
-        // we don't try ### for novel words
-        tagsPlusBND = new HashSet<String>(allTags);
-        allTags.remove(BND);
-
-        // for "add one smoothing", add an OOV
-        tagDict.put(OOV, allTags);
-
-    }
-
-    protected void processTrainData(String train) throws IOException{
-        BufferedReader br = new BufferedReader(new FileReader(train));
+        BufferedReader br    = new BufferedReader(new FileReader(train));
+        BufferedReader rawBr = new BufferedReader(new FileReader(raw));
 
         try {
             String line = br.readLine();
@@ -119,11 +109,10 @@ public class ViterbiTaggerEM {
                     String[] elements = line.split("/");
                     String word = elements[0];
                     String tag  = elements[1];
+                    tokenCount += 1.0;
 
-                    trainToken++;
                     allTags.add(tag);
                     trainTypes.add(word);
-                    allTypes.add(word);
 
                     // build word-tag HashMap
                     if (tagDict.containsKey(word)) {
@@ -137,146 +126,143 @@ public class ViterbiTaggerEM {
 
                     // Initialize Bigrams: tag to tag
                     if (prevElements != null) {
-                        addBigramTag(prevElements[1], tag);
+                        String tagTag = prevElements[1] + TAGTAG_SEP + elements[1];
+                        String tagTagSingleton = ".|" + TAGTAG_SEP + prevElements[1];
+
+                        if (currCount.containsKey(tagTag)) {
+                            double newItemCount = currCount.get(tagTag) + 1.0;
+                            currCount.replace(tagTag, newItemCount);
+
+                            // Check if the count of current tag-tag bigram reaches 2
+                            // if so, deduce the count of tag-tag singletons of preTag by 1
+                            if (Double.compare(newItemCount, 2.0) == 0) {
+                                if (countSingletons.containsKey(tagTagSingleton)) {
+                                    double newSingletonCount = countSingletons.get(tagTagSingleton) - 1.0;
+                                    countSingletons.replace(tagTagSingleton, newSingletonCount);
+                                }
+                            }
+//                            else if (Double.compare(newItemCount, 1.0) == 0) {
+//                                if (countSingletons.containsKey(tagTagSingleton)) {
+//                                    double newSingletonCount = countSingletons.get(tagTagSingleton) + 1.0;
+//                                    countSingletons.replace(tagTagSingleton, newSingletonCount);
+//                                }
+//                            }
+                        }
+                        else {
+                            currCount.put(tagTag, 1.0);
+
+                            // In this case there must be increment on number of tag-tag singletons,
+                            // Check whether create a new entry or increment on an existing one
+                            if ( !countSingletons.containsKey(tagTagSingleton)) {
+                                countSingletons.put(tagTagSingleton, 1.0);
+                            }
+                            else {
+                                double newCount2 = countSingletons.get(tagTagSingleton) + 1.0;
+                                countSingletons.replace(".|" + TAGTAG_SEP + prevElements[1], newCount2);
+                            }
+                        }
+
                     }
                     prevElements = elements;
 
                     // Initialize word to tag count
-                    addWordToTag(word, tag);
+                    String wordTag = elements[0] + WORD_TAG_SEP + elements[1];
+                    String wordTagSingleton = ".|" + WORD_TAG_SEP + elements[1];
+
+                    if (currCount.containsKey(wordTag)) {
+                        double newItemCount = currCount.get(wordTag) + 1.0;
+                        currCount.replace(wordTag, newItemCount);
+
+                        // Update/initialize tag-word singletons
+                        // Same idea for tag-tag singletons, but here we check current tag instead of previous one
+                        if (Double.compare(newItemCount, 2.0) == 0) {
+                            double newSingletonCount = countSingletons.get(wordTagSingleton) - 1.0;
+                            countSingletons.replace(wordTagSingleton, newSingletonCount);
+                        }
+                    }
+                    else{
+                        currCount.put(wordTag, 1.0);
+                        // Do increment or initialize a new tag-word singleton entry
+                        if ( !countSingletons.containsKey(wordTagSingleton)) {
+                            countSingletons.put(wordTagSingleton, 1.0);
+                        }
+                        else {
+                            double newSingletonCount = countSingletons.get(wordTagSingleton) + 1.0;
+                            countSingletons.replace(wordTagSingleton, newSingletonCount);
+                        }
+                    }
 
                     // Initialize Unigram
                     // Here we will count ### twice for each ###/###, need to correct count later
-                    addUnigram(word, tag);
-                }
-                line = br.readLine();
-            }
-            trainToken--;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            br.close();
-        }
-    }
-
-
-    protected void processRawData(String raw) throws IOException{
-        BufferedReader br = new BufferedReader(new FileReader(raw));
-        try {
-            // process raw data
-            String line = br.readLine();
-            while (line != null) {
-                String word = line.trim(); // remove trailing space if it exists
-                rawTypes.add(word);
-                allTypes.add(word);
-                rawWords.add(word);
-                rawToken++;
-                line = br.readLine();
-            }
-            rawToken--;
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            br.close();
-        }
-    }
-
-    protected void addBigramTag(String preTag, String curTag) {
-        String tagTag = preTag + TAGTAG_SEP + curTag;
-        String tagTagSingleton = SING + TAGTAG_SEP + preTag;
-
-        if (currCount.containsKey(tagTag)) {
-            double newItemCount = currCount.get(tagTag) + 1.0;
-            currCount.replace(tagTag, newItemCount);
-
-            // Check if the count of current tag-tag bigram reaches 2
-            // if so, deduce the count of tag-tag singletons of preTag by 1
-            if (Double.compare(newItemCount, 2.0) == 0) {
-                if (countSingletons.containsKey(tagTagSingleton)) {
-                    double newSingletonCount = countSingletons.get(tagTagSingleton) - 1.0;
-
-                    if (Double.compare(newSingletonCount, 0.0) == 0) {
-                        countSingletons.remove(tagTagSingleton);
+                    String wordkey = word + WORD_SEP;
+                    if (currCount.containsKey(wordkey)) {
+                        currCount.replace(wordkey, currCount.get(wordkey) + 1.0);
                     } else {
-                        countSingletons.replace(tagTagSingleton, newSingletonCount);
+                        currCount.put(wordkey, 1.0);
                     }
+
+                    String tagkey = tag + TAG_SEP;
+                    if (currCount.containsKey(tagkey)) {
+                        currCount.replace(tagkey, currCount.get(tagkey) + 1.0);
+                    } else {
+                        currCount.put(tagkey, 1.0);
+                    }
+
                 }
+                line = br.readLine();
             }
-        }
-        else {
-            currCount.put(tagTag, 1.0);
 
-            // In this case there must be increment on number of tag-tag singletons,
-            // Check whether create a new entry or increment on an existing one
-            if ( !countSingletons.containsKey(tagTagSingleton)) {
-                countSingletons.put(tagTagSingleton, 1.0);
-            }
-            else {
-                double newCount2 = countSingletons.get(tagTagSingleton) + 1.0;
-                countSingletons.replace(SING + TAGTAG_SEP + preTag, newCount2);
-            }
-        }
-    }
+            vocabulary += (double) tagDict.size();
 
-    protected void addWordToTag(String word, String tag) {
-        String wordTag = word + WORD_TAG_SEP + tag;
-        String wordTagSingleton = SING + WORD_TAG_SEP + tag;
-
-        if (currCount.containsKey(wordTag)) {
-            double newItemCount = currCount.get(wordTag) + 1.0;
-            currCount.replace(wordTag, newItemCount);
-
-            // Update/initialize tag-word singletons
-            // Same idea for tag-tag singletons, but here we check current tag instead of previous one
-            if (Double.compare(newItemCount, 2.0) == 0) {
-                double newSingletonCount = countSingletons.get(wordTagSingleton) - 1.0;
-
-                if (Double.compare(newSingletonCount, 0.0) == 0) {
-                    countSingletons.remove(wordTagSingleton);
-                } else {
-                    countSingletons.replace(wordTagSingleton, newSingletonCount);
+            // process raw data
+            line = rawBr.readLine();
+            while(line != null) {
+                String word = line.trim(); // remove trailing space if it exists
+                if (!tagDict.containsKey(word) && !rawWords.contains(word)) {
+                    vocabulary += 1.0;
                 }
+                rawTypes.add(word);
+                rawWords.add(word);
+                line = rawBr.readLine();
+
             }
-        }
-        else{
-            currCount.put(wordTag, 1.0);
-            // Do increment or initialize a new tag-word singleton entry
-            if ( !countSingletons.containsKey(wordTagSingleton)) {
-                countSingletons.put(wordTagSingleton, 1.0);
-            }
-            else {
-                double newSingletonCount = countSingletons.get(wordTagSingleton) + 1.0;
-                countSingletons.replace(wordTagSingleton, newSingletonCount);
-            }
+            tokenCount -= 1.0; // training data token
+
+            allTypes.add(OOV);
+
+            // minus one for last ###/###
+            double bndWordCnt = currCount.get(BND + WORD_SEP) - 1;
+            currCount.replace(BND + WORD_SEP, bndWordCnt);
+            double bndTagCnt = currCount.get(BND + TAG_SEP) - 1;
+            currCount.replace(BND + TAG_SEP, bndTagCnt);
+
+            // reduce the number of ###/### by 1 because we need to ignore the first or last ###/### in unigram counting
+            // but need them in bigram counting.
+            currCount.replace(BND + WORD_TAG_SEP + BND,
+                    currCount.get(BND + WORD_TAG_SEP + BND) - 1);
+
+            // we don't try ### for novel words
+            tagsPlusBND = new HashSet<String>(allTags);
+            allTags.remove(BND);
+
+            // for "add one smoothing", add an OOV
+            tagDict.put(OOV, allTags);
+
+            orgCount = new HashMap<String, Double>(currCount);
+//            orgCount = new HashMap<String, Double>();
+
+        }catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            rawBr.close();
+            br.close();
         }
     }
 
-    protected void addUnigram(String word, String tag) {
-        // add word unigram
-        String wordkey = word + WORD_SEP;
-        if (currCount.containsKey(wordkey)) {
-            currCount.replace(wordkey, currCount.get(wordkey) + 1.0);
-        } else {
-            currCount.put(wordkey, 1.0);
-        }
 
-        // add tag unigram
-        String tagkey = tag + TAG_SEP;
-        if (currCount.containsKey(tagkey)) {
-            currCount.replace(tagkey, currCount.get(tagkey) + 1.0);
-        } else {
-            currCount.put(tagkey, 1.0);
-        }
-    }
-
-
-
-
-    /*******************************************************************************
+    /*
      This will tag funciton will first perform Viterbi decoding, and then perform
-     forward-backward decoding for many iteration. After each iteration, we also
-     reestimate new parameters (counters) for the tagging model.
+     forward-backward decoding.
 
      @param words: a list of test words to be decoded.
      @param testTags: the true tags for the input words.
@@ -286,31 +272,28 @@ public class ViterbiTaggerEM {
         alpha.clear();
         beta.clear();
         mus.clear();
-        orgCount = new HashMap<String, Double>(currCount);
+
+        List<String> tags = new ArrayList<String>();
 
         for(int epoc = 0; epoc < iters; epoc++) {
             newCount = new HashMap<String, Double>(orgCount);
 
-            //****************************************************
-            // perform Viterbi decoding (supervised) on test data
-            //****************************************************
-            double token = (double)trainToken;
-            double v = (double)trainTypes.size() + 1.0; // OOV
-            List<String> tags = forward(words, false, token, v);
+            // perform Viterbi decoding on test data
+            token = tokenCount;
+            v = tagDict.size();
+            tags = forward(words, false);
             calAccuracy(words, tags, testTags);
 
-            //****************************************************
-            // perform forward-backward (unsupervised) on raw data
-            // update counters
-            //****************************************************
-            token = (double)(trainToken + rawToken);
-            v = (double)allTypes.size();
-            forward(rawWords, true, token, v);
-            backward(rawWords, token, v);
+            // perform forward-backward on raw data
+            token = tokenCount + rawWords.size() - 1;
+            v = vocabulary;
+            tags = forward(rawWords, true);
+            Map<String, Double> probTW = backward(rawWords);
             calPerplexity(epoc);
 
             currCount = new HashMap<String, Double>(newCount);
         }
+
     }
 
 
@@ -322,12 +305,12 @@ public class ViterbiTaggerEM {
      @return: (Viterbi mode) a list of tags for input words;
               (FB mode) no use
      */
-    protected List<String> forward(List<String> words, boolean isFB, double token, double v) {
+    protected List<String> forward(List<String> words, boolean isFB) {
+        probDP.clear();
         alpha.clear();
         mus.clear();
+        backPointers.clear();
 
-        Map<String, Double> probDP = new HashMap<String, Double>();
-        Map<String, String> backPointers = new HashMap<String, String>();
         List<String> tags = new ArrayList<String>();
 
         if(isFB) {
@@ -343,19 +326,20 @@ public class ViterbiTaggerEM {
             String curTime = String.valueOf(i);
             String preTime = String.valueOf(i - 1);
 
+            // check novel word
+            boolean novelWord = false;
+            if (!tagDict.containsKey(curWord)) {
+                curWord = OOV;
+                novelWord = true;
+            }
+
+            if (!tagDict.containsKey(words.get(i - 1))){
+                preWord = OOV;
+            }
+
             // get the candidate tags for current and previous words.
-            HashSet<String> candidateTag;
-            if (tagDict.containsKey(curWord)) {
-                candidateTag = tagDict.get(curWord);
-            } else {
-                candidateTag = tagDict.get(OOV);
-            }
-            HashSet<String> prevCandidateTag;
-            if (tagDict.containsKey(preWord)) {
-                prevCandidateTag = tagDict.get(preWord);
-            } else {
-                prevCandidateTag = tagDict.get(OOV);
-            }
+            HashSet<String> candidateTag     = tagDict.get(curWord);
+            HashSet<String> prevCandidateTag = tagDict.get(preWord);
 
             for (String tag : candidateTag) {
                 double alpha_ti = 0.0;
@@ -368,14 +352,27 @@ public class ViterbiTaggerEM {
                         p_tt = probDP.get(p_tt_key);
                     } else {
                         // tag-tag backoff probability
+//                        double p_tt_backoff = currCount.get(tag + TAG_SEP) / (tokenCount - 1.0);
                         double p_tt_backoff = currCount.get(tag + TAG_SEP) / token;
 
                         // Update the lambda value
-                        String singletonTTKey = SING + TAGTAG_SEP + prevTag;
-                        LAMBDA = 1.0 + countSingletons.getOrDefault(singletonTTKey, 0.0);
+                        LAMBDA = 1.0;
+                        String singletonTTKey = ".|" + TAGTAG_SEP + prevTag;
+                        if (countSingletons.containsKey(singletonTTKey)) {
+                            LAMBDA += countSingletons.get(singletonTTKey);
+                        }
 
-                        p_tt = (currCount.getOrDefault(p_tt_key, 0.0) + LAMBDA * p_tt_backoff) /
-                                (currCount.get(prevTag + TAG_SEP) + LAMBDA);
+                        if (currCount.containsKey(p_tt_key)) {
+//                            p_tt = (currCount.get(p_tt_key) + LAMBDA) /
+//                                    (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+
+                            p_tt = (currCount.get(p_tt_key) + LAMBDA * p_tt_backoff) /
+                                    (currCount.get(prevTag + TAG_SEP) + LAMBDA);
+                        } else {
+                            p_tt = LAMBDA * p_tt_backoff /  (currCount.get(prevTag + TAG_SEP) + LAMBDA);
+//                            p_tt = LAMBDA / (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+
+                        }
                         probDP.put(p_tt_key, p_tt);
                     }
 
@@ -386,21 +383,28 @@ public class ViterbiTaggerEM {
                         p_tw = probDP.get(p_tw_key);
                     } else {
                         // Update LAMBDA value
-                        String singletonTKKey = SING + WORD_TAG_SEP + tag;
-                        LAMBDA = 1.0 + countSingletons.getOrDefault(singletonTKKey, 0.0);
+                        LAMBDA = 1.0;
+                        String singletonTKKey = ".|" + WORD_TAG_SEP + tag;
 
-                        if (curWord.equals(BND) && tag.equals(BND)) {
+                        if (countSingletons.containsKey(singletonTKKey)) {
+                            LAMBDA += countSingletons.get(singletonTKKey);
+                        }
+
+                        if (novelWord) {
+                            double p_tw_backoff = 1.0 / (token + v);
+                            p_tw = LAMBDA * p_tw_backoff / (currCount.get(tag + TAG_SEP) + LAMBDA);
+                        } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (currCount.getOrDefault(curWord + WORD_SEP, 0.0) + 1.0) / (token + v);
-                            p_tw = (currCount.getOrDefault(p_tw_key, 0.0) + LAMBDA * p_tw_backoff) /
-                                    ( currCount.get(tag + TAG_SEP) + LAMBDA);
+                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / (token + v);
+                            p_tw = (currCount.get(p_tw_key) + LAMBDA * p_tw_backoff) / ( currCount.get(tag + TAG_SEP) + LAMBDA);
+
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
 
 
-                    if (isFB) {
+                    if(isFB) {
                         // for forward-backward
                         double preAlpha_p = alpha.get(prevTag + TIME_SEP + preTime) + Math.log(p_tt) + Math.log(p_tw);
                         if (alpha_ti == 0) {
@@ -420,7 +424,7 @@ public class ViterbiTaggerEM {
                     }
 
                 }
-                if (isFB) {
+                if(isFB) {
                     alpha.put(tag + TIME_SEP + curTime, alpha_ti);
                 }
             }
@@ -443,11 +447,11 @@ public class ViterbiTaggerEM {
      @param words: list of words (from raw data) to be decoded.
      @return: a HashMap containing the p_tw and p_tt probabilities.
      */
-    protected Map<String, Double> backward(List<String> words, double token, double v) {
+    protected Map<String, Double> backward(List<String> words) {
         beta.clear();
 
-        Map<String, Double> probDP = new HashMap<String, Double>();
         Map<String, Double> probTW = new HashMap<String, Double>();
+        HashSet<String> candidateTag, prevCandidateTag;
 
         double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
         beta.put(BND + TIME_SEP + String.valueOf(words.size() - 1), Math.log(1.0));
@@ -459,18 +463,18 @@ public class ViterbiTaggerEM {
             String preTime = String.valueOf(i - 1);
 
             // find tags for current word and previous word
-            HashSet<String> candidateTag;
-            if (tagDict.containsKey(curWord)) {
-                candidateTag = tagDict.get(curWord);
-            } else {
-                candidateTag = tagDict.get(OOV);
+            if (!tagDict.containsKey(preWord)) {
+                preWord = OOV;
             }
-            HashSet<String> prevCandidateTag;
-            if (tagDict.containsKey(preWord)) {
-                prevCandidateTag = tagDict.get(preWord);
-            } else {
-                prevCandidateTag = tagDict.get(OOV);
+
+            boolean curWordNovel = false;
+            if (!tagDict.containsKey(curWord)) {
+                curWord = OOV;
+                curWordNovel = true;
             }
+
+            prevCandidateTag = tagDict.get(preWord);
+            candidateTag     = tagDict.get(curWord);
 
             // perform backward algorithm
             for (String tag : candidateTag) {
@@ -484,7 +488,7 @@ public class ViterbiTaggerEM {
 
                 // update c(word/tag)
                 newCount.put(curWord + WORD_TAG_SEP + tag,
-                        newCount.getOrDefault(curWord + WORD_TAG_SEP + tag, 0.0) + Math.exp(prob_ti));
+                             newCount.getOrDefault(curWord + WORD_TAG_SEP + tag, 0.0) + Math.exp(prob_ti));
 
                 for (String prevTag : prevCandidateTag) {
 
@@ -495,12 +499,22 @@ public class ViterbiTaggerEM {
                         p_tt = probDP.get(p_tt_key);
                     } else {
                         // Compute backoff probabilities and update LAMBDA
-                        String singletonTTKey = SING + TAGTAG_SEP + prevTag;
-                        LAMBDA = 1.0 + countSingletons.getOrDefault(singletonTTKey, 0.0);
+                        LAMBDA = 1.0;
+                        String singletonTTKey = ".|" + TAGTAG_SEP + prevTag;
+                        if (countSingletons.containsKey(singletonTTKey)) {
+                            LAMBDA += countSingletons.get(singletonTTKey);
+                        }
                         double p_tt_backoff = currCount.get(tag + TAG_SEP) / token;
 
-                        p_tt = (currCount.getOrDefault(p_tt_key, 0.0) + LAMBDA * p_tt_backoff) /
-                                (currCount.get(prevTag + TAG_SEP) + LAMBDA);
+                        if (currCount.containsKey(p_tt_key)) {
+                            p_tt = (currCount.get(p_tt_key) + LAMBDA * p_tt_backoff) /
+                                    (currCount.get(prevTag + TAG_SEP) + LAMBDA);
+//                            p_tt = (currCount.get(p_tt_key) + LAMBDA) /
+//                                    (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                        } else {
+//                            p_tt = LAMBDA / (currCount.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
+                            p_tt = LAMBDA * p_tt_backoff / ( currCount.get(prevTag + TAG_SEP) + LAMBDA);
+                        }
 
                         probDP.put(p_tt_key, p_tt);
                     }
@@ -512,15 +526,20 @@ public class ViterbiTaggerEM {
                         p_tw = probDP.get(p_tw_key);
                     } else {
                         // Again, update LAMBDA
-                        String singletonTWKey = SING + WORD_TAG_SEP + tag;
-                        LAMBDA = 1.0 + countSingletons.getOrDefault(singletonTWKey, 0.0);
+                        LAMBDA = 1.0;
+                        String singletonTWKey = ".|" + WORD_TAG_SEP + tag;
+                        if (countSingletons.containsKey(singletonTWKey)) {
+                            LAMBDA += countSingletons.get(singletonTWKey);
+                        }
 
-                        if (curWord.equals(BND) && tag.equals(BND)) {
+                        if (curWordNovel) {
+                            double p_tw_backoff = 1.0 / (token + v);
+                            p_tw = LAMBDA * p_tw_backoff / ( currCount.get(tag + TAG_SEP) + LAMBDA);
+                        } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (currCount.getOrDefault(curWord + WORD_SEP, 0.0) + 1.0) / (token + v);
-                            p_tw = (currCount.getOrDefault(p_tw_key, 0.0) + LAMBDA * p_tw_backoff ) /
-                                    (currCount.get(tag + TAG_SEP) + LAMBDA);
+                            double p_tw_backoff = (currCount.get(curWord + WORD_SEP) + 1.0) / (token + v);
+                            p_tw = (currCount.get(p_tw_key) + LAMBDA * p_tw_backoff ) / (currCount.get(tag + TAG_SEP) + LAMBDA);
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
@@ -542,7 +561,7 @@ public class ViterbiTaggerEM {
                     // update c(tag to tag)
                     String key = prevTag + TAGTAG_SEP + tag;
                     newCount.put(key,
-                            newCount.getOrDefault(key, 0.0) + Math.exp(prob_ti_1));
+                                 newCount.getOrDefault(key, 0.0) + Math.exp(prob_ti_1));
                     probTW.put(prevTag + TAGTAG_SEP + tag + TIME_SEP + curTime, prob_ti_1);
 
                 }
@@ -670,7 +689,7 @@ public class ViterbiTaggerEM {
         double seenAccu  = totSeenCnt  > 0? (double)totSeenCorrect / (double)totSeenCnt * 100 : 0;
         double novelAccu = totNovelCnt > 0? (double)totNovelCorrect / (double)totNovelCnt * 100 : 0;
         System.out.printf("Tagging accuracy (Viterbi decoding): %.2f%% (known: %.2f%% seen: %.2f%% novel: %.2f%%)\n",
-                totAccu, knownAccu, seenAccu, novelAccu);
+                           totAccu, knownAccu, seenAccu, novelAccu);
 
         // calculate perplexity
         String key = tags.get(tags.size() - 1) + TIME_SEP + String.valueOf(tags.size() - 1);
@@ -718,7 +737,7 @@ public class ViterbiTaggerEM {
                   = y + log(1 + exp(x - y))  otherwise
      @param x, y: log probabilities.
      */
-    protected static double logadd(double x, double y) {
+     protected static double logadd(double x, double y) {
         if(y <= x) {
             if (1 + Math.exp(y - x) == 0) { //handle the case log(0)
                 return x + (-Double.MAX_VALUE);

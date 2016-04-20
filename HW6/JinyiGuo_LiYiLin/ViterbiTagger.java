@@ -8,18 +8,18 @@ import java.util.*;
  * Created by Jason on 4/16/16.
  */
 public class ViterbiTagger {
-    // probability tables
-    protected Map<String, Double> mus;
-    protected Map<String, Double> alpha;
-    protected Map<String, Double> beta;
-
-    // counters
+    private static final boolean DEBUG = false;
     protected Map<String, HashSet<String>> tagDict;
     protected Map<String, Double> countItems;
-    protected Map<String, Double> countSingletons;
+    protected Map<String, Double> arcProbs;
+    protected Map<String, Double> mus;
+    protected Map<String, Double> probDP;
+    protected Map<String, String> backPointers;
     protected HashSet<String> allTags;
-
-    // separators
+    protected Map<String, Double> alpha;
+    protected Map<String, Double> beta;
+    protected Map<String, Double> countSingletons;
+    protected boolean forwardTag;
     protected final String TAGTAG_SEP   = "[TT]";
     protected final String TAG_WORD_SEP = "/";
     protected final String TIME_SEP     = "__";
@@ -27,19 +27,19 @@ public class ViterbiTagger {
     protected final String TAG_SEP      = "[T]";
     protected final String OOV          = "OOV";
     protected final String BND          = "###"; //boundary marker
-    protected final String SING         = ".|";
-
     protected final String VITERBI      = "Viterbi";
     protected final String POSTERIOR    = "posterior";
-    protected boolean forwardTag;
-    protected double LAMBDA             = 0.0;   // setting LAMBDA = 0 means no add one smoothing
-    protected double tokenCount         = 0.0;  // Token count (number of training entries
+    protected double LAMBDA       = 0.0;   // setting LAMBDA = 0 means no add one smoothing
+    protected double tokenCount     = 0.0;  // Token count (number of training entries
 
 
     public ViterbiTagger() {
         this.tagDict      = new HashMap<String, HashSet<String>>();
         this.countItems   = new HashMap<String, Double>();
+        this.arcProbs     = new HashMap<String, Double>();
         this.mus          = new HashMap<String, Double>();
+        this.probDP       = new HashMap<String, Double>();
+        this.backPointers = new HashMap<String, String>();
         this.allTags      = new HashSet<String>();
         this.alpha        = new HashMap<String, Double>();
         this.beta         = new HashMap<String, Double>();
@@ -49,9 +49,23 @@ public class ViterbiTagger {
 
 
     /*
+     When starting a new training, clean relevant instance variables.
+     */
+    protected void init() {
+        countItems.clear();
+        tagDict.clear();
+        arcProbs.clear();
+        mus.clear();
+        allTags.clear();
+        forwardTag = false;
+    }
+
+    /*
      Read file and parse word/tag pairs and store needed data.
      */
     public void readFile(String fileName) throws IOException {
+        init();
+
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         try {
             String line = br.readLine();
@@ -79,7 +93,7 @@ public class ViterbiTagger {
                     // Initialize Bigrams: tag to tag
                     if (prevElements != null) {
                         String tagTag = prevElements[1] + TAGTAG_SEP + elements[1];
-                        String tagTagSingleton = SING + TAGTAG_SEP + prevElements[1];
+                        String tagTagSingleton = ".|" + TAGTAG_SEP + prevElements[1];
 
                         if (countItems.containsKey(tagTag)) {
                             double newItemCount = countItems.get(tagTag) + 1.0;
@@ -110,7 +124,7 @@ public class ViterbiTagger {
                             }
                             else {
                                 double newCount2 = countSingletons.get(tagTagSingleton) + 1.0;
-                                countSingletons.replace(SING + TAGTAG_SEP + prevElements[1], newCount2);
+                                countSingletons.replace(".|" + TAGTAG_SEP + prevElements[1], newCount2);
                             }
                         }
                     }
@@ -118,7 +132,7 @@ public class ViterbiTagger {
 
                     // Initialize tag to word
                     String wordTag = elements[0] + TAG_WORD_SEP + elements[1];
-                    String wordTagSingleton = SING + TAG_WORD_SEP + elements[1];
+                    String wordTagSingleton = ".|" + TAG_WORD_SEP + elements[1];
 
                     if (countItems.containsKey(wordTag)) {
                         double newItemCount = countItems.get(wordTag) + 1.0;
@@ -189,6 +203,7 @@ public class ViterbiTagger {
         }
     }
 
+
     /*
      This will tag funciton will first perform Viterbi decoding, and then perform
      forward-backward decoding.
@@ -214,8 +229,6 @@ public class ViterbiTagger {
     protected List<String> forward(List<String> words) {
         forwardTag = true;
 
-        Map<String, String> backPointers = new HashMap<String, String>();
-        Map<String, Double> probDP = new HashMap<String, Double>();
         List<String> tags = new ArrayList<String>();
 
         tags.add(BND);
@@ -223,7 +236,7 @@ public class ViterbiTagger {
         mus.put(BND + TIME_SEP + "0", Math.log(1.0));
 
         HashSet<String> candidateTag;
-        HashSet<String> prevCandidateTag;
+        HashSet<String> prevCandidateTag = tagDict.get(words.get(0));
 
         for (int i = 1; i < words.size(); i++) {
             String curWord = words.get(i);
@@ -237,6 +250,7 @@ public class ViterbiTagger {
                 curWord = OOV;
                 novelWord = true;
             }
+
             if (!tagDict.containsKey(words.get(i - 1))){
                 preWord = OOV;
             }
@@ -259,7 +273,7 @@ public class ViterbiTagger {
 
                         // Update the lambda value
                         LAMBDA = 1.0;
-                        String singletonTTKey = SING + TAGTAG_SEP + prevTag;
+                        String singletonTTKey = ".|" + TAGTAG_SEP + prevTag;
                         if (countSingletons.containsKey(singletonTTKey)) {
                             LAMBDA += countSingletons.get(singletonTTKey);
                         }
@@ -268,7 +282,7 @@ public class ViterbiTagger {
                             p_tt = (countItems.get(p_tt_key) + LAMBDA * p_tt_backoff) /
                                     (countItems.get(prevTag + TAG_SEP) + LAMBDA);
                         } else {
-                            p_tt = LAMBDA * p_tt_backoff / (countItems.get(prevTag + TAG_SEP) + LAMBDA);
+                            p_tt = LAMBDA * p_tt_backoff /  (countItems.get(prevTag + TAG_SEP) + LAMBDA);
                         }
                         probDP.put(p_tt_key, p_tt);
                     }
@@ -281,7 +295,7 @@ public class ViterbiTagger {
                     } else {
                         // Update LAMBDA value
                         LAMBDA = 1.0;
-                        String singletonTKKey = SING + TAG_WORD_SEP + tag;
+                        String singletonTKKey = ".|" + TAG_WORD_SEP + tag;
                         if (countSingletons.containsKey(singletonTKKey)) {
                             LAMBDA += countSingletons.get(singletonTKKey);
                         }
@@ -293,10 +307,8 @@ public class ViterbiTagger {
                         } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (countItems.get(curWord + WORD_SEP) + 1.0) /
-                                    (tokenCount + tagDict.size() - 1.0);
-                            p_tw = (countItems.get(p_tw_key) + LAMBDA * p_tw_backoff) /
-                                    ( countItems.get(tag + TAG_SEP) + LAMBDA);
+                            double p_tw_backoff = (countItems.get(curWord + WORD_SEP) + 1.0) / (tokenCount + tagDict.size() - 1.0);
+                            p_tw = (countItems.get(p_tw_key) + LAMBDA * p_tw_backoff) / ( countItems.get(tag + TAG_SEP) + LAMBDA);
 
                         }
                         probDP.put(p_tw_key, p_tw);
@@ -333,7 +345,6 @@ public class ViterbiTagger {
 
     protected Map<String, Double> backward(List<String> words) {
         Map<String, Double> probTW = new HashMap<String, Double>();
-        Map<String, Double> probDP = new HashMap<String, Double>();
 
         double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
 
@@ -380,7 +391,7 @@ public class ViterbiTagger {
                     } else {
                         // Compute backoff probabilities and update LAMBDA
                         LAMBDA = 1.0;
-                        String singletonTTKey = SING + TAGTAG_SEP + prevTag;
+                        String singletonTTKey = ".|" + TAGTAG_SEP + prevTag;
                         if (countSingletons.containsKey(singletonTTKey)) {
                             LAMBDA += countSingletons.get(singletonTTKey);
                         }
@@ -389,6 +400,7 @@ public class ViterbiTagger {
                             p_tt = (countItems.get(p_tt_key) + LAMBDA * p_tt_backoff) /
                                     (countItems.get(prevTag + TAG_SEP) + LAMBDA);
                         } else {
+//                            p_tt = LAMBDA / (countItems.get(prevTag + TAG_SEP) + (allTags.size() + 1.0) * LAMBDA);
                             p_tt = LAMBDA * p_tt_backoff / ( countItems.get(prevTag + TAG_SEP) + LAMBDA);
                         }
                         probDP.put(p_tt_key, p_tt);
@@ -402,7 +414,7 @@ public class ViterbiTagger {
                     } else {
                         // Again, update LAMBDA
                         LAMBDA = 1.0;
-                        String singletonTWKey = SING + TAG_WORD_SEP + tag;
+                        String singletonTWKey = ".|" + TAG_WORD_SEP + tag;
                         if (countSingletons.containsKey(singletonTWKey)) {
                             LAMBDA += countSingletons.get(singletonTWKey);
                         }
@@ -414,11 +426,10 @@ public class ViterbiTagger {
                         } else if (curWord.equals(BND) && tag.equals(BND)) {
                             p_tw = 1.0;
                         } else {
-                            double p_tw_backoff = (countItems.get(curWord + WORD_SEP) + 1.0) /
-                                    ( tokenCount + tagDict.size() - 1.0 );
-                            p_tw = (countItems.get(p_tw_key) + LAMBDA * p_tw_backoff ) /
-                                    (countItems.get(tag + TAG_SEP) + LAMBDA);
-
+                            double p_tw_backoff = (countItems.get(curWord + WORD_SEP) + 1.0) / ( tokenCount + tagDict.size() - 1.0 );
+                            p_tw = (countItems.get(p_tw_key) + LAMBDA * p_tw_backoff ) / (countItems.get(tag + TAG_SEP) + LAMBDA);
+//                            p_tw = (countItems.get(p_tw_key) + LAMBDA) /
+//                                    (countItems.get(tag + TAG_SEP) + tagDict.size() * LAMBDA);
                         }
                         probDP.put(p_tw_key, p_tw);
                     }
