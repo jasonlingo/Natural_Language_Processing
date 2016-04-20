@@ -83,88 +83,70 @@ Li-Yi Lin
     Tagging accuracy (posterior decoding): 94.20% (known: 96.90% novel: 66.18%)
 
 
-        
-6.    
+6.
     Result running vtagem on entrain25k entest enraw:
-    Tagging accuracy (Viterbi decoding): 91.10% (known: 96.53% seen: 62.86% novel: 65.65%)
-    Perplexity per Viterbi-tagged test word: 1107.463124
-    Iteration 0: Perplexity per untagged raw word: 1046.211149
+        Tagging accuracy (Viterbi decoding): 91.08% (known: 96.51% seen: 62.86% novel: 65.65%)
+        Perplexity per Viterbi-tagged test word: 1058.452860
+        Iteration 0: Perplexity per untagged raw word: 1320.862231
 
-    Tagging accuracy (Viterbi decoding): 91.03% (known: 96.48% seen: 62.48% novel: 65.65%)
-    Perplexity per Viterbi-tagged test word: 1309.441859
-    Iteration 1: Perplexity per untagged raw word: 1198.928486
+        Tagging accuracy (Viterbi decoding): 91.69% (known: 96.53% seen: 69.79% novel: 65.49%)
+        Perplexity per Viterbi-tagged test word: 921.513619
+        Iteration 1: Perplexity per untagged raw word: 613.137676
 
-    Tagging accuracy (Viterbi decoding): 90.94% (known: 96.39% seen: 62.34% novel: 65.65%)
-    Perplexity per Viterbi-tagged test word: 1308.380925
-    Iteration 2: Perplexity per untagged raw word: 1197.138597
+        Tagging accuracy (Viterbi decoding): 91.35% (known: 96.45% seen: 67.26% novel: 64.82%)
+        Perplexity per Viterbi-tagged test word: 907.187926
+        Iteration 2: Perplexity per untagged raw word: 582.704577
 
-    Tagging accuracy (Viterbi decoding): 90.92% (known: 96.37% seen: 62.34% novel: 65.65%)
-    Perplexity per Viterbi-tagged test word: 1307.987950
-    Iteration 3: Perplexity per untagged raw word: 1196.410134
+        Tagging accuracy (Viterbi decoding): 90.93% (known: 96.37% seen: 64.20% novel: 63.78%)
+        Perplexity per Viterbi-tagged test word: 903.148714
+        Iteration 3: Perplexity per untagged raw word: 562.085207
 
-    Tagging accuracy (Viterbi decoding): 90.91% (known: 96.35% seen: 62.34% novel: 65.65%)
-    Perplexity per Viterbi-tagged test word: 1307.746398
-    Iteration 4: Perplexity per untagged raw word: 1195.944573
+        Tagging accuracy (Viterbi decoding): 90.48% (known: 96.30% seen: 60.33% novel: 63.05%)
+        Perplexity per Viterbi-tagged test word: 902.960198
+        Iteration 4: Perplexity per untagged raw word: 549.413567
 
-    Tagging accuracy (Viterbi decoding): 90.90% (known: 96.35% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.622057
-    Iteration 5: Perplexity per untagged raw word: 1195.610259
+        Tagging accuracy (Viterbi decoding): 90.29% (known: 96.30% seen: 57.57% novel: 63.67%)
+        Perplexity per Viterbi-tagged test word: 903.630196
+        Iteration 5: Perplexity per untagged raw word: 541.652762
 
-    Tagging accuracy (Viterbi decoding): 90.88% (known: 96.33% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.582606
-    Iteration 6: Perplexity per untagged raw word: 1195.432990
+        Tagging accuracy (Viterbi decoding): 90.13% (known: 96.31% seen: 55.70% novel: 63.67%)
+        Perplexity per Viterbi-tagged test word: 904.679256
+        Iteration 6: Perplexity per untagged raw word: 536.267092
 
-    Tagging accuracy (Viterbi decoding): 90.88% (known: 96.32% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.574674
-    Iteration 7: Perplexity per untagged raw word: 1195.315787
+        Tagging accuracy (Viterbi decoding): 89.94% (known: 96.30% seen: 53.41% novel: 63.93%)
+        Perplexity per Viterbi-tagged test word: 905.998298
+        Iteration 7: Perplexity per untagged raw word: 532.908861
 
-    Tagging accuracy (Viterbi decoding): 90.88% (known: 96.32% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.586587
-    Iteration 8: Perplexity per untagged raw word: 1195.212159
+        Tagging accuracy (Viterbi decoding): 89.85% (known: 96.29% seen: 52.51% novel: 63.88%)
+        Perplexity per Viterbi-tagged test word: 906.938113
+        Iteration 8: Perplexity per untagged raw word: 530.681524
 
-    Tagging accuracy (Viterbi decoding): 90.88% (known: 96.32% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.617961
-    Iteration 9: Perplexity per untagged raw word: 1195.097996
+        Tagging accuracy (Viterbi decoding): 89.72% (known: 96.26% seen: 51.69% novel: 63.41%)
+        Perplexity per Viterbi-tagged test word: 907.754718
+        Iteration 9: Perplexity per untagged raw word: 528.909000
 
-    Tagging accuracy (Viterbi decoding): 90.88% (known: 96.32% seen: 62.39% novel: 65.59%)
-    Perplexity per Viterbi-tagged test word: 1307.672938
-    Iteration 10: Perplexity per untagged raw word: 1194.959061
-    
+        Tagging accuracy (Viterbi decoding): 89.64% (known: 96.24% seen: 51.12% novel: 63.31%)
+        Perplexity per Viterbi-tagged test word: 908.294508
+        Iteration 10: Perplexity per untagged raw word: 527.543697
+
+        Tagging accuracy (Viterbi decoding): 89.60% (known: 96.23% seen: 50.74% novel: 63.36%)
+        Perplexity per Viterbi-tagged test word: 908.713777
+        Iteration 11: Perplexity per untagged raw word: 526.470870
+
     Questions:
     (a) alpha_S(T) probability means the probability from the start state to the state S at time T. The probability for alpha_###(0) that is the start state must be 1 because all the paths must go out from the start state. In the forward process, we process the word stream from the start state to the end state, so we need to set alpha_###(0) to 1.
-    
+
         beta_S(T) probability means the probability from state S at time T to the end state. The probability for beta_###(n) that is the end state must also be 1 because all the paths must end at the end state. In the backward process, we process the word stream from the end state to the start state, so we need to set beta_###(n) to 1.
-        
+
     (b) Because we use raw dataset for the forward-backward process, the updated parameters will fit the model for raw dataset more. Thus the perplexity for raw data will be lower than the that for test dataset.
-    
+
     The perplexity per untagged raw word is more important. Because this perplexity is derived from forward-backward algorithm, which takes all possibilities into consideration.
-    
+
     (c) We need to seperate the test data in the EM training process so that the trained algorithm can be applied on unseen sentences in the future (generalized). If we include the test dataset in the V counters, then the smoothing will have less effect.
-    
-    (d) For the EM algorithm with add one smoothing. The result of running on en dataset is:
-        Tagging accuracy (Viterbi decoding): 88.08% (known: 96.46% seen: 47.45% novel: 45.67%)
-        Perplexity per Viterbi-tagged test word: 1588.559113
-        Iteration 0: Perplexity per untagged raw word: 1372.925458
 
-        Tagging accuracy (Viterbi decoding): 86.16% (known: 96.16% seen: 37.47% novel: 35.70%)
-        Perplexity per Viterbi-tagged test word: 978.522082
-        Iteration 1: Perplexity per untagged raw word: 808.423961
+    (d) Although this algorithm improved the accuracy of the ice dataset, it only helped the accuracy for the first iteration and then the accuracy went down. The accuracy on entest data for 11th iteration are 96.23% (known), 50.74% (seen), and 63.36% (novel). Those accuracies also went down after the 0th iteration in the EM training process.
 
-          ...
-
-        Tagging accuracy (Viterbi decoding): 84.59% (known: 95.22% seen: 33.37% novel: 30.36%)
-        Perplexity per Viterbi-tagged test word: 963.401952
-        Iteration 98: Perplexity per untagged raw word: 789.122104
-
-        Tagging accuracy (Viterbi decoding): 84.59% (known: 95.22% seen: 33.37% novel: 30.36%)
-        Perplexity per Viterbi-tagged test word: 963.400799
-        Iteration 99: Perplexity per untagged raw word: 789.112703
-        
-        Although this algorithm improved the accuracy of the ice dataset, but it didn't help the tagging accuracy for en dataset. 
-        
-        For the EM algorithm with one-count smoothing, as the result shown before, the tagging accuracy is slightly hurted from the very begining (the first iteration). This is possibly due to the fact that we have enough training data for tagging the test data and we reached optimal solution before doing the EM iteration.
-    
-    (e) When we only have small tagged dataset, the EM algorithm can help us reestimate the parameters from the raw dataset for the model and improve the performance by repeating the expectation and maximization steps.
+    (e) When we only have small tagged dataset, the EM algorithm can help us reestimate the parameters from the raw dataset for the model and improve the performance by repeating the expectation and maximization steps. Since raw dataset is a word list without tags, it is much easier to get than the training data. So we can use the large raw dataset to do the EM and find parameters for the model.
     
     (f) If the model is not concave for a maximization problem, then the EM algorithm will possibly get stuck in a local optimal.
         In this problem, we use Viterbi approxmation, so it only picks the best parse in each EM iteration. Therefore, the EM might not guarantee to increase.
