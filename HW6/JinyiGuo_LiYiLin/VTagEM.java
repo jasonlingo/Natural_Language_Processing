@@ -41,13 +41,13 @@ public class VTagEM {
         String test  = args[1];
         String raw   = args[2];
 
-        ViterbiTaggerEM2 tagger = new ViterbiTaggerEM2();
+        ViterbiTaggerEM tagger = new ViterbiTaggerEM();
         tagger.readFile(train, raw);
 
         VTagEM dt = new VTagEM();
         dt.readTestFile(test);
 
-        tagger.emTag(dt.words, dt.tags, 10);
+        tagger.emTag(dt.words, dt.tags, 100);
 
     }
 }

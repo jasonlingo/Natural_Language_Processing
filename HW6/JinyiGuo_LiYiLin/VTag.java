@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by Jinyi on 4/16/16.
  */
-public class DoTag {
+public class VTag {
     List<String> words  = new ArrayList<String>();
     List<String> tags   = new ArrayList<String>();
 
@@ -37,17 +37,20 @@ public class DoTag {
     }
 
     public static void main(String[] args) throws IOException {
+        String train = args[0];
+        String test  = args[1];
+
         ViterbiTagger tagger = new ViterbiTagger();
-        tagger.readFile("data/entrain");
+        tagger.readFile(train);
 
-        DoTag dt = new DoTag();
-        dt.readTestFile("data/entest");
+        VTag vt = new VTag();
+        vt.readTestFile(test);
 
-        List<String> vTags = tagger.viterbiTag(dt.words);
-        tagger.computeAccuracy(dt.words, vTags, dt.tags, true);
+        List<String> vTags = tagger.viterbiTag(vt.words);
+        tagger.computeAccuracy(vt.words, vTags, vt.tags, true);
 
-        List<String> posTags = tagger.posTag(dt.words);
-        tagger.computeAccuracy(dt.words, posTags, dt.tags, false);
+        List<String> posTags = tagger.posTag(vt.words);
+        tagger.computeAccuracy(vt.words, posTags, vt.tags, false);
 
     }
 }

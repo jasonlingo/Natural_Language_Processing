@@ -5,15 +5,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Jason on 4/19/16.
+ * Created by Jinyi on 4/16/16.
  */
-public class VTagEM {
+public class VTag {
     List<String> words  = new ArrayList<String>();
     List<String> tags   = new ArrayList<String>();
 
+
+
     public void readTestFile(String fileName) throws  IOException {
-        words.clear();
-        tags.clear();
 
         BufferedReader br = new BufferedReader(new FileReader(fileName));
         try {
@@ -39,15 +39,18 @@ public class VTagEM {
     public static void main(String[] args) throws IOException {
         String train = args[0];
         String test  = args[1];
-        String raw   = args[2];
 
-        ViterbiTaggerEM2 tagger = new ViterbiTaggerEM2();
-        tagger.readFile(train, raw);
+        ViterbiTagger tagger = new ViterbiTagger();
+        tagger.readFile(train);
 
-        VTagEM dt = new VTagEM();
-        dt.readTestFile(test);
+        VTag vt = new VTag();
+        vt.readTestFile(test);
 
-        tagger.emTag(dt.words, dt.tags, 10);
+        List<String> vTags = tagger.viterbiTag(vt.words);
+        tagger.computeAccuracy(vt.words, vTags, vt.tags, true);
+
+        List<String> posTags = tagger.posTag(vt.words);
+        tagger.computeAccuracy(vt.words, posTags, vt.tags, false);
 
     }
 }
