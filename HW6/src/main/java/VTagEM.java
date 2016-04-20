@@ -47,7 +47,7 @@ public class VTagEM {
         VTagEM dt = new VTagEM();
         dt.readTestFile(test);
 
-        tagger.emTag(dt.words, dt.tags, 100);
+        tagger.emTag(dt.words, dt.tags, 10);
 
     }
 }
