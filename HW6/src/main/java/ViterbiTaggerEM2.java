@@ -349,17 +349,29 @@ public class ViterbiTaggerEM2 {
             String preTime = String.valueOf(i - 1);
 
             // check novel word
-            if (!tagDict.containsKey(curWord)) {
-                curWord = OOV;
-            }
-
-            if (!tagDict.containsKey(preWord)) {
-                preWord = OOV;
-            }
+//            if (!tagDict.containsKey(curWord)) {
+//                curWord = OOV;
+//            }
+//
+//            if (!tagDict.containsKey(preWord)) {
+//                preWord = OOV;
+//            }
 
             // get the candidate tags for current and previous words.
-            HashSet<String> candidateTag     = tagDict.get(curWord);
-            HashSet<String> prevCandidateTag = tagDict.get(preWord);
+//            HashSet<String> candidateTag     = tagDict.get(curWord);
+//            HashSet<String> prevCandidateTag = tagDict.get(preWord);
+            HashSet<String> candidateTag;
+            if (tagDict.containsKey(curWord)) {
+                candidateTag = tagDict.get(curWord);
+            } else {
+                candidateTag = tagDict.get(OOV);
+            }
+            HashSet<String> prevCandidateTag;
+            if (tagDict.containsKey(preWord)) {
+                prevCandidateTag = tagDict.get(preWord);
+            } else {
+                prevCandidateTag = tagDict.get(OOV);
+            }
 
             for (String tag : candidateTag) {
                 double alpha_ti = 0.0;
@@ -451,7 +463,7 @@ public class ViterbiTaggerEM2 {
 
         Map<String, Double> probDP = new HashMap<String, Double>();
         Map<String, Double> probTW = new HashMap<String, Double>();
-        HashSet<String> candidateTag, prevCandidateTag;
+//        HashSet<String> candidateTag, prevCandidateTag;
 
         double s = alpha.get(BND + TIME_SEP + String.valueOf(words.size() - 1));
         beta.put(BND + TIME_SEP + String.valueOf(words.size() - 1), Math.log(1.0));
@@ -463,16 +475,28 @@ public class ViterbiTaggerEM2 {
             String preTime = String.valueOf(i - 1);
 
             // find tags for current word and previous word
-            if (!tagDict.containsKey(preWord)) {
-                preWord = OOV;
-            }
+//            if (!tagDict.containsKey(preWord)) {
+//                preWord = OOV;
+//            }
+//
+//            if (!tagDict.containsKey(curWord)) {
+//                curWord = OOV;
+//            }
 
-            if (!tagDict.containsKey(curWord)) {
-                curWord = OOV;
+//            prevCandidateTag = tagDict.get(preWord);
+//            candidateTag     = tagDict.get(curWord);
+            HashSet<String> candidateTag;
+            if (tagDict.containsKey(curWord)) {
+                candidateTag = tagDict.get(curWord);
+            } else {
+                candidateTag = tagDict.get(OOV);
             }
-
-            prevCandidateTag = tagDict.get(preWord);
-            candidateTag     = tagDict.get(curWord);
+            HashSet<String> prevCandidateTag;
+            if (tagDict.containsKey(preWord)) {
+                prevCandidateTag = tagDict.get(preWord);
+            } else {
+                prevCandidateTag = tagDict.get(OOV);
+            }
 
             // perform backward algorithm
             for (String tag : candidateTag) {
