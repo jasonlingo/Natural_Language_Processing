@@ -1,0 +1,21 @@
+import 'byte.grm' as bytelib;   # copy this file from grammars/byte.grm
+Letter = bytelib.kAlpha;        # kAlpha is defined in byte.grm
+Sigma = Letter | "'";           # alphabet also includes stress mark
+Vowel = "a" | "e" | "i" | "o" | "u" | "A" | "E" | "I" | "O" | "U";
+Consonant = Letter - Vowel;
+Nucleus = Vowel+;
+
+# YOU WILL FILL IN THE REST
+export AddStress = ("" : "'") Nucleus Consonant+ Nucleus;
+export Stress123 = CDRewrite[AddStress, Sigma* - (Sigma* "'" Nucleus Consonant*) , "", Sigma*, 'ltr', 'obl'];
+
+export left = Optimize[(Sigma+ - (Sigma* "'"* Nucleus Consonant* Nucleus*))|"[BOS]"];
+
+export OneSyllable = CDRewrite[("" : "'"), "[BOS]" Consonant*, Nucleus Consonant*"[EOS]", Sigma*];
+
+export Stress = CDRewrite[("" : "'") (Nucleus Consonant+ Nucleus), left , "", Sigma*, 'ltr', 'obl'] @ OneSyllable;
+
+export InvertStress = Invert[Stress];
+
+Alphabet = bytelib.kBytes;
+export StressWords = CDRewrite[Stress, " "|"[BOS]", " "|"[EOS]", Alphabet*, 'sim','obl'];

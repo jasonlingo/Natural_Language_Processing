@@ -1,0 +1,129 @@
+# grmtest-with-symbols noisy.grm CompleteWord byte entrain.sym
+import 'byte.grm' as bytelib;        # load a simple grammar (.grm)
+
+
+export ByteSigma = (bytelib.kSpace | bytelib.kGraph);  # printable characters
+export ByteSigmaStar = Optimize[ByteSigma*];
+
+export LM = LoadFst['entrain.fst'];  # load trigram language model (.fst)
+vocab = SymbolTable['entrain.sym'];  # load model's symbol table (.sym)
+
+# ================================
+export Spell = Optimize[StringFile['entrain.alpha', vocab, byte]];
+export Part = Optimize[CDRewrite[(ByteSigmaStar:""), ByteSigma, "[EOS]", ByteSigmaStar ,'rtl','opt'] ];
+
+export CompleteWord  = Optimize[Invert[Part] @ Invert[Spell]] @ LM;
+
+# 10f extra
+export Spell2 = (Optimize[StringFile['entrain.alpha', byte, vocab]])*;
+export InvertPart = Invert[Part];
+export CompleteWordInContext = Optimize[CDRewrite[InvertPart, " ", "[EOS]", ByteSigmaStar, 'sim', 'obl']] ;
+# 10f extra ends
+
+AddEndSpace = ByteSigmaStar ("" : " ");
+
+# 11 (a)
+export DelSpaces = CDRewrite[" " : "", "", "", ByteSigmaStar, 'sim', 'obl'];
+
+# 11 (b)
+export SpellText = Optimize[ (Spell ("".vocab : " "))* ];
+export InvSpellText = Invert[SpellText];
+#export InvSpellText = Optimize[Invert[SpellText]];
+
+export InvLM = Invert[LM];
+export InvDelSpaces = Optimize[Invert[DelSpaces]];
+
+# 11 (e)
+export RandomChar = bytelib.kGraph <4.54>;
+export RandomWord = Optimize[(RandomChar (RandomChar <0.1>)* ) <2.3>];
+export SpellOOV = "<unk>".vocab : RandomWord;
+
+# 11 (f)
+export RevSpellText = Optimize[ ((Spell | SpellOOV) ("".vocab : " "))* ];
+export RevPrintText = (Optimize[Spell | ("<unk>".vocab : "<unk>")] ("".vocab: " "))*;
+export InvRevSpellText = Optimize[Invert[RevSpellText]];
+
+
+# 12 (a)
+DelSomeSpacesFST = Optimize[((" ": " " <2>) | ((" ": "") <1>))];
+export DelSomeSpaces = CDRewrite[DelSomeSpacesFST, "", "", ByteSigmaStar, 'sim', 'obl'];
+export InvDelSomeSpaces = Optimize[Invert[DelSomeSpaces] @ AddEndSpace];
+
+# 12 (b)
+export Suffixes = "acy"|"al"|"ance"|"ence"|"dom"|"er"|"or"|"ism"|"ist"|"ity"|
+                  "ty"|"ment"|"ness"|"ship"|"sion"|"tion"|"ate"|"en"|"ify"|
+                  "ize"|"ise"|"able"|"ible"|"al"|"ful"|"ic"|"ical"|"ious"|"ous"|
+                  "ish"|"ive"|"less"|"y";
+
+export DelSuffixes = Optimize[CDRewrite[ (Suffixes : "" <1>) , ByteSigma, ("[EOS]" | " "), ByteSigmaStar, 'sim', 'obl']];
+
+export InvDelSuffixes = Invert[DelSuffixes] @ AddEndSpace;
+
+# 12 (c)
+Qwerty = Optimize[("q" : ("w" | "e") <3>) |
+                  ("w" : ("q" | "s" | "e") <2>) |
+                  ("e" : ("w" | "r" | "d") <2>) |
+                  ("r" : ("e" | "f" | "t") <2>) |
+                  ("t" : ("r" | "g" | "y") <2>) |
+                  ("y" : ("t" | "h" | "u") <2>) |
+	          ("u" : ("y" | "j" | "i") <2>) |
+	          ("i" : ("u" | "k" | "o") <2>) |
+	          ("o" : ("i" | "l" | "p") <2>) |
+	          ("a" : ("q" | "s" | "z") <2>) |
+	          ("s" : ("a" | "w" | "d" | "x") <1>) |
+	          ("d" : ("s" | "e" | "f" | "c") <1>) |
+	          ("f" : ("d" | "r" | "g" | "v") <1>) |
+	          ("g" : ("f" | "t" | "h" | "b") <1>) |
+	          ("h" : ("g" | "y" | "j" | "n") <1>) |
+	          ("j" : ("h" | "u" | "k" | "m") <1>) |
+	          ("k" : ("j" | "i" | "l" | "m") <1>) |
+	          ("l" : ("k" | "o" | "p") <2>) |
+	          ("z" : ("a" | "x" | "s") <2>) |
+	          ("x" : ("z" | "s" | "c") <2>) |
+	          ("c" : ("x" | "d" | "v") <2>) |
+	          ("v" : ("c" | "f" | "b") <2>) |
+	          ("b" : ("v" | "g" | "h" | "n") <1>) |
+	          ("n" : ("b" | "h" | "j" | "m") <1>) |
+	          ("m" : ("n" | "j" | "k") <2>)];
+
+export Typos = Optimize[CDRewrite[Qwerty, "", "", ByteSigmaStar, 'sim', 'obl' ]];
+export InvTypos = Optimize[Invert[Typos] @ AddEndSpace];
+
+# 12 (d)
+CharToDigit = Optimize[(((("a" <1>) | ("b" <2>) | ("c" <3>)) : "2") |
+                        ((("d" <3>) | ("e" <1>) | ("f" <2>)) : "3") |
+                        ((("g" <1>) | ("h" <1>) | ("i" <2>)) : "4") |
+	                ((("j" <2>) | ("k" <3>) | ("l" <3>)) : "5") |
+	                ((("m" <1>) | ("n" <1>) | ("o" <1>)) : "6") |
+	                ((("p" <2>) | ("q" <2>) | ("r" <2>) | ("s" <1>)) : "7") |
+	                ((("t" <3>) | ("u" <1>) | ("v" <1>)) : "8") |
+	                ((("w" <1>) | ("x" <2>) | ("y" <3>) | ("z" <1>)) : "9"))];
+
+export Telephone = CDRewrite[CharToDigit, "", "", ByteSigmaStar, 'sim', 'obl'];
+export InvTelephone = Optimize[Invert[Telephone] @ AddEndSpace];
+
+# 12 (e)
+export DelDigit = Optimize[(bytelib.kDigit : "" <2>)];
+
+DoubleDigit = Optimize[("1" : "11" <1>) |
+("2" : "22" <1>) |
+("3" : "33" <1>) |
+("4" : "44" <1>) |
+("5" : "55" <1>) |
+("6" : "66" <1>) |
+("7" : "77" <1>) |
+("8" : "88" <1>) |
+("9" : "99" <1>) |
+("0" : "00" <1>) ];
+
+export ChangeDigit = CDRewrite[(DoubleDigit | DelDigit | (ByteSigma <1>)), "", "", ByteSigmaStar, 'sim', 'obl'];
+export Tinyphone = Optimize[Telephone @ ChangeDigit];
+
+export InvTinyphone = Optimize[Invert[Tinyphone] @ AddEndSpace];
+
+
+# 12 (f)
+
+export DelSuffTelephone = Optimize[DelSuffixes @ Telephone];
+
+export InvDelSuffTelephone = Optimize[Invert[DelSuffTelephone] @ AddEndSpace];

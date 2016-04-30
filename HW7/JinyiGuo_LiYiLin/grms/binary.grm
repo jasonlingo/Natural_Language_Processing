@@ -1,0 +1,27 @@
+Zero = "0";
+One = "1";
+Bit = Zero | One;
+export First = Optimize[Zero Zero* Bit* One One One One?];
+export Second = Optimize[Zero Bit* One One One];
+export Disagreements = Optimize[(First - Second) | (Second - First)];
+
+export AtLeastThreeOne = Optimize[One One One+];  
+export Triplets = Optimize[(Zero* AtLeastThreeOne* Zero*)*];
+
+export EvenOne = Optimize[One One];
+export NotPillars = Optimize[(Bit* - EvenOne*)];
+
+export MultiEvenOne = Optimize[(Bit* Zero)* EvenOne+ (Zero Bit*)*];
+export Oddlets = Optimize[(Bit* - MultiEvenOne*)];
+
+
+export WBits = Optimize[(Zero <1>) (Bit+ <0.2>) (One <0.5>)];
+export WFlip = Optimize[(Zero : (Zero <1>) | (One <2>)) ((Zero : Zero One <0.5>) | (One : Zero <0.4>))+ (One <0.5>)];
+
+export WeightedMultipath = ((Zero : "" <1>) (Zero : One <1>)) | ((Zero : One <2>) (Zero : "" <2>)) | (Zero Zero : One <3>);
+export WeightedMultipathOpt = Optimize[WeightedMultipath];
+
+
+
+
+

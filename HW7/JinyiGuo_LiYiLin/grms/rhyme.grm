@@ -1,0 +1,15 @@
+import 'byte.grm' as bytelib;
+import 'arpabet.grm' as arpabet;
+import 'dactyls.grm' as dactyls;
+
+arpasyms = SymbolTable['arpabet.sym'];
+
+export Pronounce = dactyls.Pronounce;
+Phoneme = arpabet.Phoneme;
+
+export Ending = CDRewrite[(Phoneme* : "".arpasyms), "".arpasyms, arpabet.Stressed (arpabet.Unstressed)*, Phoneme*, 'ltr', 'obl'];
+export WordEnding = Optimize[Pronounce @ Ending];
+
+export InvWordEnding = Invert[WordEnding];
+Word = (bytelib.kGraph)*;
+export WordEndingInvert = (Word @ WordEnding) @ Invert[WordEnding];

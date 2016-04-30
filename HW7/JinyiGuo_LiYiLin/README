@@ -1,0 +1,471 @@
+Intro to NLP, Assignment 7: Finite-State Programming
+
+Team members:
+Jinyi Guo
+Li-Yi Lin
+
+
+
+2. 
+  (a)
+    ii. First accepts languages that start with "0", have arbitrary combinations of "0" and "1" in the middle, and have at least three "1" in the end.
+        0 and 1 are quoted in the .grm file because they are seen as a unit in the FST.
+      
+    iii. There are 5 states and 9 arcs.
+              
+  (b)
+    i. the First language can be simplified as 
+       export Second = Optimize[Zero Bit* One One One];
+       
+    ii. Disagreements should accept nothing.
+    
+  (c)
+    i. The First language has 20 states and 25 arcs.
+       The Second language has 13 states and 16 arcs.
+       
+    ii. Because now the First and Second language are not the same, the Disagreements will branches into two sub-FSA, (First - Second) and (Second - First).
+    
+    iii. The result output includes duplicate string when the input is accepted. This is because the unoptimized version contains all possible "routes" of a given FSM. For example, input string "00111" can be either interpreted as "Zero Zero One One One" or "Zero Bit One One One", that is why grmtest outputs two duplicate strings.
+
+  (d)
+    We got same result as problem 2(b), i.e. a FSA with no arc or state at all and hence accepts nothing.
+    The reason is that when we "subtract" one unoptimized FSA with another (e.g. First - Second), the resulting FSA, though may have many states and arcs, accepts nothing because of some "flaws" like no ending state.
+
+4
+    (a) a(b*|c+)a
+    
+    (b) 0 outputs: a
+        1 outputs: aba
+        2 outputs: aa
+        more than 2 outputs: aca
+        
+    (c) This relation matches a string with an "a" in both the first place and the last place, with either 0 or more "b"s or 1 or more "c"s or nothing in between. The first and last "a"s will remain unchanged, while each "b" in between will be transduced to a "x" (if there is any), or each "c" will be transduced to 0 or more "y"s if there are "c"s in between, or if there is nothing between the two "a"s, insert "fric" in between.
+    
+    
+    (d) The optimized version of Cross is consistent with the result above. There are 10 states and 16 arcs.
+    
+5.
+    (c) Invalid input.
+    
+    (d) Valid input but produces no output.
+    
+    (f) Transduce 0 or 1 to all possible binary numbers that can generate them by Parity2.
+    
+    
+6.
+  (a)
+    i. export NP = Optimize[("Art" | "Quant")? ("Adj")* ("Noun")+];
+    Accepted examples: AdjNoun, ArtNoun, ArtAdjAdjNounNoun.
+        
+    ii. There are 13 states and 17 arcs.
+    The machine splits each alphabet into an unique state, with the same alphabet shared by multiple words (e.g. "t" is both in "Quant" and "Art") only appears once and being reused.
+    
+  (c)
+    i. This composition will transform a NP to a MakeNmod form. If the input string is not a NP, then it will fail to rewrite. 
+    ii. ArtAdjNounNounNoun -> ArtAdjNmodNmodNoun
+        AdjNounNounNounNounVerb -> Rewrite failed.
+    iii. MakeNmod has 36 states and 46 arcs. TransformNP, on the other, has 16 states and 20 arcs.
+    iv. The topology of TransformNP is very similar to NP. The only difference is that TransformNP has a branch to represent Nmod* and Noun must be the last tag of a string.
+    
+  (d) 
+    BracketNP will use <> to enclose a NP and if the input is not a NP, it will fail. For example:
+    ArtAdj -> Rewrite failed.
+    AdjNoun -> <AdjNoun>
+    VerbArtAdjNounNounNounVerbPrepNoun -> Rewrite failed.
+    
+    
+    Whereas Brackets1 will enclose a substring that is a NP but not necessarily enclose all the NPs. So it might have many output strings. For instance:
+    ArtAdj -> ArtAdj
+    AdjNoun -> Adj<Noun>
+    VerbArtAdjNounNounNounVerbPrepNoun -> 
+        Output string: VerbArtAdjNounNoun<Noun>VerbPrep<Noun>
+        Output string: VerbArtAdjNoun<NounNoun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNoun>Noun<Noun>VerbPrepNoun
+        Output string: VerbArt<AdjNoun><Noun>NounVerbPrepNoun
+        Output string: VerbArtAdj<NounNounNoun>VerbPrepNoun
+        Output string: VerbArtAdjNoun<Noun><Noun>VerbPrepNoun
+        Output string: VerbArtAdj<Noun><Noun>NounVerbPrep<Noun>
+        Output string: VerbArtAdjNoun<Noun>NounVerbPrepNoun
+        Output string: Verb<ArtAdjNoun><Noun><Noun>VerbPrepNoun
+        Output string: VerbArtAdj<Noun>Noun<Noun>VerbPrepNoun
+        Output string: VerbArtAdj<NounNoun><Noun>VerbPrepNoun
+        Output string: VerbArtAdjNounNoun<Noun>VerbPrepNoun
+        Output string: Verb<ArtAdjNounNoun><Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun><NounNoun>VerbPrepNoun
+        Output string: VerbArtAdj<NounNoun>NounVerbPrepNoun
+        Output string: VerbArtAdj<Noun><NounNoun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNoun><Noun>NounVerbPrep<Noun>
+        Output string: VerbArt<AdjNounNoun>NounVerbPrepNoun
+        Output string: VerbArtAdjNounNounNounVerbPrepNoun
+        Output string: VerbArt<AdjNoun>NounNounVerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun>NounNounVerbPrep<Noun>
+        Output string: VerbArtAdj<Noun><Noun><Noun>VerbPrepNoun
+        Output string: VerbArtAdj<NounNounNoun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNounNounNoun>VerbPrepNoun
+        Output string: Verb<ArtAdjNoun><Noun>NounVerbPrep<Noun>
+        Output string: Verb<ArtAdjNounNoun>NounVerbPrepNoun
+        Output string: VerbArtAdj<NounNoun><Noun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNounNoun><Noun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNounNoun><Noun>VerbPrepNoun
+        Output string: VerbArt<AdjNoun>Noun<Noun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNoun><NounNoun>VerbPrep<Noun>
+        Output string: VerbArtAdj<Noun><Noun>NounVerbPrepNoun
+        Output string: Verb<ArtAdjNoun><NounNoun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNounNoun><Noun>VerbPrepNoun
+        Output string: VerbArt<AdjNoun><Noun><Noun>VerbPrepNoun
+        Output string: VerbArtAdj<Noun><NounNoun>VerbPrepNoun
+        Output string: VerbArtAdjNounNounNounVerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun><Noun>NounVerbPrepNoun
+        Output string: VerbArt<AdjNoun><NounNoun>VerbPrepNoun
+        Output string: Verb<ArtAdjNounNoun>NounVerbPrep<Noun>
+        Output string: VerbArtAdj<Noun><Noun><Noun>VerbPrep<Noun>
+        Output string: VerbArtAdjNoun<Noun><Noun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNoun><Noun><Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNounNounNoun>VerbPrep<Noun>
+        Output string: VerbArtAdj<Noun>NounNounVerbPrepNoun
+        Output string: VerbArtAdj<Noun>Noun<Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun>Noun<Noun>VerbPrepNoun
+        Output string: Verb<ArtAdjNounNounNoun>VerbPrepNoun
+        Output string: VerbArt<AdjNounNounNoun>VerbPrep<Noun>
+        Output string: VerbArtAdjNoun<NounNoun>VerbPrepNoun
+        Output string: Verb<ArtAdjNoun>NounNounVerbPrepNoun
+        Output string: VerbArtAdjNoun<Noun>NounVerbPrep<Noun>
+        Output string: VerbArt<AdjNoun>NounNounVerbPrepNoun
+        Output string: Verb<ArtAdjNoun>Noun<Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun><Noun><Noun>VerbPrep<Noun>
+        Output string: VerbArt<AdjNounNoun>NounVerbPrep<Noun>
+        Output string: VerbArtAdj<NounNoun>NounVerbPrep<Noun>
+        Output string: VerbArtAdj<Noun>NounNounVerbPrep<Noun>
+    
+    Brackets2 will enclose all the substrings that are NPs but might have multiple different output strings because one NP could be separated into several shorter NPs. For example
+    ArtAdj -> ArtAdj
+    AdjNoun -> <AdjNoun>
+    VerbArtAdjNounNounNounVerbPrepNoun ->
+        Output string: Verb<ArtAdjNounNoun><Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNounNounNoun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun><Noun><Noun>VerbPrep<Noun>
+        Output string: Verb<ArtAdjNoun><NounNoun>VerbPrep<Noun>
+    
+7.
+    (b)
+        "ev'apor'ating" has no possible input ("'evap'orating" is produced by putting "evaporating" to Stress).
+        "'incomm'unic'ado" has possible inputs "incommunicado".
+        
+    (d)
+        We add two FSTs to handle the "Y" and "y" case: 
+            "ClassifyY" to turn "y" that serves as vowel to "^" and vowel "Y" to "*",
+            "RestoreY" to replace "^" or "*" in the processed string back to "y" or "Y" respectively.
+        To make "Stress" works as usual, we also have to add "^" and "*" to both "Vowel" and "Sigma".
+        
+        We used a separate file "Stressy.grm" to store the transducer.
+    
+8.
+    (a) 
+        The present and past tenses of "read" have the same spell but different rhyme.
+        
+    (b) 
+        In the two words, the letter a has 3 different phonemic realizations: AE2, AH0, and AE1.
+        AH0: our tongue will be near the top of our mouth.
+        AE1: our tongue will be near the bottom of our mouth and our mouth will open larger.
+        AE2: our tongue will be near the bottom of our mouth and our mouth will open smaller than AE1.
+        
+    (c)
+        The Results defines a language that only accepts words whose number of syllables is multiple of three, and for each 3 syllables the first one is stressed (has a stress level 1 or 2) and the following two are unstressed, words without syllable (which may not exist) may also be accepted.
+        
+        The Results is composited by Pronounce, StressPattern and (Dacytl*). It will first match the pronounce with the input word by the Pronounce, and then filter the prouounce to make the string only have the stress marker, 0-2. Finally, (Dacytl*) will output the strings that match the pattern, ("1" | "2") "0" "0". 
+        
+    (g)
+        WordEnding @ Invert[WordEnding] will find all the words that have the same rhyming ending with the input word.
+        The input and output alphabets are both ASCII characters (in byte mode). 
+        
+    (h) 
+        If we use "cmudict.txt" for the Pronounce, it will show the error message, "Memory allocation failed." 
+        This is probably caused by insufficient memory when we try to allocate memory which is the square of the size of "cmudict.txt" (O(N^2) where N is the size of cmudict). 
+        When it performs composition on the two FSTs, it will first try to find the rhyming ending of given word, which takes the same amount of memory as "cmudict.txt" it is used, and then find all possible words that contain this rhyming ending. The second step takes significantly larger space because it will go through the entire dictionary to find the matching words for each of the rhyming ending (while there could be O(N) types). Thus, if the input has large amount of states and arcs (e.g. when we use cmudict.txt as our phoneme dict), then it will be very likely to have very high demand in memory space usage.
+        
+    (i) 
+        Using pipeline for WordEnding and Invert[WordingEnding] is more efficient than the composition of WordEnding @ Invert[WordingEnding] because when we pass a word to WordEnding, it will eliminate many arcs and states that are not relevant to the word. Therefore, when it passes the result to the next FST, Invert[WordingEnding], it only has one WordEnding to be processed through the next FST, and that is why it is more efficient.
+        
+        Interesting observation: the output for the word "academic" is "nemec", which is a word I have never seen.
+        The dictionary has a rhyme for orange, but doesn't have a rhyme for adventureland.
+    
+    (j) 
+    
+9.
+    (a) 
+        i. All strings accepted by this FSA have the same weight, namely 1 + 0.2 + 0.5 = 1.7.
+        ii. Similarly, all accepted string pairs have the same weight, for there is only one way of assigning weights.
+        
+    (c) i. Let's take (x, y) = (00, 1).
+        One example of weighted FST that can accept the string pair (x, y) along two paths is: 
+            WeightedMultipath = ((Zero : "" <1>) (Zero : One <1>)) | ((Zero : One <2>) (Zero : "" <2>)) | (Zero Zero : One <3>); 
+        where either of the zero is replaced by 1 with the other one being eliminated, or the two zeros are replace by one at the same time.
+        
+        The weight of path where the first zero is replaced by one and the other zero is deleted is 4, the second path (second zero is replaced by 1 and the first one is deleted) has a weight of 2, and the path with two zeros replaced at the same time has a weight of 3.
+        
+        ii. Still there are 3 paths accept (x, y), with all the weights remain unchanged. This is because Optimize[] only helps cancel out empty arcs of machine, we cannot find the minimum path by directly apply it to an FSM. 
+    
+    
+        iii. The last machine only has one single state without any arc. This one is important because it only keeps the minimum weight of all possible paths.
+        xT_out_opt keeps the minimum weight of all paths together with the output of the corresponding path.
+        Ty_in_opt is important because it keeps the input of the the path that has the minimum weight.
+        
+10. 
+    (b)
+        The "ngramrandgen --max_sents=1 --remove_epsilon entrain.fst | farprintstrings" randomly generated a sentence "Navigation Mixte compared with the , the stakes risks from the 500 could cutting costs fund employees the quality of results weren't disclosed .", whose length is 25 including punctuations. The length of generated sentences will be different because the ngramrandgen doesn't restrict the length of randomly generated sentences.
+        
+        Using "fstprintstring entrain.fst" can only print out very short sentences (usually less than 5 words). 
+        
+        The main reason for this is that "ngramrandgen" uses a n-gram model with backoff, which makes it possible to generate words that are not included in the training file (represented by <epsilon>), thus making the random sentence easier to continue. 
+        I guess apply fstprintstring directly to an FST is like picking up a random state in the FST and see how "far" it can go to generate sentence. Since there is no backoff and the corpus is very small, chances of getting into a stop state are very high.
+        
+        
+    (d)
+        The results of transducing "Andy cherished the barrels each house made ." are:
+          Output string: Andycherishedthebarrelseachhousemade. <cost=67.4284>
+          Output string: Andycherishedthebarrelseachhousemade. <cost=69.3358>
+          Output string: Andycherishedthebarrelseachhousemade. <cost=79.479>
+          Output string: Andycherishedthebarrelseachhousemade. <cost=81.3864>
+          
+        
+        The result of transducing "If only the reporters had been nice ." are:
+          Output string: Ifonlythereportershadbeennice. <cost=49.2604>
+          Output string: Ifonlythereportershadbeennice. <cost=49.5864>
+          Output string: Ifonlythereportershadbeennice. <cost=50.0427>
+          Output string: Ifonlythereportershadbeennice. <cost=50.3688>
+          Output string: Ifonlythereportershadbeennice. <cost=55.2341>
+          Output string: Ifonlythereportershadbeennice. <cost=55.5601>
+          Output string: Ifonlythereportershadbeennice. <cost=55.6953>
+          Output string: Ifonlythereportershadbeennice. <cost=56.0164>
+          Output string: Ifonlythereportershadbeennice. <cost=56.0213>
+          Output string: Ifonlythereportershadbeennice. <cost=56.3424>
+          Output string: Ifonlythereportershadbeennice. <cost=56.4776>
+          Output string: Ifonlythereportershadbeennice. <cost=56.8036>
+          Output string: Ifonlythereportershadbeennice. <cost=61.311>
+          Output string: Ifonlythereportershadbeennice. <cost=61.637>
+          Output string: Ifonlythereportershadbeennice. <cost=61.6689>
+          Output string: Ifonlythereportershadbeennice. <cost=61.9949>
+          Output string: Ifonlythereportershadbeennice. <cost=62.0933>
+          Output string: Ifonlythereportershadbeennice. <cost=62.4194>
+          Output string: Ifonlythereportershadbeennice. <cost=62.4512>
+          Output string: Ifonlythereportershadbeennice. <cost=62.7772>
+          Output string: Ifonlythereportershadbeennice. <cost=67.2847>
+          Output string: Ifonlythereportershadbeennice. <cost=67.6107>
+          Output string: Ifonlythereportershadbeennice. <cost=67.7459>
+          Output string: Ifonlythereportershadbeennice. <cost=68.067>
+          Output string: Ifonlythereportershadbeennice. <cost=68.0719>
+          Output string: Ifonlythereportershadbeennice. <cost=68.393>
+          Output string: Ifonlythereportershadbeennice. <cost=68.5282>
+          Output string: Ifonlythereportershadbeennice. <cost=68.8542>
+          Output string: Ifonlythereportershadbeennice. <cost=73.7195>
+          Output string: Ifonlythereportershadbeennice. <cost=74.0455>
+          Output string: Ifonlythereportershadbeennice. <cost=74.5018>
+          Output string: Ifonlythereportershadbeennice. <cost=74.8278>
+        The output contains many results with different cost, meaning the input sentence has multiple parse.
+        Each of the output result represents an unique parse of the given sentence, with the cost as the amount of weight along the parse "path". 
+        
+        The sentence "Thank you" cannot be transduced because the word "thank" is not included by the corpus, thus it is impossible for the FST to produce the sentence.
+
+        The domain and range of the relation LM are both entrain.sym, as the FST can only parse sentence with all words contained in the corpus.
+    
+    
+11.
+    (d) Similar to the result in 10(d), input "ThereportersaidtothecitythatEveryoneIskilled." and "Ifonlythereporterhadbeennice." have multiple output with different total cost, each of the output represents an unique way of restoring the sentence. 
+    Putting "If only" and "Thankyou" gets result "Rewrite failed". "If only" is not rewritable because it is a complete sentence with space in between, there is not need trying to restore it. "Thankyou" cannot be rewritten because the word "Thank" is not in corpus.
+    
+    (e) 
+      i. w_1 means the cost of adding an random character, excluding the first random character, is 0.1. w_2 represents the cost of getting a random word, whose length is at least 1, is 2.3.
+      
+      ii. It needs cost 4.54 for each RandomChar and a fixed cost 2.3 for each RandomWord. For a RandomWord, it needs an extra cost 0.1 for each RandomChar that is not the first character of the RandomWord. Therefore, the cost for a RandomWord is 2.3 + 4.54 * n + 0.1 * (n - 1) = 2.2 + 4.64 * n.
+          
+          Since the cost is -log(p_n_i), we have 
+          p_n_i = exp(-cost) = exp( -(2.2 + 4.64 * n) ), where i represents a unique combination of RandomWord of length n. 
+          Since we have total 94 characters, p_n = p_n_i * 94^n = exp( -(2.2 + 4.64 * n) ) * 94^n. 
+          
+      
+      iii.           
+          The probability of having a RandomWord is 0.1 * 0.9^(n - 1) * (1/94)^n. 
+          So p_n can be rewritten as 0.1 * 0.9^(n - 1) * (1/94)^n * 94^n = 0.1 * 0.9^(n - 1).
+      
+          When n = 0, p_n = 0 because RandomWord requires at least one character. Thus, we only have to sum up the probabilities from 1 to inf.
+      
+          let r = p_n / p_{n-1} = 0.1 * 0.9^(n - 1) / 0.1 * 0.9^(n - 2) = 0.9
+          
+          sum_{n=1^inf} (p_n) = p_1 * (1 - r^inf) / (1 - r)
+                              = 0.1 * (1 - 0) / (1 - 0.9)
+                              = 0.1 / 0.1
+                              = 1
+          
+          Thus, sum_{n=0^inf} (p_n) = 0 + sum_{n=1^inf} (p_n) = 1.
+          
+          Because sum_{n=0^inf} (p_n) means the sum of the probabilities of all the possible RandomWord, sum_{n=0^inf} (p_n) should be 1. However, this result also need the assumption that exp(w_1) + exp(w_2) = 1. Otherwise the sum of all the probabilities before normalization will not be 1.
+          
+      iv. Since the cost of a single RandomWord is 2.2 + 4.64 * n, in order to increase the probability of getting longer RandomWord, we need to make the cost that associates with n lower. Thus, we can make w_1 lower, and if we want to make the probability sum to 1, we can also make w_2 higher correspondingly. 
+          On the other hand, although changing w_2 will affect the cost of each RandomWord, it will not affect the probability of getting a longer RandomWord. The reason is that every RandomWord has the same w_2 cost, so it will have no effect.
+      
+      v. If we decrease both the w_1 and w_2, then the probabilities of the random words will become higher and the sum of all the p_n will exceed 1. The decoder produces sightly more long words than before, words of length larger than 3 become more frequent. 
+      When we decrease w_1 and w_2, the cost of words increases more slowly than before by the definition of word cost above. Thus with the same "base cost" (w_2), the probabilities of long words coming out increases slightly.
+      
+      
+      vi. We can further employee a word model that take can do the same thing like bigram and trigram on characters. So the probability of a random word not only depends on the length of a word, but also on the previous characters.
+      
+    (g)
+      The commonest error we spotted in "entest-recovered.txt" is that a long word being splitted into several other words (some are "<unk>"). For example, the word "recommending" after copllapse and recovery became "<unk>" and "ending".
+      
+      Since we come across these error quite often, we suspect that the cause is probably we assigned equal weight to "<unk>" and other words in the corpus. One possible way of solving this is to reduce the weight of OOV. 
+      We might also want to add space to the corpus so that we can treat space equivalently like words. By assigning higher cost to space we can prevent more long words from being collapsed.
+      
+      
+    (h)
+      Yes, as the result showed, almost all "<unk>"s are caused by the inability to recover long words. For example, "minicomputers" is recovered as "<unk> computer" and "higher-priced" became "higher <unk>". Although our proposed methods in (g) might help improve the decoder, we can also eliminate these errors simply by adding more training data that contains as more long words as possible. Because the reverse noisy-channel will "guess" all possible recovery of each word, thus once the original word is included by the corpus, "Spell" will be able to filter it out and successfully recover the collapsed word.
+      
+      
+12.
+    (a)
+      i. We defined DelSomeSpaces as:
+        DelSomeSpacesFST = Optimize[((" ": " " <2>) | ((" ": "") <1>))];
+        export DelSomeSpaces = CDRewrite[DelSomeSpacesFST, "", "", ByteSigmaStar, 'sim', 'obl'];
+        
+      ii. We give lower weight to a deletion of space because we want to make more noise on the original sentence.
+      v. Some digit will have a space in-between after we inverted the sentence:
+          Unemployment in September dropped to 1,695,000 , the lowest level since 1980 .
+      <unk> employment in September dropped to 1 , 69 5,000 , the lowest level since 1980 .
+       
+       This condition happened because the separated digits also can be inverted (i.e. the dictionary has the vocabulary).
+       
+       In addition, when a number followed by a "-point", it is easily to be inverted to a "<unk>". For example:
+       Org:  Discussing the recent slide in stock prices , the central bank governor stated that `` the markets now appear to have steadied '' after the `` nasty jolt '' of the 190.58-point plunge in the Dow Jones Industrial Average a week ago .
+       Invert:   <unk> the recent slide in stock prices , the central bank governor stated that `` the markets now appear to have <unk> tea died '' after the `` nasty jolt '' of the 190 <unk> point plunge in the Dow Jones Industrial Average a week ago .
+          
+      Although the New York market plunge prompted a 70.5-point drop in the London Financial Times-Stock Exchange 100 Share Index , Mr. Leigh-Pemberton declared `` that the experience owed nothing to the particular problems of the British economy . ''
+      Although the New York market plunge prompted <unk> point drop in the London Financial Times-Stock Exchange 100 Share Index , Mr. <unk> on declared `` that the experience owed nothing to the particular problems of the British economy . ''
+            
+      vi. Total edit distance 703 over 50 lines (about 14 per line).
+      
+    (b) 
+      i. Our noisy channel is defined as:
+        DelSuffixes = Optimize[CDRewrite[ Suffixes : "" , ByteSigma, "[EOS]"|" ", ByteSigmaStar, 'sim', 'obl']];
+        where
+        Suffixes = Optimize[("acy":"" <2>)|("al":"" <2>)|("ance":"" <3>)|("ence":"" <3>)|
+                            ("dom":"" <3>)|("er":"" <1.5>)|("or":"" <2>)|("ism":"" <2>)|
+                            ("ist":"" <1.5>)|("ity":"" <3>)|("ty":"" <3>)|("ment":"" <1>)|
+                            ("ness":"" <2>)|("ship":"" <3>)|("sion":"" <2>)|("tion":"" <1>)|
+                            ("ate":"" <3>)|("en":"" <3>)|("ify":"" <3>)|("fy":"" <3>)|
+                            ("ize":"" <2>)|("ise":"" <2>)|("able":"" <2>)|("ible":"" <2>)|
+                            ("al":"" <2>)|("ful":"" <1.5>)|("ic":"" <2>)|("ical":"" <2>)|
+                            ("ious":"" <1.5>)|("ous":"" <2>)|("ish":"" <2>)|("ive":"" <2>)|
+                            ("less":"" <2>)|("y":"" <2>)];
+        
+        We hard-wired all possible suffixes in the program as the there are not so many of them.
+        
+      ii. Our FST check each word in the sentence if there is a suffix in the list above, if there is, delete the suffix in the word.
+        For each possible suffix deletion, we assigned different weight based on the frequency of the suffix. Suffix that appears more frequently gets a higher probability and hence a lower cost and vise versa.
+      
+      v. In "entext-recovered.txt", most words with suffixes listed above become "<unk>", which is the case that words with suffix deleted are not successfully recovered. For example, "El Espectador" in "entest.txt" became "El <unk>" in "entest-recovered.txt", for the word "Espectador" cannot be recovered after deleting the suffix "or". Probably because this word does not appear in "entrain.txt". 
+      
+      vi. Total edit distance 957 over 50 lines (about 19 per line).
+      
+      
+    (c)
+      i. we defined Typos as:
+          Qwerty = Optimize[("q" : ("w" | "e") <3>) |
+                            ("w" : ("q" | "s" | "e") <2>) |
+                            ("e" : ("w" | "r" | "d") <2>) |
+                            ("r" : ("e" | "f" | "t") <2>) |
+                            ("t" : ("r" | "g" | "y") <2>) |
+                            ("y" : ("t" | "h" | "u") <2>) |
+                            ("u" : ("y" | "j" | "i") <2>) |
+                            ("i" : ("u" | "k" | "o") <2>) |
+                            ("o" : ("i" | "l" | "p") <2>) |
+                            ("a" : ("q" | "s" | "z") <2>) |
+                            ("s" : ("a" | "w" | "d" | "x") <1>) |
+                            ("d" : ("s" | "e" | "f" | "c") <1>) |
+                            ("f" : ("d" | "r" | "g" | "v") <1>) |
+                            ("g" : ("f" | "t" | "h" | "b") <1>) |
+                            ("h" : ("g" | "y" | "j" | "n") <1>) |
+                            ("j" : ("h" | "u" | "k" | "m") <1>) |
+                            ("k" : ("j" | "i" | "l" | "m") <1>) |
+                            ("l" : ("k" | "o" | "p") <2>) |
+                            ("z" : ("a" | "x" | "s") <2>) |
+                            ("x" : ("z" | "s" | "c") <2>) |
+                            ("c" : ("x" | "d" | "v") <2>) |
+                            ("v" : ("c" | "f" | "b") <2>) |
+                            ("b" : ("v" | "g" | "h" | "n") <1>) |
+                            ("n" : ("b" | "h" | "j" | "m") <1>) |
+                            ("m" : ("n" | "j" | "k") <2>)];
+
+          export Typos = CDRewrite[Qwerty, "", "", ByteSigmaStar, 'sim', 'opt'];
+      
+      ii. We used the key position on the keyboard to design the this Typos FST. We assigned lower cost for those keys that have more neighbor keys because it is easier for them to be typed incorrectly.
+      
+      v. In the noisy channel, we optionally replace each character for each word in sentence with a typo in our typo list. e.g. "recommending" -> "rdcommendknh". Most words that appear in the training data are recovered, except the case that all characters of the word are typos. Words that we haven't seen in training process are not recovered, this case we see a "<unk>" in the corresponding place.
+      
+      vi. Total edit distance 1708 over 50 lines (about 34 per line)
+      
+    (d)
+      i. We defined Telephone as:
+        CharToDigit = Optimize[(((("a" <1>) | ("b" <2>) | ("c" <3>)) : "2") |
+                                ((("d" <3>) | ("e" <1>) | ("f" <2>)) : "3") |
+                                ((("g" <1>) | ("h" <1>) | ("i" <2>)) : "4") |
+                                ((("j" <2>) | ("k" <3>) | ("l" <3>)) : "5") |
+                                ((("m" <1>) | ("n" <1>) | ("o" <1>)) : "6") |
+                                ((("p" <2>) | ("q" <2>) | ("r" <2>) | ("s" <1>)) : "7") |
+                                ((("t" <3>) | ("u" <1>) | ("v" <1>)) : "8") |
+                                ((("w" <1>) | ("x" <2>) | ("y" <3>) | ("z" <1>)) : "9"))];
+
+
+        export Telephone = CDRewrite[CharToDigit, "", "", ByteSigmaStar, 'sim', 'obl'];
+        
+      ii. For each character to digit transformation, we randomly assigned different cost to them.
+      
+      v. Like before, most words that do not appear in the corpus are not successfully recovered, as they cannot be selected by "Spell". Examples:
+          Org: I was appalled to read the misstatements of facts in your Oct. 13 editorial `` Colombia 's Brave Publisher . ''
+          Invert: I was <unk> to read the <unk> of facts in your Oct. 13 editorial `` <unk> 's <unk> <unk> . ''
+      
+      vi. Total edit distance 1497 over 50 lines (about 29 per line)
+      
+    (e)
+      i. 
+        We defined Tinyphone as:
+          export DelDigit = Optimize[(bytelib.kDigit : "" <2>)];
+
+          DoubDigit = Optimize[("1" : "11" <1>) |
+                               ("2" : "22" <1>) |
+                               ("3" : "33" <1>) |
+                               ("4" : "44" <1>) |
+                               ("5" : "55" <1>) |
+                               ("6" : "66" <1>) |
+                               ("7" : "77" <1>) |
+                               ("8" : "88" <1>) |
+                               ("9" : "99" <1>) |
+                               ("0" : "00" <1>) ];
+          export DoubleDigit = CDRewrite[DoubDigit | DelDigit, "", "", bytelib.kDigit+, 'sim', 'obl'];
+
+          export Tinyphone = Optimize[Telephone @ CDRewrite[DoubleDigit, "", "", ByteSigmaStar, 'sim', 'opt']];        
+        
+      ii. We adopted deletion of digit and doubling of digit for our Tinyphone FST. In the FST, it will randomly delete or double a digit.
+          We assigned more cost to deletion of digit because we think it is harder to recover a deletion of a digit.  
+        
+       v. This noisy channel produced more error and many words are inverted as digits because digits are also acceptable in the lanbuage model and vocabulary dictionary. For example:
+          Org: `` What this means is that Europeans will have these machines in their offices before Americans do , '' the spokesman said .
+          Invert: `` What is men 7 28 <unk> 1945 have 7 machines in their 33 before Americans 36 , '' he spokesman 24 .
+       
+      vi. Total edit distance 3371 over 50 lines (about 67 per line).
+      
+    (f)
+      i. We combined DelSuffixes and Telephone to make a new FST.
+    
+      v. We found that this combined noisy channel is very hard to be inverted. The edit distance is much higher than other FST. In addition, many words become "<unk>".
+        Org: A sinking pound makes imports more expensive and increases businesses ' expectations of future inflation , he argued .
+        Invert: <unk> <unk> <unk> of <unk> <unk>
+      
+      vi. Total edit distance 6490 over 50 lines (about 129 per line)
+      
+      
+        
+        
+      
+        
+    
+
+    

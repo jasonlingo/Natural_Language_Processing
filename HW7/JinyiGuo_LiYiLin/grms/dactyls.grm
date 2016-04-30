@@ -1,0 +1,14 @@
+import 'byte.grm' as bytelib;
+import 'arpabet.grm' as arpabet;
+Sigma = bytelib.kGraph | bytelib.kSpace;
+
+arpa = SymbolTable['arpabet.sym'];
+
+export Pronounce = StringFile['cmumini.txt', byte, arpa];
+export StressPattern = CDRewrite[arpabet.Consonant : "".arpa, "".arpa, "".arpa, arpabet.Phoneme*, 'sim', 'obl'];
+export Dacytl = arpabet.Stressed arpabet.Unstressed arpabet.Unstressed;
+
+export test = Pronounce @ StressPattern @ Dacytl;
+
+export Results = Optimize[Project[Pronounce @ StressPattern @ (Dacytl*), 'input']];
+export ListResults = "".arpa : Results;
