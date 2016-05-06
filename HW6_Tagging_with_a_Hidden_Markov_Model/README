@@ -1,0 +1,156 @@
+Team member:
+Jinyi Guo 
+Li-Yi Lin
+
+
+
+1.
+    (a)
+    i. The new probability of day 1 is hot is 0.491 (the old probability is 0.871).
+    
+        p(133 | HHH) = p(1 | H) * p(3 | H) * p(3 | H) = 0.049
+        p(133 | CHH) = p(1 | C) * p(3 | H) * p(3 | H) = 0.343
+
+    The probability CHH as explanations of the first three days of data is higher, that's why the probability of first day being hot goes down. 
+
+    ii. The probability that day 2 is hot changes from 0.977 to 0.918.
+        Cell K28.
+
+    iii. The graph of p(H) and p(H -> H) on day 1 fell greatly (from approximately 0.9 to 0), while the plot of p(H -> C) and p(C -> C) on day 1 raised slightly. Other part of the graph almost remains unchanged.
+
+    p(H) on day 1 changed from 1.0 to 0. p(H) on day 2 changed from 0.995 to 0.557.
+
+    (b)
+    i. p(H) immediately falls to 0 when only 1 ice cream is eaten during the day.
+
+    ii. The graph looks exactly the same as the one before reestimation.
+
+    iii. p(1 | H) = 0.
+
+    The probability p(1 | H) after 10 iterations is defined by sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ).
+    
+    Each p_d(H, 1) is equal to p_d(H) if only 1 ice cream is consumed at that day and equal to 0 otherwise.
+    
+    p_d(H) = (alpha_d(H) * beta_d(H) / ( alpha_d(H) * beta_d(H) + alpha_d(C) * beta_d(C) )
+    
+    alpha_d(H) = ( alpha_{d-1}(C) * p(H | C) + alpha_{d-1}(H) * p(H | H) ) * p(1 | H) if 1 ice cream is consumed at day d.
+    
+    p(1 | H) at 10th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 9th iteration, 
+    and p(1 | H) at 9th iteration refers to sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) of 8th iteration, and so on.
+
+    Since we changed p(1 | H) from 0.1 to 0 at the beginning, all alpha_d(H) that relates to eating 1 ice cream at day d in each iteration will be 0. Therefore, p_d(H, 1) will also be 0.
+    
+    Thus, p(1 | H) = sum_{d=1^33}( p_d(H, 1) ) / sum_{d=1^33} ( p_d(H) ) = 0 after 10 iterations.
+
+
+    (c)
+        i. The sum of all first word's beta probabilities.
+        ii. An H constituent means that particular day with known ice cream consumption ends with a "Hot" tag.
+        All the rule we have is 
+        START -> 2 C
+        C     -> 3 H
+        H     -> 1 C
+        H     -> epsilon
+        
+        So, 
+        p(H -> 1 C) = 0.5
+        p(H -> epsilon) = 0.5
+        
+        By using the approach on the right hand side, the rules can be more flexible and the total number of rules can possibly reduced. For example, we can write following rules:
+        START -> EC C
+        EC    -> 1
+        EC    -> 2
+        EC    -> 3
+        ...
+4.  
+    Baseline tagger:
+    Tagging accuracy (Viterbi decoding): 92.48% (known: 95.99% novel: 56.07%)
+    Perplexity per Viterbi-tagged test word: 1577.499
+
+    Result after improvement:
+    Tagging accuracy (Vierbi decoding): 94.13% (known: 96.86% novel: 65.89%)
+    Perplexity per Viterbi-tagged test word: 971.540      
+        
+5. 
+    Result on ictrain/ictest:
+    Tagging accuracy (Viterbi decoding): 90.91% (known: 90.91% novel: 0.00%)
+    Perplexity per Viterbi-tagged test word: 3.689
+    Tagging accuracy (posterior decoding): 87.88% (known: 87.88% novel: 0.00%)
+
+
+    Result on entrain/entest:
+    Tagging accuracy (Viterbi decoding): 94.13% (known: 96.86% novel: 65.89%)
+    Perplexity per Viterbi-tagged test word: 971.540
+    Tagging accuracy (posterior decoding): 94.20% (known: 96.90% novel: 66.18%)
+
+
+6.
+    Result running vtagem on entrain25k entest enraw:
+        Tagging accuracy (Viterbi decoding): 91.08% (known: 96.51% seen: 62.86% novel: 65.65%)
+        Perplexity per Viterbi-tagged test word: 1058.452860
+        Iteration 0: Perplexity per untagged raw word: 1320.862231
+
+        Tagging accuracy (Viterbi decoding): 91.69% (known: 96.53% seen: 69.79% novel: 65.49%)
+        Perplexity per Viterbi-tagged test word: 921.513619
+        Iteration 1: Perplexity per untagged raw word: 613.137676
+
+        Tagging accuracy (Viterbi decoding): 91.35% (known: 96.45% seen: 67.26% novel: 64.82%)
+        Perplexity per Viterbi-tagged test word: 907.187926
+        Iteration 2: Perplexity per untagged raw word: 582.704577
+
+        Tagging accuracy (Viterbi decoding): 90.93% (known: 96.37% seen: 64.20% novel: 63.78%)
+        Perplexity per Viterbi-tagged test word: 903.148714
+        Iteration 3: Perplexity per untagged raw word: 562.085207
+
+        Tagging accuracy (Viterbi decoding): 90.48% (known: 96.30% seen: 60.33% novel: 63.05%)
+        Perplexity per Viterbi-tagged test word: 902.960198
+        Iteration 4: Perplexity per untagged raw word: 549.413567
+
+        Tagging accuracy (Viterbi decoding): 90.29% (known: 96.30% seen: 57.57% novel: 63.67%)
+        Perplexity per Viterbi-tagged test word: 903.630196
+        Iteration 5: Perplexity per untagged raw word: 541.652762
+
+        Tagging accuracy (Viterbi decoding): 90.13% (known: 96.31% seen: 55.70% novel: 63.67%)
+        Perplexity per Viterbi-tagged test word: 904.679256
+        Iteration 6: Perplexity per untagged raw word: 536.267092
+
+        Tagging accuracy (Viterbi decoding): 89.94% (known: 96.30% seen: 53.41% novel: 63.93%)
+        Perplexity per Viterbi-tagged test word: 905.998298
+        Iteration 7: Perplexity per untagged raw word: 532.908861
+
+        Tagging accuracy (Viterbi decoding): 89.85% (known: 96.29% seen: 52.51% novel: 63.88%)
+        Perplexity per Viterbi-tagged test word: 906.938113
+        Iteration 8: Perplexity per untagged raw word: 530.681524
+
+        Tagging accuracy (Viterbi decoding): 89.72% (known: 96.26% seen: 51.69% novel: 63.41%)
+        Perplexity per Viterbi-tagged test word: 907.754718
+        Iteration 9: Perplexity per untagged raw word: 528.909000
+
+        Tagging accuracy (Viterbi decoding): 89.64% (known: 96.24% seen: 51.12% novel: 63.31%)
+        Perplexity per Viterbi-tagged test word: 908.294508
+        Iteration 10: Perplexity per untagged raw word: 527.543697
+
+        Tagging accuracy (Viterbi decoding): 89.60% (known: 96.23% seen: 50.74% novel: 63.36%)
+        Perplexity per Viterbi-tagged test word: 908.713777
+        Iteration 11: Perplexity per untagged raw word: 526.470870
+
+    Questions:
+    (a) alpha_S(T) probability means the probability from the start state to the state S at time T. The probability for alpha_###(0) that is the start state must be 1 because all the paths must go out from the start state. In the forward process, we process the word stream from the start state to the end state, so we need to set alpha_###(0) to 1.
+
+        beta_S(T) probability means the probability from state S at time T to the end state. The probability for beta_###(n) that is the end state must also be 1 because all the paths must end at the end state. In the backward process, we process the word stream from the end state to the start state, so we need to set beta_###(n) to 1.
+
+    (b) Because we use raw dataset for the forward-backward process, the updated parameters will fit the model for raw dataset more. Thus the perplexity for raw data will be lower than the that for test dataset.
+
+    The perplexity per untagged raw word is more important. Because this perplexity is derived from forward-backward algorithm, which takes all possibilities into consideration.
+
+    (c) We need to seperate the test data in the EM training process so that the trained algorithm can be applied on unseen sentences in the future (generalized). If we include the test dataset in the V counters, then the smoothing will have less effect.
+
+    (d) Although this algorithm improved the accuracy of the ice dataset, it only helped the accuracy for the first iteration and then the accuracy went down. The accuracy on entest data for 11th iteration are 96.23% (known), 50.74% (seen), and 63.36% (novel). Those accuracies also went down after the 0th iteration in the EM training process.
+
+    (e) When we only have small tagged dataset, the EM algorithm can help us reestimate the parameters from the raw dataset for the model and improve the performance by repeating the expectation and maximization steps. Since raw dataset is a word list without tags, it is much easier to get than the training data. So we can use the large raw dataset to do the EM and find parameters for the model.
+    
+    (f) If the model is not concave for a maximization problem, then the EM algorithm will possibly get stuck in a local optimal.
+        In this problem, we use Viterbi approxmation, so it only picks the best parse in each EM iteration. Therefore, the EM might not guarantee to increase.
+    
+    (g) We didn't write diary to keep track of how many ice creams we have eaten everyday. But in our memory, there is a tendency that we ate more ice creams in hot days than in cold days. However, we hadn't eaten any ice cream in some days no matter it was cold or hot. In addition, we didn't eat too many ice creams a day because we think it is not very healthy and we will easily get tired of eating many ice creams due to the sweetness. Thus, for us, weather is not the only factor that will affect the number of ice cream we eat a day. We didn't get sick because we will stop eating ice creams before we get sick. 
+
